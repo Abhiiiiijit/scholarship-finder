@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -18,6 +18,18 @@ export const metadata: Metadata = {
   title: "Scholarship Finder",
   description:
     "Find the scholarships an Indian B.E./B.Tech student qualifies for, with the official rule quoted for every result.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/site.webmanifest",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1B3A6B",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

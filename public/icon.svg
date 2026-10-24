@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Paatra"><title>Paatra</title>
+<rect width="64" height="64" rx="12" fill="#1B3A6B"/>
+<g transform="translate(2 1) scale(.94)">
+<ellipse cx="32" cy="43" rx="22" ry="16" fill="#FFFFFF"/>
+<rect x="24" y="23" width="16" height="8" fill="#FFFFFF"/>
+<rect x="18" y="19" width="28" height="7" rx="3" fill="#FFFFFF"/>
+<path d="M21 43 L29 51 L43 36" fill="none" stroke="#1F8A4C" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="32" cy="10" r="7.5" fill="#E9A23B"/>
+</g>
+</svg>

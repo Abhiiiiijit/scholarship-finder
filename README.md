@@ -27,6 +27,26 @@ npm run dev:local   # starts Postgres, applies migrations, runs the app at http:
 
 No `.env` is needed for local work: the app falls back to the Docker database. To point at Neon instead, copy `.env.example` to `.env` and paste the Neon connection string.
 
+## Run it online
+
+### Deploy (Vercel + Neon, free tiers)
+
+1. **Database.** Sign up at [neon.com](https://neon.com), create a project, and pick the region closest to India (Singapore). On the project dashboard, open **Connect** and copy the **pooled** connection string (its host contains `-pooler`). It looks like `postgresql://user:password@ep-xxx-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require`.
+2. **Create the tables.** From your laptop, run the migrations against Neon once:
+   ```bash
+   DATABASE_URL="<neon connection string>" npm run db:migrate
+   ```
+   Run this again whenever a PR adds a file under `drizzle/`.
+3. **App.** Sign in at [vercel.com](https://vercel.com) with GitHub, choose **Add New → Project**, and import `scholarship-finder` (grant Vercel access to the repo if it isn't listed). Vercel detects Next.js; leave the build settings as they are.
+4. **Environment variable.** Before the first deploy, under **Environment Variables**, add `DATABASE_URL` with the Neon connection string. Then click **Deploy**.
+5. **Done.** You get a `*.vercel.app` link. Every push to `main` redeploys it, and every PR gets its own preview link. To use a subdomain such as `scholarships.abhijitbosedas.com`, add it under **Settings → Domains** and create the CNAME record Vercel shows.
+
+Admin sign-in and email reminders add more environment variables when they are built; they will be listed here then.
+
+### Develop in the browser (GitHub Codespaces)
+
+On the repo page, choose **Code → Codespaces → Create codespace on main**. In its terminal, run `npm install && npm run dev:local`, then open the forwarded port 3000. Codespaces includes Docker, so the local database works there unchanged.
+
 ## Scripts
 
 | Script | What it does |

@@ -15,6 +15,20 @@
       "when": 1792871358382,
       "tag": "0001_percentile_and_ambiguous",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792871864769,
+      "tag": "0002_registry_editor",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792871875377,
+      "tag": "0003_publish_gate",
+      "breakpoints": true
     }
   ]
 }

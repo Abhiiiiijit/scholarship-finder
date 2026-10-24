@@ -43,18 +43,27 @@ No `.env` is needed for local work: the app falls back to the Docker database. T
 
 A separate Neon account works too: create a project at [neon.com](https://neon.com), copy its pooled connection string into a `DATABASE_URL` variable in Vercel, and use the direct (non-pooler) string for migrations.
 
-Admin sign-in and email reminders add more environment variables when they are built; they will be listed here then.
+For admin sign-in, also set `AUTH_SECRET`, `AUTH_GITHUB_ID` and `AUTH_GITHUB_SECRET` (see Admin sign-in below) and add `https://<your domain>/api/auth/callback/github` to the GitHub OAuth app. Email reminders add more variables when they are built.
 
 ### Develop in the browser (GitHub Codespaces)
 
 On the repo page, choose **Code → Codespaces → Create codespace on main**. In its terminal, run `npm install && npm run dev:local`, then open the forwarded port 3000. Codespaces includes Docker, so the local database works there unchanged.
+
+## Admin sign-in
+
+`/admin` is behind GitHub sign-in (Auth.js) and only lets in the logins in `ADMIN_GITHUB_LOGINS` (default `Abhiiiiijit`).
+
+1. Create a GitHub OAuth app (Settings → Developer settings → OAuth Apps) with callback URL `http://localhost:3000/api/auth/callback/github`.
+2. Put its client ID and secret in `.env` as `AUTH_GITHUB_ID` and `AUTH_GITHUB_SECRET`, and add `AUTH_SECRET` from `npx auth secret`.
+
+On Vercel, set the same three variables and add the production callback URL to the OAuth app. Never commit `.env`.
 
 ## Scripts
 
 | Script | What it does |
 | --- | --- |
 | `npm run dev:local` | Postgres up, migrations, dev server |
-| `npm test` | Unit tests |
+| `npm test` | Unit tests (registry tests run on an in-memory PGlite database, no Docker needed) |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
 | `npm run db:generate` | Create a migration after editing `src/db/schema.ts` |
 | `npm run db:migrate` | Apply migrations |
@@ -64,7 +73,10 @@ On the repo page, choose **Code → Codespaces → Create codespace on main**. I
 ## Layout
 
 ```
-src/app/          pages and route handlers
+src/app/          pages and route handlers (admin registry and editor under /admin, snapshot at /api/rules/latest)
+src/components/   shared UI components from the design's component list
+src/lib/registry/ scheme editor input, publish checklist, registry reads and writes
+src/lib/states.ts the 16 states' portals, category lists and state questions
 src/db/           Drizzle schema and client
 src/lib/rules/    rule schema (operators, publish requirements), rule fields, published snapshot
 src/lib/match.ts  match(): eligible / near-miss / needs-info, runs in the browser

@@ -1,7 +1,23 @@
 @import "tailwindcss";
 
+/* Tokens from the design's UI kit. Components use these names, never raw hex. */
 @theme inline {
   --font-sans: var(--font-plex-sans);
   --font-mono: var(--font-plex-mono);
+  --color-ink: #13213c;
   --color-navy: #1b3a6b;
+  --color-slate: #4a5363;
+  --color-field: #b9c0cb;
+  --color-line: #dde1e7;
+  --color-line-soft: #eaedf2;
+  --color-ground: #f4f5f7;
+  --color-muted: #2e3746;
+  --color-disabled: #c3c9d3;
+  --color-pass: #0b5d4b;
+  --color-pass-tint: #ddf0ea;
+  --color-warn: #8a4300;
+  --color-warn-tint: #fce9d2;
+  --color-warn-row: #fff7ec;
+  --color-info: #1d4e89;
+  --color-info-tint: #e3ecf8;
 }

@@ -27,6 +27,15 @@ npm run dev:local   # starts Postgres, applies migrations, runs the app at http:
 
 No `.env` is needed for local work: the app falls back to the Docker database. To point at Neon instead, copy `.env.example` to `.env` and paste the Neon connection string.
 
+## Admin sign-in
+
+`/admin` is behind GitHub sign-in (Auth.js) and only lets in the logins in `ADMIN_GITHUB_LOGINS` (default `Abhiiiiijit`).
+
+1. Create a GitHub OAuth app (Settings → Developer settings → OAuth Apps) with callback URL `http://localhost:3000/api/auth/callback/github`.
+2. Put its client ID and secret in `.env` as `AUTH_GITHUB_ID` and `AUTH_GITHUB_SECRET`, and add `AUTH_SECRET` from `npx auth secret`.
+
+On Vercel, set the same three variables and add the production callback URL to the OAuth app. Never commit `.env`.
+
 ## Scripts
 
 | Script | What it does |

@@ -41,7 +41,7 @@ On Vercel, set the same three variables and add the production callback URL to t
 | Script | What it does |
 | --- | --- |
 | `npm run dev:local` | Postgres up, migrations, dev server |
-| `npm test` | Unit tests |
+| `npm test` | Unit tests (registry tests run on an in-memory PGlite database, no Docker needed) |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
 | `npm run db:generate` | Create a migration after editing `src/db/schema.ts` |
 | `npm run db:migrate` | Apply migrations |
@@ -51,7 +51,10 @@ On Vercel, set the same three variables and add the production callback URL to t
 ## Layout
 
 ```
-src/app/          pages and route handlers
+src/app/          pages and route handlers (admin registry and editor under /admin, snapshot at /api/rules/latest)
+src/components/   shared UI components from the design's component list
+src/lib/registry/ scheme editor input, publish checklist, registry reads and writes
+src/lib/states.ts the 16 states' portals, category lists and state questions
 src/db/           Drizzle schema and client
 src/lib/rules/    rule schema (operators, publish requirements), rule fields, published snapshot
 src/lib/match.ts  match(): eligible / near-miss / needs-info, runs in the browser

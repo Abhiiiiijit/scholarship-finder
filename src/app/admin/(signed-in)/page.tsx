@@ -84,6 +84,7 @@ export default async function Registry({ searchParams }: PageProps<"/admin">) {
                     {scheme.trackerId && <span className="mr-2 font-mono text-slate">{scheme.trackerId}</span>}
                     {scheme.name}
                   </Link>
+                  {scheme.reviewNotes && <span className="ml-2 text-xs font-semibold text-warn">Gaps noted</span>}
                 </td>
                 <td className="px-4 py-3.5">{scheme.source ?? sourceFallback(scheme.provider, scheme.stateCode)}</td>
                 <td className={`px-4 py-3.5 font-mono ${quotedCount < ruleCount || ruleCount === 0 ? "font-semibold text-warn" : ""}`}>

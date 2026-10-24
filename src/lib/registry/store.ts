@@ -51,6 +51,7 @@ function schemeValues(d: SchemeDraft) {
     benefitTypes: d.benefitTypes,
     documents: d.documents,
     cannotCombineWith: d.cannotCombineWith,
+    reviewNotes: d.reviewNotes,
     opensOn: d.opensOn,
     deadline: d.deadline,
   };

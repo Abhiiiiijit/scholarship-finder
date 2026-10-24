@@ -33,6 +33,7 @@ export const schemeDraftSchema = z
     benefitTypes: z.array(z.string()).default([]),
     documents: z.array(z.string()).default([]),
     cannotCombineWith: z.array(z.string().trim().min(1)).default([]),
+    reviewNotes: optionalText,
     opensOn: optionalDate,
     deadline: optionalDate,
     rules: z.array(draftRuleSchema),

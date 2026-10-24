@@ -68,6 +68,7 @@ On Vercel, set the same three variables and add the production callback URL to t
 | `npm run db:generate` | Create a migration after editing `src/db/schema.ts` |
 | `npm run db:migrate` | Apply migrations |
 | `npm run db:studio` | Browse the database |
+| `npm run db:seed` | Load the Phase 0 schemes as drafts (skips any already there; `-- --sql` prints the SQL instead) |
 | `npm run db:down` | Stop Postgres (data is kept in a Docker volume) |
 
 ## Layout

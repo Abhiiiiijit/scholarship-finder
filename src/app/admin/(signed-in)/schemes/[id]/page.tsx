@@ -32,6 +32,7 @@ export default async function EditScheme({ params }: PageProps<"/admin/schemes/[
       sourceFormat: (scheme.sourceFormat as "HTML" | "PDF" | null) ?? "",
       officialUrl: scheme.officialUrl,
       amountText: scheme.amountText ?? "",
+      reviewNotes: scheme.reviewNotes ?? "",
       benefitTypes: scheme.benefitTypes,
       documents: scheme.documents,
       cannotCombineWith: scheme.cannotCombineWith,

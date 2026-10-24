@@ -26,6 +26,8 @@ export const RULE_FIELDS = {
   cgpa: { label: "CGPA", kind: "number", tier: "notAsked" },
   institution_type: { label: "Institution type", kind: "choice", tier: "common" },
   aicte_approved: { label: "AICTE-approved course", kind: "boolean", tier: "common" },
+  // Top-class schemes name their institutes in a list the MVP does not ask about.
+  listed_institute: { label: "Studies at a listed institute", kind: "boolean", tier: "notAsked" },
   parent_occupation: { label: "Parent occupation", kind: "multi", tier: "unlock" },
   special_status: { label: "Special status", kind: "multi", tier: "unlock" },
   siblings_claiming: { label: "Siblings claiming", kind: "number", tier: "notAsked" },

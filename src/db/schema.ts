@@ -42,6 +42,8 @@ export const scholarships = pgTable(
     documents: jsonb().$type<string[]>().notNull().default([]),
     // Tracker ids of schemes this one cannot be combined with.
     cannotCombineWith: jsonb().$type<string[]>().notNull().default([]),
+    // What still needs checking before publishing: gaps in the source, rules the matcher can't check.
+    reviewNotes: text(),
     opensOn: date(),
     deadline: date(),
     status: text().notNull().default("DRAFT"),

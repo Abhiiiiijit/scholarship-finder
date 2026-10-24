@@ -66,6 +66,8 @@ On the repo page, choose **Code → Codespaces → Create codespace on main**. I
 ```
 src/app/          pages and route handlers
 src/db/           Drizzle schema and client
-src/lib/rules/    rule schema (operators, publish requirements)
+src/lib/rules/    rule schema (operators, publish requirements), rule fields, published snapshot
+src/lib/match.ts  match(): eligible / near-miss / needs-info, runs in the browser
+src/lib/profile.ts  the student's answers
 drizzle/          generated SQL migrations
 ```

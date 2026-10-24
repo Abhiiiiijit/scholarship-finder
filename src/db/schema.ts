@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   bigserial,
   bigint,
+  boolean,
   check,
   date,
   index,
@@ -58,6 +59,8 @@ export const rules = pgTable(
     // Empty while drafting; the editor refuses to publish until every rule has both.
     quote: text().notNull().default(""),
     sourceUrl: text().notNull().default(""),
+    // Sources disagree: students see "confirm on the official site" for this rule.
+    ambiguous: boolean().notNull().default(false),
   },
   (t) => [
     check("rules_op_check", sql`${t.op} IN (${inList(OPERATORS)})`),

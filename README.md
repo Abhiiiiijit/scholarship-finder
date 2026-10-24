@@ -31,15 +31,17 @@ No `.env` is needed for local work: the app falls back to the Docker database. T
 
 ### Deploy (Vercel + Neon, free tiers)
 
-1. **Database.** Sign up at [neon.com](https://neon.com), create a project, and pick the region closest to India (Singapore). On the project dashboard, open **Connect** and copy the **pooled** connection string (its host contains `-pooler`). It looks like `postgresql://user:password@ep-xxx-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require`.
-2. **Create the tables.** From your laptop, run the migrations against Neon once:
+1. **App.** Sign in at [vercel.com](https://vercel.com) with GitHub, choose **Add New → Project**, and import `scholarship-finder` (grant Vercel access to the repo if it isn't listed). Keep the detected Next.js settings and click **Deploy**. It builds without a database.
+2. **Database.** In the Vercel project, open **Storage → Create Database → Neon**, keep the Free plan, pick the Singapore region, and connect it to the project for all environments. Vercel adds `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED` itself.
+3. **Redeploy** from **Deployments → ⋯ → Redeploy** so the app picks up the new variables.
+4. **Create the tables.** From your laptop, copy `DATABASE_URL_UNPOOLED` from **Settings → Environment Variables** and run the migrations once:
    ```bash
-   DATABASE_URL="<neon connection string>" npm run db:migrate
+   DATABASE_URL="<DATABASE_URL_UNPOOLED value>" npm run db:migrate
    ```
    Run this again whenever a PR adds a file under `drizzle/`.
-3. **App.** Sign in at [vercel.com](https://vercel.com) with GitHub, choose **Add New → Project**, and import `scholarship-finder` (grant Vercel access to the repo if it isn't listed). Vercel detects Next.js; leave the build settings as they are.
-4. **Environment variable.** Before the first deploy, under **Environment Variables**, add `DATABASE_URL` with the Neon connection string. Then click **Deploy**.
 5. **Done.** You get a `*.vercel.app` link. Every push to `main` redeploys it, and every PR gets its own preview link. To use a subdomain such as `scholarships.abhijitbosedas.com`, add it under **Settings → Domains** and create the CNAME record Vercel shows.
+
+A separate Neon account works too: create a project at [neon.com](https://neon.com), copy its pooled connection string into a `DATABASE_URL` variable in Vercel, and use the direct (non-pooler) string for migrations.
 
 Admin sign-in and email reminders add more environment variables when they are built; they will be listed here then.
 

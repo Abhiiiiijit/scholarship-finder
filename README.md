@@ -27,6 +27,28 @@ npm run dev:local   # starts Postgres, applies migrations, runs the app at http:
 
 No `.env` is needed for local work: the app falls back to the Docker database. To point at Neon instead, copy `.env.example` to `.env` and paste the Neon connection string.
 
+## Run it online
+
+### Deploy (Vercel + Neon, free tiers)
+
+1. **App.** Sign in at [vercel.com](https://vercel.com) with GitHub, choose **Add New → Project**, and import `scholarship-finder` (grant Vercel access to the repo if it isn't listed). Keep the detected Next.js settings and click **Deploy**. It builds without a database.
+2. **Database.** In the Vercel project, open **Storage → Create Database → Neon**, keep the Free plan, pick the Singapore region, and connect it to the project for all environments. Vercel adds `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED` itself.
+3. **Redeploy** from **Deployments → ⋯ → Redeploy** so the app picks up the new variables.
+4. **Create the tables.** From your laptop, copy `DATABASE_URL_UNPOOLED` from **Settings → Environment Variables** and run the migrations once:
+   ```bash
+   DATABASE_URL="<DATABASE_URL_UNPOOLED value>" npm run db:migrate
+   ```
+   Run this again whenever a PR adds a file under `drizzle/`.
+5. **Done.** You get a `*.vercel.app` link. Every push to `main` redeploys it, and every PR gets its own preview link. To use a subdomain such as `scholarships.abhijitbosedas.com`, add it under **Settings → Domains** and create the CNAME record Vercel shows.
+
+A separate Neon account works too: create a project at [neon.com](https://neon.com), copy its pooled connection string into a `DATABASE_URL` variable in Vercel, and use the direct (non-pooler) string for migrations.
+
+Admin sign-in and email reminders add more environment variables when they are built; they will be listed here then.
+
+### Develop in the browser (GitHub Codespaces)
+
+On the repo page, choose **Code → Codespaces → Create codespace on main**. In its terminal, run `npm install && npm run dev:local`, then open the forwarded port 3000. Codespaces includes Docker, so the local database works there unchanged.
+
 ## Scripts
 
 | Script | What it does |

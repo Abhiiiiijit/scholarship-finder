@@ -29,6 +29,13 @@
       "when": 1792871875377,
       "tag": "0003_publish_gate",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792874229171,
+      "tag": "0004_review_notes",
+      "breakpoints": true
     }
   ]
 }

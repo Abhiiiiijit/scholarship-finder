@@ -48,13 +48,14 @@ export interface EditorScheme {
   id: number;
   badge: SchemeBadge;
   lastVerifiedAt: string | null;
-  draft: Omit<SchemeDraft, "trackerId" | "stateCode" | "source" | "appliesVia" | "sourceFormat" | "amountText" | "opensOn" | "deadline" | "rules"> & {
+  draft: Omit<SchemeDraft, "trackerId" | "stateCode" | "source" | "appliesVia" | "sourceFormat" | "amountText" | "reviewNotes" | "opensOn" | "deadline" | "rules"> & {
     trackerId: string;
     stateCode: string;
     source: string;
     appliesVia: string;
     sourceFormat: "HTML" | "PDF" | "";
     amountText: string;
+    reviewNotes: string;
     opensOn: string;
     deadline: string;
     rules: Omit<UiRule, "key">[];
@@ -74,6 +75,7 @@ const EMPTY: EditorScheme["draft"] = {
   sourceFormat: "",
   officialUrl: "",
   amountText: "",
+  reviewNotes: "",
   benefitTypes: [],
   documents: [],
   cannotCombineWith: [],
@@ -232,6 +234,15 @@ export function SchemeEditor({ initial }: { initial?: EditorScheme }) {
           {message.body}
         </Alert>
       )}
+      {initial?.draft.reviewNotes && (
+        <Alert tone="warning" title="Gaps to close before publishing">
+          <ul className="list-disc pl-5">
+            {initial.draft.reviewNotes.split("\n").filter(Boolean).map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        </Alert>
+      )}
 
       <div className="flex flex-wrap items-start gap-5">
         <div className="flex min-w-0 flex-[999_1_640px] flex-col gap-5">
@@ -273,6 +284,12 @@ export function SchemeEditor({ initial }: { initial?: EditorScheme }) {
               ))}
             </div>
             <Checklist legend="Benefit" items={BENEFIT_TYPES} selected={draft.benefitTypes} onToggle={(i) => toggle("benefitTypes", i)} />
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="notes" className="text-[13px] font-semibold">Gaps to close before publishing</label>
+              <textarea id="notes" rows={3} value={draft.reviewNotes} placeholder="One per line. Students never see this."
+                onChange={(e) => set("reviewNotes", e.target.value)}
+                className="w-full rounded-lg border border-field px-2.5 py-2 text-sm leading-5 outline-none focus:border-navy" />
+            </div>
           </Section>
 
           <Section
@@ -327,6 +344,8 @@ export function SchemeEditor({ initial }: { initial?: EditorScheme }) {
             <ul className="flex flex-col gap-2">
               <RuleRow result={draft.officialUrl ? "pass" : "fail"} text="Official link added" detail="Checked to open when you publish" />
               <RuleRow result={draft.amountText && draft.deadline ? "pass" : "unknown"} text="Amount and deadline filled in" />
+              <RuleRow result={draft.reviewNotes.trim() ? "unknown" : "pass"} text="Gaps closed"
+                detail={draft.reviewNotes.trim() ? "Clear the gaps note once each item is checked" : undefined} />
               <RuleRow result={draft.rules.length > 0 && quoted === draft.rules.length ? "pass" : "fail"}
                 text={`Every rule has a quote and link (${quoted} of ${draft.rules.length})`} />
               <RuleRow result={!dirty && id !== undefined ? "pass" : "fail"} text="Changes saved" />

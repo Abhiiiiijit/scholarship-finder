@@ -7,7 +7,7 @@ import type { Profile } from "@/domain/profile";
 import type { PublishableRule } from "@/domain/rules/schema";
 import { gapText, missText, reasonRows, ruleText, yourAnswer } from "./explain";
 import { answer, questionFor } from "./questions";
-import { buildResults, counts, mainReason } from "./results";
+import { buildResults, counts, deadlineLine, mainReason } from "./results";
 
 // English, so these sentences match what students see today.
 const t = createTranslator({ locale: "en", messages: en });
@@ -51,6 +51,17 @@ describe("rule reasons", () => {
     expect(reasonRows(t, reliance.groups, exampleStudent)[0].text).toBe("Income ₹9 L is within the ₹15 L limit");
   });
 
+  it("shows a disputed rule the student fails on every reading, instead of hiding it", () => {
+    // Sitaram Jindal: ₹4 L for salaried families, ₹2.5 L for others. ₹9 L is over both.
+    const groups = match(exampleStudent, {
+      ...scheme("reliance-foundation-ug"),
+      rules: [r({ field: "family_income", op: "LTE", value: 400000, ambiguous: true })],
+    }).groups;
+    expect(reasonRows(t, groups, exampleStudent).map((x) => [x.result, x.text])).toEqual([
+      ["fail", "Income ₹9 L is ₹5 L over the ₹4 L limit. Sources differ, so confirm on the official site"],
+    ]);
+  });
+
   it("shows the student's own answer beside a rule", () => {
     expect(yourAnswer(t, "family_income", exampleStudent)).toBe("₹9,00,000");
     expect(yourAnswer(t, "MH.cap_admission", { state: { "MH.cap_admission": "no" } })).toBe("No, institute or management quota");
@@ -80,6 +91,27 @@ describe("results", () => {
     expect(mainReason(t, res, rich)).toBe(
       "Most schemes cap family income between ₹4.5 L and ₹15 L. Yours is ₹20 L, so merit-based and private scholarships are your best chance.",
     );
+  });
+
+  it("lists schemes that fit but have closed, instead of dropping them", () => {
+    const closed = { ...scheme("reliance-foundation-ug"), deadline: "2026-10-05" };
+    const snapshot = { ...section5Snapshot, schemes: section5Snapshot.schemes.map((s) => (s.slug === closed.slug ? closed : s)) };
+    const res = buildResults(t, exampleStudent, snapshot, TODAY, NOW);
+    expect(res.results.map((m) => m.scheme.slug)).not.toContain("reliance-foundation-ug");
+    expect(res.closed.map((m) => [m.scheme.slug, m.status])).toEqual([["reliance-foundation-ug", "eligible"]]);
+    // A closed scheme the student doesn't fit stays out.
+    const far = { ...scheme("central-sector-scheme"), deadline: "2026-10-05" };
+    const res2 = buildResults(t, exampleStudent, { ...section5Snapshot, schemes: [far] }, TODAY, NOW);
+    expect(res2.closed).toEqual([]);
+  });
+
+  it("says when to apply by, and warns in the last two weeks", () => {
+    const s = (deadline: string | null) => ({ ...scheme("reliance-foundation-ug"), deadline });
+    expect(deadlineLine(t, "en", s(null), TODAY)).toEqual({ text: "Deadline not announced yet", urgent: false });
+    expect(deadlineLine(t, "en", s("2026-12-31"), TODAY)).toEqual({ text: "Apply by 31 Dec 2026", urgent: false });
+    expect(deadlineLine(t, "en", s("2026-10-29"), TODAY)).toEqual({ text: "Apply by 29 Oct 2026 · 5 days left", urgent: true });
+    expect(deadlineLine(t, "en", s("2026-10-24"), TODAY).text).toBe("Apply by 24 Oct 2026 · closes today");
+    expect(deadlineLine(t, "en", s("2026-10-05"), TODAY)).toEqual({ text: "Closed on 5 Oct 2026", urgent: false });
   });
 
   it("asks the CAP question inline and re-matches with the answer", () => {

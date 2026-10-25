@@ -32,6 +32,11 @@ export function formatDate(iso: string | null, language = "en"): string {
   });
 }
 
+// Whole days from one YYYY-MM-DD date to another: daysUntil("2026-10-25", "2026-10-30") is 5.
+export function daysUntil(today: string, iso: string): number {
+  return Math.round((Date.parse(`${iso}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000);
+}
+
 // The registry's dates are Indian dates.
 export function todayInIndia(now: Date): string {
   return new Date(now.getTime() + 5.5 * 3_600_000).toISOString().slice(0, 10);

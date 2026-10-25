@@ -124,7 +124,6 @@
     "providerCentral": "Central",
     "providerAicte": "AICTE",
     "providerPrivate": "Private",
-    "closes": "closes {date}",
     "answerAbove": "{rule}: answer above",
     "answerInEdit": "{rule}: answer in Edit answers",
     "incomeNote": "The limit is checked against your income certificate. If it shows {limit} or less, you pass this rule.",
@@ -156,7 +155,13 @@
     "mainIncomeAt": "at {limit}",
     "mainIncomeBetween": "between {low} and {high}",
     "mainIncome": "Most schemes cap family income {range}. Yours is {yours}, so merit-based and private scholarships are your best chance.",
-    "mainField": "Most schemes you missed have a rule on {field} that your answers don't meet."
+    "mainField": "Most schemes you missed have a rule on {field} that your answers don't meet.",
+    "applyBy": "Apply by {date}",
+    "daysLeft": "{count, plural, =0 {closes today} one {# day left} other {# days left}}",
+    "noDeadline": "Deadline not announced yet",
+    "closedOn": "Closed on {date}",
+    "closedGroup": "Closed for this year ({count})",
+    "closedIntro": "These fit your answers, but applications have closed. Most open again around the same time next year, so keep your documents ready."
   },
   "status": {
     "eligible": "Eligible to apply",
@@ -166,7 +171,8 @@
     "pass": "Pass",
     "fail": "Fail",
     "unknown": "Unknown",
-    "confirm": "Confirm on the official site"
+    "confirm": "Confirm on the official site",
+    "closed": "Closed"
   },
   "checking": {
     "line": "Checking {sources}, rule by rule.",
@@ -214,7 +220,12 @@
     "you": "You: {answer}",
     "notAnswered": "You haven't answered this yet.",
     "source": "Source: official page",
-    "officialWording": "Official wording, as published"
+    "officialWording": "Official wording, as published",
+    "deadlineUnknown": "Not announced yet",
+    "closedTitle": "Applications closed on {date}",
+    "closedBody": "Most scholarships open again around the same time each year. Check the official page for the next round.",
+    "checkOfficial": "Check the official site",
+    "youDisputed": "You: {answer}. Sources differ on this rule, so confirm on the official site."
   },
   "rules": {
     "incomeUpTo": "Family income up to {amount}",
@@ -235,7 +246,8 @@
     "confirm": "{rule}: confirm on the official site",
     "confirmDisputed": "{rule}: sources differ, confirm on the official site",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "failDisputed": "{miss}. Sources differ, so confirm on the official site"
   },
   "ruleFields": {
     "family_income": "Annual family income",

@@ -264,6 +264,15 @@ export function reasonRows(t: T, groups: GroupCheck[], p: Profile): ReasonRow[] 
         .filter((c) => c.outcome === "unknown" && !c.rule.ambiguous && c.rule.op !== "PERCENTILE_GTE" && fieldTier(c.rule.field) !== "notAsked")
         .map((c) => ({ result: "unknown", text: ruleText(t, c.rule), field: c.rule.field }));
     }
+    // Every rule in the group fails and one of them is disputed: say what fails rather than
+    // leaving a "needs info" card with nothing on it. The status stays "needs info".
+    if (g.checks.every((c) => c.outcome === "fail")) {
+      return g.checks.map((c) => ({
+        result: "fail",
+        text: c.rule.ambiguous ? t("rules.failDisputed", { miss: missText(t, c, p) }) : ruleText(t, c.rule),
+        field: c.rule.field,
+      }));
+    }
     return g.checks
       .filter((c) => c.outcome !== "fail")
       .map((c) => ({

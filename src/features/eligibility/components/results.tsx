@@ -17,6 +17,7 @@ export function ResultCard({
   badgeLabel,
   schemeName,
   meta,
+  deadline,
   headline,
   rules,
   note,
@@ -24,10 +25,12 @@ export function ResultCard({
   linkLabel,
   href,
 }: {
-  status: Exclude<MatchStatus, "notEligible">;
+  status: Exclude<MatchStatus, "notEligible"> | "closed";
   badgeLabel?: string;
   schemeName: string;
   meta: string;
+  // "Apply by 30 Sep 2026 · 5 days left", "Deadline not announced yet" or "Closed on 5 Oct 2026".
+  deadline: { text: string; urgent?: boolean };
   headline?: string;
   rules: { result: RowResult; text: string }[];
   note?: string;
@@ -42,6 +45,13 @@ export function ResultCard({
         <StatusBadge status={status} label={badgeLabel ?? t(`status.${status}`)} />
         <h3 className="m-0 text-lg leading-6 font-semibold">{schemeName}</h3>
         <div className="text-sm leading-5 text-slate">{meta}</div>
+        <div className={`flex items-center gap-1.5 text-sm leading-5 ${deadline.urgent ? "font-semibold text-warn" : "text-slate"}`}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="flex-none">
+            <rect x="4" y="5" width="16" height="15" rx="2" />
+            <path d="M4 10h16M9 3v4M15 3v4" />
+          </svg>
+          {deadline.text}
+        </div>
       </div>
       {headline && <div className="text-[15px] leading-[21px] font-semibold text-warn">{headline}</div>}
       <ul className="m-0 flex list-none flex-col gap-2 p-0">

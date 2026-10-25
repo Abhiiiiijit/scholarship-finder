@@ -53,6 +53,17 @@ Scholarship rules for engineering students are spread across NSP, AICTE, 36 stat
 
 <sub>Screenshots use the PRD's section 5 worked example (a Maharashtra B.Tech student with ₹9 L family income), not live data.</sub>
 
+**Admin:** one person keeps the scheme registry accurate. Nothing reaches students until every rule carries a quote and a link.
+
+<table>
+  <tr>
+    <td align="center" width="50%"><img src="docs/screenshots/a01-registry.png" alt="Admin registry: every scheme with its status, rules quoted and last verified date"><br><sub><b>Registry</b><br>Every scheme, what's live, what needs re-checking</sub></td>
+    <td align="center" width="50%"><img src="docs/screenshots/a02-editor.png" alt="Scheme editor with gaps to close and a test against the example student"><br><sub><b>Scheme editor</b><br>Gaps to close, a live test, then publish</sub></td>
+  </tr>
+</table>
+
+<sub>Admin screenshots show the Phase 0 schemes loaded as drafts on a local database, not the live registry.</sub>
+
 ## How it works
 
 ```mermaid

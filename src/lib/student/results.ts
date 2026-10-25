@@ -1,6 +1,6 @@
-import { isFresh, type Snapshot, type SnapshotScheme } from "../rules/snapshot";
-import { match, matchAll, type MatchSummary, type RuleCheck, type SchemeMatch } from "../match";
-import type { Profile } from "../profile";
+import { isFresh, type Snapshot, type SnapshotScheme } from "@/domain/rules/snapshot";
+import { match, matchAll, type MatchSummary, type RuleCheck, type SchemeMatch } from "@/domain/match";
+import type { Profile } from "@/domain/profile";
 import { fieldLabel, missText } from "./explain";
 import { formatLakh } from "../format";
 

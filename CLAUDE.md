@@ -9,13 +9,13 @@ Context for AI agents working in this repo. Read this first, then the file you a
 **Paatra** (पात्र, "eligible") tells an Indian B.E./B.Tech student which scholarships they qualify for, and shows the official rule, quoted word for word with a link, behind every answer. The repo is still named `scholarship-finder`.
 
 - **Users.** Students on a phone (no account), and one admin (`Abhiiiiijit`) who keeps the scheme registry accurate.
-- **Scope (MVP).** B.E./B.Tech only. Students domiciled in 16 live states and UTs: MH, JK, LA, HP, HR, DL, GA, MP, LD, SK, TR, BR, OD, TG, KA, TN (`STATES` in `src/lib/states.ts`). The other 20 are `OTHER_STATES`: they see central, AICTE and private schemes plus a "your state isn't covered yet" note (S04). About 65 hand-verified schemes: central, AICTE, state and private.
+- **Scope (MVP).** B.E./B.Tech only. Students domiciled in 16 live states and UTs: MH, JK, LA, HP, HR, DL, GA, MP, LD, SK, TR, BR, OD, TG, KA, TN (`STATES` in `src/domain/states.ts`). The other 20 are `OTHER_STATES`: they see central, AICTE and private schemes plus a "your state isn't covered yet" note (S04). About 65 hand-verified schemes: central, AICTE, state and private.
 - **Live.** Student site https://scholarship-finder-umber-phi.vercel.app, admin at `/admin` (Vercel + Neon, every push to `main` deploys).
 - **Product docs.** PRD: https://claude.ai/artifact/UuWcGVMCpGCvRBoVYHSGRi (tabs: main doc, Parameters by state, Phase 0 data plan, Quoted rules, Tech stack, Task checklist). Screen designs and flow: https://claude.ai/artifact/SoXLK4qi2qy9RPzAuigieR. Screen ids (S01–S09 student, A01–A04 admin) in code comments refer to the design.
 
 ## Non-negotiable rules
 
-1. **No rule without a quote.** A rule reaches students only with a verbatim `quote` from the official source and a `sourceUrl`. This is enforced three times: `publishableRuleSchema` (`src/lib/rules/schema.ts`), `publishProblems()` on the editor, and a deferred Postgres trigger (`drizzle/0003_publish_gate.sql`). Never weaken any of them, and never paraphrase a quote. A close summary is allowed in a draft only, and `seedNotes()` flags it for replacement.
+1. **No rule without a quote.** A rule reaches students only with a verbatim `quote` from the official source and a `sourceUrl`. This is enforced three times: `publishableRuleSchema` (`src/domain/rules/schema.ts`), `publishProblems()` on the editor, and a deferred Postgres trigger (`drizzle/0003_publish_gate.sql`). Never weaken any of them, and never paraphrase a quote. A close summary is allowed in a draft only, and `seedNotes()` flags it for replacement.
 2. **Student answers never leave the phone.** They live in `localStorage` (`paatra.answers.v1`, document ticks in `paatra.documents.v1`). Matching runs in the browser against the published snapshot. Do not add any API that receives a profile, analytics on answers, or server-side matching for students.
 3. **Freshness.** A scheme not re-verified in 90 days (`FRESH_DAYS`) is left out of the snapshot. Unknown is never a fail: a skipped question becomes "needs info", never "not eligible".
 4. **Email alerts are future scope.** "Email me when a scheme fits" and deadline reminders were deliberately removed from the MVP (PR #11). Do not add email capture or stored student emails.
@@ -44,9 +44,9 @@ student phone ──GET /api/rules/latest──▶ latest snapshot (cached)
 ```
 
 - **Rules.** Each rule is `{ group, field, op, value, quote, sourceUrl, ambiguous }`. Rules in the same group are OR-ed; groups are AND-ed. Operators: `EQ IN LTE GTE BETWEEN IS_TRUE PERCENTILE_GTE` (percentile is stored but always answers "confirm on the official site", and the editor refuses it).
-- **Fields.** `RULE_FIELDS` in `src/lib/rules/fields.ts` is the locked list. Each has a tier: `common` (asked on S02; missing means a question on results), `unlock` (optional; schemes needing it stay hidden behind "answer this to check N more"), `notAsked` (always "confirm on the official site"). State keys look like `MH.cap_admission`, come from each state's `questions` in `src/lib/states.ts`, and behave like `common`.
+- **Fields.** `RULE_FIELDS` in `src/domain/rules/fields.ts` is the locked list. Each has a tier: `common` (asked on S02; missing means a question on results), `unlock` (optional; schemes needing it stay hidden behind "answer this to check N more"), `notAsked` (always "confirm on the official site"). State keys look like `MH.cap_admission`, come from each state's `questions` in `src/domain/states.ts`, and behave like `common`.
 - **Enums.** `rules.field` and `rules.op` are Postgres enums `rule_field` / `rule_op` built from `RULE_FIELD_KEYS` and `OPERATORS`. Adding a field or a state question changes the enum, so it needs `npm run db:generate` and a migration.
-- **Matcher.** `src/lib/match.ts` is pure and shared. `resolveField()` maps a rule field to the profile. A numeric fail within 20% of the limit (`NEAR_MISS_GAP`) is a near-miss. Ambiguous rules, `notAsked` fields and percentile rules make a scheme "confirm", never plain "eligible". State schemes match only the student's own domicile state.
+- **Matcher.** `src/domain/match.ts` is pure and shared. `resolveField()` maps a rule field to the profile. A numeric fail within 20% of the limit (`NEAR_MISS_GAP`) is a near-miss. Ambiguous rules, `notAsked` fields and percentile rules make a scheme "confirm", never plain "eligible". State schemes match only the student's own domicile state.
 - **Publishing.** `publishScheme()` and `withdrawScheme()` in `src/server/services/publish-service.ts` always write a new full snapshot. Snapshots are append-only; the API serves the highest version.
 
 ## Key paths
@@ -56,9 +56,10 @@ student phone ──GET /api/rules/latest──▶ latest snapshot (cached)
 | `src/app/page.tsx`, `check/basics`, `check/state`, `results`, `scheme/[slug]` | Student screens S01–S09 |
 | `src/app/admin/(signed-in)/` | A01 registry list, A02 scheme editor, server actions in `schemes/actions.ts` |
 | `src/app/api/rules/latest/route.ts` | Public snapshot endpoint |
-| `src/lib/rules/` | `schema.ts` (operators, publish requirement), `fields.ts` (field list and tiers), `snapshot.ts` (snapshot schema, 90-day filter) |
-| `src/lib/match.ts`, `src/lib/profile.ts` | Matcher and the student profile schema |
-| `src/lib/states.ts` | The 16 live states: portal, categories, state questions; `OTHER_STATES` |
+| `src/domain/` | Pure TypeScript shared by the browser and the server: no React, Next or database imports (Zod only) |
+| `src/domain/rules/` | `schema.ts` (operators, publish requirement), `fields.ts` (field list and tiers), `snapshot.ts` (snapshot schema, 90-day filter) |
+| `src/domain/match.ts`, `src/domain/profile.ts` | Matcher and the student profile schema |
+| `src/domain/states.ts` | The 16 live states: portal, categories, state questions; `OTHER_STATES` |
 | `src/lib/registry/` | `scheme-input.ts` (editor schema, `publishProblems`), `options.ts` (labels), `status.ts` (A01 badges), `seed/phase0.ts` (Phase 0 schemes) |
 | `src/server/` | Server-only code (each file imports `server-only`): `env.ts` (checked settings), `db/` (Drizzle client, `schema.ts`), `repositories/` (`scheme-repo.ts`, `snapshot-repo.ts`: queries only), `services/` (`publish-service.ts`: quote gate + snapshot; `url-check.ts`), `auth/` (Auth.js, allowlist, `requireAdmin()`) |
 | `src/lib/student/` | Results assembly, plain-language reasons (`explain.ts`), inline questions, localStorage hooks |

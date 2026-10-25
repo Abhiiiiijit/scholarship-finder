@@ -1,4 +1,4 @@
-import { isFresh } from "../rules/snapshot";
+import { isFresh } from "@/domain/rules/snapshot";
 
 // The A01 status badge, set by the system from the stored status, freshness and deadline.
 export type SchemeBadge = "draft" | "live" | "recheck" | "stale" | "closed" | "onHold" | "retired";

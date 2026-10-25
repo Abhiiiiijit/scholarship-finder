@@ -7,9 +7,9 @@ import { Column, Footnote, Screen } from "@/components/student/layout";
 import { Checking, CountTile, LoadFailed, QuestionCard, ResultCard } from "@/components/student/results";
 import { UNLOCK_FIELDS, UnlockQuestions, unansweredUnlocks, type UnlockKey } from "@/components/student/Unlocks";
 import { formatDate, formatINR, todayInIndia } from "@/lib/format";
-import type { SchemeMatch } from "@/lib/match";
-import type { Profile } from "@/lib/profile";
-import type { SnapshotScheme } from "@/lib/rules/snapshot";
+import type { SchemeMatch } from "@/domain/match";
+import type { Profile } from "@/domain/profile";
+import type { SnapshotScheme } from "@/domain/rules/snapshot";
 import { isLive } from "@/lib/student/answers";
 import { fieldLabel, gapText, reasonRows } from "@/lib/student/explain";
 import { labelOf, YEAR_OPTIONS } from "@/lib/student/labels";
@@ -17,7 +17,7 @@ import { answer, questionFor } from "@/lib/student/questions";
 import { buildResults, counts, mainReason, type Results } from "@/lib/student/results";
 import { useAnswers } from "@/lib/student/use-answers";
 import { useSnapshot } from "@/lib/student/use-snapshot";
-import { categoriesFor, STATE_BY_CODE, stateName } from "@/lib/states";
+import { categoriesFor, STATE_BY_CODE, stateName } from "@/domain/states";
 
 // S05 Checking, S06 Results, S07 Nothing fits yet and S09 Offline, all matched on this phone.
 

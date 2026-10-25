@@ -1,7 +1,7 @@
 import "server-only";
 import { asc, desc, eq, inArray } from "drizzle-orm";
 import type { SchemeDraft } from "@/lib/registry/scheme-input";
-import { buildSnapshot, type Snapshot } from "@/lib/rules/snapshot";
+import { buildSnapshot, type Snapshot } from "@/domain/rules/snapshot";
 import { rules, scholarships, snapshots } from "@/server/db/schema";
 import type { Db } from "@/server/db/types";
 import type { RuleRow } from "@/server/repositories/scheme-repo";

@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { RULE_FIELDS } from "../rules/fields";
-import { publishableRuleSchema, ruleValueSchema } from "../rules/schema";
-import { STATE_BY_CODE, stateFieldKeys } from "../states";
+import { RULE_FIELDS } from "@/domain/rules/fields";
+import { publishableRuleSchema, ruleValueSchema } from "@/domain/rules/schema";
+import { STATE_BY_CODE, stateFieldKeys } from "@/domain/states";
 
 // What the scheme editor (A02) saves. A draft may have rules without quotes; publishing may not.
 

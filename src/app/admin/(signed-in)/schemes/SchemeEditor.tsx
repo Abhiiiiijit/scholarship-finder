@@ -11,7 +11,7 @@ import { RuleRow } from "@/components/RuleRow";
 import { StatusBadge } from "@/components/StatusBadge";
 import { exampleStudent } from "@/lib/fixtures/section5";
 import { formatINR, formatLakh } from "@/lib/format";
-import { match, type RuleCheck } from "@/lib/match";
+import { match, type RuleCheck } from "@/domain/match";
 import {
   APPLIES_VIA,
   BENEFIT_TYPES,
@@ -27,10 +27,10 @@ import {
 } from "@/lib/registry/options";
 import { publishProblems, type SchemeDraft } from "@/lib/registry/scheme-input";
 import type { SchemeBadge } from "@/lib/registry/status";
-import type { PublishableRule } from "@/lib/rules/schema";
-import { ruleValueSchema } from "@/lib/rules/schema";
-import type { SnapshotScheme } from "@/lib/rules/snapshot";
-import { STATES } from "@/lib/states";
+import type { PublishableRule } from "@/domain/rules/schema";
+import { ruleValueSchema } from "@/domain/rules/schema";
+import type { SnapshotScheme } from "@/domain/rules/snapshot";
+import { STATES } from "@/domain/states";
 import { publishSchemeAction, saveSchemeAction, withdrawSchemeAction } from "./actions";
 
 type Op = (typeof EDITOR_OPERATORS)[number] | "PERCENTILE_GTE";

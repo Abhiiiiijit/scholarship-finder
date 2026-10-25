@@ -1,4 +1,4 @@
-import type { Profile } from "../profile";
+import type { Profile } from "@/domain/profile";
 
 // The labels students see for each stored value, from the screen spec's "Student field values".
 

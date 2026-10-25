@@ -1,5 +1,5 @@
-import type { Profile } from "../profile";
-import type { Snapshot, SnapshotScheme } from "../rules/snapshot";
+import type { Profile } from "@/domain/profile";
+import type { Snapshot, SnapshotScheme } from "@/domain/rules/snapshot";
 
 // PRD section 5, "Worked example: the Maharashtra B.Tech student". Rules are exactly the ones
 // that example evaluates, worded as the PRD found them (to be re-verified on the official pages).

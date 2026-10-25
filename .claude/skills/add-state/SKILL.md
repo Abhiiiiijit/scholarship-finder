@@ -9,7 +9,7 @@ Students from a state that is not live see only central, AICTE and private schem
 
 ## 1. Gather from the PRD row
 
-- Two-letter code and name (already in `OTHER_STATES` in `src/lib/states.ts`).
+- Two-letter code and name (already in `OTHER_STATES` in `src/domain/states.ts`).
 - Scholarship portal name.
 - The state's own category list, in its own words (e.g. `BC-A · BC-B · EBC`).
 - The few state questions that decide most of its schemes (residence certificate, counselling route, family ID, hostel or day scholar…). Keep it to five or fewer.
@@ -17,7 +17,7 @@ Students from a state that is not live see only central, AICTE and private schem
 
 ## 2. Add the state config
 
-In `src/lib/states.ts`:
+In `src/domain/states.ts`:
 
 1. Remove the state from `OTHER_STATES`.
 2. Add a `StateConfig` to `STATES`, keeping the existing order:

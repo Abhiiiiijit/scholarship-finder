@@ -8,7 +8,7 @@ import { requireAdmin } from "@/server/auth/require-admin";
 import { daysAgo, formatDate, todayInIndia } from "@/lib/format";
 import { matchesStatus, NEEDS_ATTENTION, schemeBadge, STATUS_FILTERS } from "@/lib/registry/status";
 import { listSchemes } from "@/server/repositories/scheme-repo";
-import { STATE_BY_CODE } from "@/lib/states";
+import { STATE_BY_CODE } from "@/domain/states";
 import { StateFilter } from "./StateFilter";
 
 export const metadata = { title: "Registry · Scholarship Finder admin" };

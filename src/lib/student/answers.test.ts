@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Profile } from "../profile";
+import type { Profile } from "@/domain/profile";
 import { sanitize, withState } from "./answers";
 
 describe("saved answers", () => {

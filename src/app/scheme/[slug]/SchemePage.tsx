@@ -7,15 +7,15 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { BackIcon, Column, Footnote, Screen } from "@/components/student/layout";
 import { Checking, LoadFailed } from "@/components/student/results";
 import { formatDate } from "@/lib/format";
-import { match, type GroupCheck, type RuleCheck } from "@/lib/match";
-import type { Profile } from "@/lib/profile";
-import { fieldTier } from "@/lib/rules/fields";
-import type { SnapshotScheme } from "@/lib/rules/snapshot";
+import { match, type GroupCheck, type RuleCheck } from "@/domain/match";
+import type { Profile } from "@/domain/profile";
+import { fieldTier } from "@/domain/rules/fields";
+import type { SnapshotScheme } from "@/domain/rules/snapshot";
 import { useDocumentTicks } from "@/lib/student/documents";
 import { gapText, ruleText, yourAnswer } from "@/lib/student/explain";
 import { useAnswers } from "@/lib/student/use-answers";
 import { useSnapshot } from "@/lib/student/use-snapshot";
-import { STATE_BY_CODE } from "@/lib/states";
+import { STATE_BY_CODE } from "@/domain/states";
 
 export function SchemePage({ slug }: { slug: string }) {
   const [profile] = useAnswers();

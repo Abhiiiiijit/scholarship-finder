@@ -93,7 +93,7 @@ flowchart TD
 
 - A skipped question is never a "no": it becomes a question on the results screen.
 - Optional questions (disability, minority, parent occupation…) unlock hidden schemes: "answer this to check 3 more".
-- State schemes match only students domiciled in that state. Each live state asks its own few questions (`src/lib/states.ts`).
+- State schemes match only students domiciled in that state. Each live state asks its own few questions (`src/domain/states.ts`).
 
 </details>
 
@@ -115,7 +115,7 @@ flowchart TD
 | --- | --- |
 | App | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4 |
 | Database | PostgreSQL (Docker locally, Neon in production), Drizzle ORM. Rule fields and operators are Postgres enums |
-| Rules | Zod schemas in `src/lib/rules`, shared by the admin editor, the snapshot and the matcher |
+| Rules | Zod schemas in `src/domain/rules`, shared by the admin editor, the snapshot and the matcher |
 | Admin sign-in | Auth.js with GitHub, allowlisted logins only |
 | Tests | Vitest (registry tests run migrations on in-memory PGlite, no Docker needed) |
 | Hosting | Vercel + Neon free tiers, about $0 a month |
@@ -185,13 +185,13 @@ CI runs lint, typecheck, tests and build on every pull request.
 src/app/                 student screens (/, /check/*, /results, /scheme/[slug]), admin under /admin,
                          snapshot at /api/rules/latest
 src/components/          shared UI from the design's component list; student/ for student screens
-src/lib/rules/           rule schema (operators, publish requirement), rule fields, published snapshot
-src/lib/match.ts         match(): eligible / near miss / needs info, runs in the browser
-src/lib/profile.ts       the student's answers
-src/lib/states.ts        the 16 live states' portals, category lists and state questions
+src/domain/rules/        rule schema (operators, publish requirement), rule fields, published snapshot
+src/domain/match.ts      match(): eligible / near miss / needs info, runs in the browser
+src/domain/profile.ts    the student's answers
+src/domain/states.ts     the 16 live states' portals, category lists and state questions
 src/lib/registry/        scheme editor input, publish checklist, admin labels, Phase 0 seed
 src/lib/student/         results assembly, plain-language reasons, on-phone storage
-src/server/               server-only: env check, Drizzle client and schema, repositories,
+src/server/              server-only: env check, Drizzle client and schema, repositories,
                          publish service, admin auth
 drizzle/                 generated SQL migrations
 public/brand/            Paatra logos and mark

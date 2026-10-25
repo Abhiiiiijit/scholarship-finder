@@ -1,4 +1,4 @@
-import type { MatchStatus } from "@/lib/match";
+import type { MatchStatus } from "@/domain/match";
 import { BADGE_LABELS, type SchemeBadge } from "@/lib/registry/status";
 
 export type BadgeStatus = Exclude<MatchStatus, "notEligible"> | SchemeBadge | "notEligible";

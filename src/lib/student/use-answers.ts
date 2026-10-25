@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
-import type { Profile } from "../profile";
+import type { Profile } from "@/domain/profile";
 import { loadAnswers, saveAnswers, subscribeAnswers } from "./answers";
 
 // null until the browser has read localStorage, so the server render and hydration agree.

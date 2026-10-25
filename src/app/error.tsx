@@ -12,7 +12,7 @@ export default function Error({ error, retry }: { error: unknown; retry: () => v
 
   return (
     <Screen>
-      <Column className="flex-1 gap-5 pt-5 pb-8">
+      <Column width="narrow" className="flex-1 gap-5 pt-5 pb-8">
         <Brand />
         <div className="flex flex-col gap-2 pt-10">
           <h1 className="m-0 text-2xl leading-[30px] font-semibold">Something went wrong</h1>

@@ -1,15 +1,40 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-// Page chrome for the student screens: a phone-width column on the grey ground, StepHeader and
-// StickyCTA from the screen spec, and the Paatra mark.
+// Page chrome for the student screens: a column on the grey ground, StepHeader and StickyCTA from
+// the screen spec, and the Paatra mark. Phones get the designed single column; wider screens get a
+// wider column that the views split into a sidebar and a main area or a grid of cards.
 
 export function Screen({ children }: { children?: ReactNode }) {
   return <div className="flex flex-1 flex-col bg-ground text-ink">{children}</div>;
 }
 
-export function Column({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`mx-auto flex w-full max-w-md flex-col px-5 ${className}`}>{children}</div>;
+const WIDTHS = {
+  // Short messages (error, not found) read best at phone width on any screen.
+  narrow: "max-w-md",
+  wide: "max-w-6xl",
+} as const;
+
+export function Column({
+  children,
+  className = "",
+  width = "wide",
+}: {
+  children: ReactNode;
+  className?: string;
+  width?: keyof typeof WIDTHS;
+}) {
+  return <div className={`mx-auto flex w-full ${WIDTHS[width]} flex-col px-5 sm:px-8 ${className}`}>{children}</div>;
+}
+
+// Basics and state questions: the heading and intro sit beside the form on a laptop, above it on a phone.
+export function FormLayout({ intro, children }: { intro: ReactNode; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-[22px] lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,40rem)] lg:items-start lg:gap-16">
+      <div className="flex flex-col gap-1.5 lg:sticky lg:top-6 lg:gap-3">{intro}</div>
+      <div className="flex flex-col gap-[22px]">{children}</div>
+    </div>
+  );
 }
 
 export function Brand() {
@@ -70,10 +95,10 @@ export function StickyCTA({
   note?: string;
 }) {
   return (
-    <div className="sticky bottom-0 border-t border-line bg-white pt-4 pb-6">
-      <Column className="gap-2">
+    <div className="sticky bottom-0 border-t border-line bg-white pt-4 pb-6 md:py-4">
+      <Column className="gap-2 md:flex-row-reverse md:items-center md:justify-between md:gap-6">
         {href && !disabled ? (
-          <Link href={href} onClick={onClick} className={cta}>
+          <Link href={href} onClick={onClick} className={`${cta} md:w-80`}>
             {label}
           </Link>
         ) : (
@@ -81,12 +106,12 @@ export function StickyCTA({
             type="button"
             onClick={onClick}
             disabled={disabled}
-            className={`${cta} disabled:cursor-not-allowed disabled:bg-disabled disabled:text-muted`}
+            className={`${cta} md:w-80 disabled:cursor-not-allowed disabled:bg-disabled disabled:text-muted`}
           >
             {label}
           </button>
         )}
-        {note && <div className="text-center text-xs leading-4 text-slate">{note}</div>}
+        {note && <div className="text-center text-xs leading-4 text-slate md:text-left">{note}</div>}
       </Column>
     </div>
   );
@@ -94,7 +119,7 @@ export function StickyCTA({
 
 export function Footnote({ children }: { children?: ReactNode }) {
   return (
-    <p className="m-0 text-xs leading-[17px] text-slate">
+    <p className="m-0 max-w-3xl text-xs leading-[17px] text-slate">
       {children ?? "Eligibility is decided by the scheme. Always confirm on the official page before applying."}
     </p>
   );

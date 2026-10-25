@@ -35,7 +35,7 @@ export function ResultCard({
   href: string;
 }) {
   return (
-    <article className="flex flex-col gap-3 rounded-[14px] border border-line bg-white p-4">
+    <article className="flex h-full flex-col gap-3 rounded-[14px] border border-line bg-white p-4">
       <div className="flex flex-col items-start gap-1.5">
         <StatusBadge status={status} label={badgeLabel} />
         <h3 className="m-0 text-lg leading-6 font-semibold">{schemeName}</h3>
@@ -48,7 +48,7 @@ export function ResultCard({
         ))}
       </ul>
       {note && <div className="rounded-lg bg-ground px-3 py-2.5 text-[13px] leading-[18px] text-slate">{note}</div>}
-      <div className="flex items-center justify-between gap-2 border-t border-line-soft pt-2.5">
+      <div className="mt-auto flex items-center justify-between gap-2 border-t border-line-soft pt-2.5">
         <span className="text-xs leading-4 text-slate">Verified {verified}</span>
         <Link href={href} className="flex min-h-11 items-center text-[15px] font-semibold text-navy">
           {linkLabel}

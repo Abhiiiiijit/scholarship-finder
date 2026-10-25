@@ -23,13 +23,13 @@ export function SchemeView({ slug }: { slug: string }) {
 
   return (
     <Screen>
-      <Column className="pt-4">
+      <Column className="pt-4 lg:pt-6">
         <Link href="/results" className="-ml-1 flex min-h-11 items-center gap-1 self-start text-[15px] font-semibold text-navy">
           <BackIcon />
           All results
         </Link>
       </Column>
-      <Column className="flex-1 gap-6 pt-2 pb-8">
+      <Column className="flex-1 gap-6 pt-2 pb-8 lg:pb-12">
         {snap.status === "failed" ? (
           <LoadFailed reason={snap.reason} onRetry={retry} />
         ) : snap.status === "loading" || !profile ? (
@@ -78,11 +78,22 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
     ["Apply through", applyVia ?? "The official site"],
   ];
 
+  const factList = (className: string) => (
+    <dl className={`m-0 grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-line bg-line ${className}`}>
+      {facts.map(([k, v]) => (
+        <div key={k} className="flex flex-col gap-0.5 bg-white px-3.5 py-3">
+          <dt className="text-xs leading-4 text-slate">{k}</dt>
+          <dd className="m-0 text-[15px] leading-5 font-semibold">{v}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+
   return (
     <>
       <header className="flex flex-col items-start gap-2">
         <StatusBadge status={m.status} />
-        <h1 className="m-0 text-[26px] leading-8 font-semibold tracking-tight">{scheme.name}</h1>
+        <h1 className="m-0 text-[26px] leading-8 font-semibold tracking-tight lg:text-[32px] lg:leading-10">{scheme.name}</h1>
         <div className="flex items-center gap-1.5 text-[13px] leading-[18px] text-slate">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="8" />
@@ -92,60 +103,63 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
         </div>
       </header>
 
-      {m.failed && <Alert tone="warning" title={gapText(m.failed, profile) ?? "One rule is not met yet."} />}
+      {/* Phone: one column in the designed order. Laptop: the rules on the left, and the facts, documents and
+          apply button on the right. */}
+      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start lg:gap-10">
+        <div className="flex flex-col gap-6">
+          {m.failed && <Alert tone="warning" title={gapText(m.failed, profile) ?? "One rule is not met yet."} />}
 
-      <dl className="m-0 grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-line bg-line">
-        {facts.map(([k, v]) => (
-          <div key={k} className="flex flex-col gap-0.5 bg-white px-3.5 py-3">
-            <dt className="text-xs leading-4 text-slate">{k}</dt>
-            <dd className="m-0 text-[15px] leading-5 font-semibold">{v}</dd>
-          </div>
-        ))}
-      </dl>
+          {factList("lg:hidden")}
 
-      <section className="flex flex-col gap-3">
-        <h2 className="m-0 text-lg leading-6 font-semibold">The rules, and how you match</h2>
-        {m.groups.map((g) => (
-          <RuleGroup key={g.group} group={g} profile={profile} />
-        ))}
-      </section>
-
-      {documents.length > 0 && (
-        <section className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
-            <h2 className="m-0 text-lg leading-6 font-semibold">Documents you&apos;ll need</h2>
-            <p className="m-0 text-[13px] leading-[18px] text-slate">Tick what you already have. Saved on this phone.</p>
-          </div>
-          <div className="flex flex-col rounded-[14px] border border-line bg-white">
-            {documents.map((d) => (
-              <label key={d} className="flex min-h-12 cursor-pointer items-center gap-3 border-b border-line-soft px-4 py-2 text-[15px] leading-5 last:border-b-0">
-                <input type="checkbox" checked={ticks.includes(d)} onChange={(e) => toggle(d, e.target.checked)} className="size-5 flex-none accent-navy" />
-                {d}
-              </label>
+          <section className="flex flex-col gap-3">
+            <h2 className="m-0 text-lg leading-6 font-semibold">The rules, and how you match</h2>
+            {m.groups.map((g) => (
+              <RuleGroup key={g.group} group={g} profile={profile} />
             ))}
-          </div>
-          {m.status === "eligible" && missing.length > 0 && (
-            <Alert tone="warning" title={`You qualify, but still need ${missing.length} document${missing.length === 1 ? "" : "s"}:`}>
-              {missing.join(", ")}.
-            </Alert>
-          )}
-          {missing.length === 0 && <Alert tone="success" title="You have every document on the list." />}
-        </section>
-      )}
+          </section>
+        </div>
 
-      <div className="flex flex-col gap-3">
-        <a
-          href={scheme.officialUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex h-[52px] items-center justify-center gap-2 rounded-xl bg-navy text-[17px] font-semibold text-white no-underline hover:bg-ink"
-        >
-          Apply on the official site
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5" />
-          </svg>
-        </a>
-        <Footnote />
+        <aside className="flex flex-col gap-6">
+          {factList("max-lg:hidden")}
+
+          {documents.length > 0 && (
+            <section className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
+                <h2 className="m-0 text-lg leading-6 font-semibold">Documents you&apos;ll need</h2>
+                <p className="m-0 text-[13px] leading-[18px] text-slate">Tick what you already have. Saved on this phone.</p>
+              </div>
+              <div className="flex flex-col rounded-[14px] border border-line bg-white">
+                {documents.map((d) => (
+                  <label key={d} className="flex min-h-12 cursor-pointer items-center gap-3 border-b border-line-soft px-4 py-2 text-[15px] leading-5 last:border-b-0">
+                    <input type="checkbox" checked={ticks.includes(d)} onChange={(e) => toggle(d, e.target.checked)} className="size-5 flex-none accent-navy" />
+                    {d}
+                  </label>
+                ))}
+              </div>
+              {m.status === "eligible" && missing.length > 0 && (
+                <Alert tone="warning" title={`You qualify, but still need ${missing.length} document${missing.length === 1 ? "" : "s"}:`}>
+                  {missing.join(", ")}.
+                </Alert>
+              )}
+              {missing.length === 0 && <Alert tone="success" title="You have every document on the list." />}
+            </section>
+          )}
+
+          <div className="flex flex-col gap-3">
+            <a
+              href={scheme.officialUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-[52px] items-center justify-center gap-2 rounded-xl bg-navy text-[17px] font-semibold text-white no-underline hover:bg-ink"
+            >
+              Apply on the official site
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5" />
+              </svg>
+            </a>
+            <Footnote />
+          </div>
+        </aside>
       </div>
     </>
   );

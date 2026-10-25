@@ -16,6 +16,7 @@ import { labelOf, YEAR_OPTIONS } from "@/features/eligibility/lib/labels";
 import { answer, questionFor } from "@/features/eligibility/lib/questions";
 import { buildResults, counts, mainReason, type Results } from "@/features/eligibility/lib/results";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
+import { useMediaQuery } from "@/features/eligibility/hooks/use-media-query";
 import { useSnapshot } from "@/features/eligibility/hooks/use-snapshot";
 import { categoriesFor, STATE_BY_CODE, stateName } from "@/domain/states";
 
@@ -52,16 +53,16 @@ export function ResultsView() {
 
   return (
     <Screen>
-      <Column className="gap-2.5 pt-5">
+      <Column className="gap-2.5 pt-5 lg:pt-10">
         <div className="flex items-center justify-between">
-          <h1 className="m-0 text-2xl leading-[30px] font-semibold">{results ? "Your scholarships" : "Checking your schemes"}</h1>
+          <h1 className="m-0 text-2xl leading-[30px] font-semibold lg:text-[32px] lg:leading-10">{results ? "Your scholarships" : "Checking your schemes"}</h1>
           <Link href="/check/basics" className="flex min-h-11 items-center text-sm font-semibold text-navy">
             Edit answers
           </Link>
         </div>
         <div className="font-mono text-[13px] leading-[18px] text-slate">{summaryLine(profile)}</div>
       </Column>
-      <Column className="flex-1 gap-6 pt-4 pb-8">
+      <Column className="flex-1 gap-6 pt-4 pb-8 lg:gap-8 lg:pt-6 lg:pb-12">
         {results ? <Found results={results} profile={profile} update={update} /> : <Checking sources={sources} />}
       </Column>
     </Screen>
@@ -124,7 +125,13 @@ function Group({ id, title, children }: { id?: string; title: string; children: 
   );
 }
 
+// One card per row on a phone, two side by side from tablet width.
+function Cards({ children }: { children: React.ReactNode }) {
+  return <div className="grid gap-2.5 md:grid-cols-2 md:gap-4">{children}</div>;
+}
+
 function Found({ results, profile, update }: { results: Results; profile: Profile; update: (fn: (p: Profile) => Profile) => void }) {
+  const wide = useMediaQuery("(min-width: 1024px)");
   const c = counts(results);
   const of = (s: SchemeMatch["status"]) => results.results.filter((m) => m.status === s);
   const nothing = c.eligible === 0 && c.nearMiss === 0;
@@ -151,84 +158,124 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
     return n ? `checks ${n} more scheme${n === 1 ? "" : "s"}` : undefined;
   };
 
-  return (
-    <>
-      {nothing ? (
-        <section className="flex flex-col gap-2">
-          <h2 className="m-0 text-xl leading-7 font-semibold">Nothing you can apply for right now</h2>
-          <p className="m-0 text-[15px] leading-[22px] text-muted">{mainReason(results, profile)}</p>
-        </section>
-      ) : (
-        <div className="grid grid-cols-3 gap-2">
-          <CountTile kind="eligible" count={c.eligible} href="#eligible" />
-          <CountTile kind="nearMiss" count={c.nearMiss} href="#near" />
-          <CountTile kind="needsInfo" count={questions.length} href="#answers" />
-        </div>
-      )}
+  const summary = nothing ? (
+    <section className="flex flex-col gap-2">
+      <h2 className="m-0 text-xl leading-7 font-semibold">Nothing you can apply for right now</h2>
+      <p className="m-0 text-[15px] leading-[22px] text-muted">{mainReason(results, profile)}</p>
+    </section>
+  ) : (
+    <div className="grid grid-cols-3 gap-2 md:gap-3">
+      <CountTile kind="eligible" count={c.eligible} href="#eligible" />
+      <CountTile kind="nearMiss" count={c.nearMiss} href="#near" />
+      <CountTile kind="needsInfo" count={questions.length} href="#answers" />
+    </div>
+  );
 
-      {c.eligible > 0 && (
-        <Group id="eligible" title="Eligible to apply">
-          {of("eligible").map((m) => (
-            <Card key={m.scheme.slug} m={m} profile={profile} />
-          ))}
-        </Group>
-      )}
+  const eligible = c.eligible > 0 && (
+    <Group id="eligible" title="Eligible to apply">
+      <Cards>
+        {of("eligible").map((m) => (
+          <Card key={m.scheme.slug} m={m} profile={profile} />
+        ))}
+      </Cards>
+    </Group>
+  );
 
-      {questions.length > 0 && (
-        <section id="answers" className="flex scroll-mt-4 flex-col gap-2.5 rounded-[14px] bg-info-tint p-4">
-          <div className="flex flex-col gap-0.5">
-            <h2 className="m-0 text-[17px] leading-6 font-semibold">
-              Answer {questions.length} question{questions.length === 1 ? "" : "s"} to check {decided} more
-            </h2>
-            <p className="m-0 text-[13px] leading-[18px] text-info">Results update as soon as you tap.</p>
-          </div>
-          {questions.map(({ q, card }) => (
-            <QuestionCard key={q.field} question={card!} why={why(q.field)} onAnswer={(v) => update((p) => answer(p, q.field, v))} />
-          ))}
-        </section>
-      )}
+  const toAnswer = questions.length > 0 && (
+    <section id="answers" className="flex scroll-mt-4 flex-col gap-2.5 rounded-[14px] bg-info-tint p-4">
+      <div className="flex flex-col gap-0.5">
+        <h2 className="m-0 text-[17px] leading-6 font-semibold">
+          Answer {questions.length} question{questions.length === 1 ? "" : "s"} to check {decided} more
+        </h2>
+        <p className="m-0 text-[13px] leading-[18px] text-info">Results update as soon as you tap.</p>
+      </div>
+      {questions.map(({ q, card }) => (
+        <QuestionCard key={q.field} question={card!} why={why(q.field)} onAnswer={(v) => update((p) => answer(p, q.field, v))} />
+      ))}
+    </section>
+  );
 
-      {c.needsInfo > 0 && (
-        <Group id={questions.length > 0 ? undefined : "answers"} title="Needs an answer or a check">
-          {of("needsInfo").map((m) => (
-            <Card key={m.scheme.slug} m={m} profile={profile} />
-          ))}
-        </Group>
-      )}
+  const needsInfo = c.needsInfo > 0 && (
+    <Group id={questions.length > 0 ? undefined : "answers"} title="Needs an answer or a check">
+      <Cards>
+        {of("needsInfo").map((m) => (
+          <Card key={m.scheme.slug} m={m} profile={profile} />
+        ))}
+      </Cards>
+    </Group>
+  );
 
-      {c.nearMiss > 0 && (
-        <Group id="near" title="Near misses: one rule away">
-          {of("nearMiss").map((m) => (
-            <Card key={m.scheme.slug} m={m} profile={profile} />
-          ))}
-        </Group>
-      )}
+  const nearMiss = c.nearMiss > 0 && (
+    <Group id="near" title="Near misses: one rule away">
+      <Cards>
+        {of("nearMiss").map((m) => (
+          <Card key={m.scheme.slug} m={m} profile={profile} />
+        ))}
+      </Cards>
+    </Group>
+  );
 
-      {(nothing ? unansweredUnlocks(profile).length > 0 : unlockKeys.length > 0) && (
-        <Group title={nothing ? "Ways to find more" : "Optional: check more schemes"}>
-          <UnlockQuestions profile={profile} update={update} only={nothing ? unansweredUnlocks(profile) : unlockKeys} detailFor={more} />
-          {nothing && (
-            <p className="m-0 text-[13px] leading-[18px] text-slate">
-              Check your income figure too: use the amount on your income certificate.{" "}
-              <Link href="/check/basics" className="font-semibold text-navy underline">
-                Edit answers
-              </Link>
-            </p>
-          )}
-        </Group>
-      )}
-
+  const unlocks = (nothing ? unansweredUnlocks(profile).length > 0 : unlockKeys.length > 0) && (
+    <Group title={nothing ? "Ways to find more" : "Optional: check more schemes"}>
+      <UnlockQuestions profile={profile} update={update} only={nothing ? unansweredUnlocks(profile) : unlockKeys} detailFor={more} />
       {nothing && (
         <p className="m-0 text-[13px] leading-[18px] text-slate">
-          We add schemes every week. Your answers stay on this phone, so checking again later takes one tap.
+          Check your income figure too: use the amount on your income certificate.{" "}
+          <Link href="/check/basics" className="font-semibold text-navy underline">
+            Edit answers
+          </Link>
         </p>
       )}
+    </Group>
+  );
 
-      <WhyNot results={results} />
-      <Footnote>
-        Eligibility is decided by the scheme. Always confirm on the official page before applying. Schemes not verified in
-        the last 90 days are not shown.
-      </Footnote>
+  const later = nothing && (
+    <p className="m-0 text-[13px] leading-[18px] text-slate">
+      We add schemes every week. Your answers stay on this phone, so checking again later takes one tap.
+    </p>
+  );
+
+  const whyNot = <WhyNot results={results} />;
+  const footnote = (
+    <Footnote>
+      Eligibility is decided by the scheme. Always confirm on the official page before applying. Schemes not verified in
+      the last 90 days are not shown.
+    </Footnote>
+  );
+
+  const side = [toAnswer, unlocks, later].some(Boolean) || results.farMisses.length > 0 || results.hidden.length > 0;
+  if (wide && side) {
+    // Laptop: the schemes on the left; the questions that decide more of them stay beside the cards.
+    return (
+      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,22rem)] items-start gap-10">
+        <div className="flex flex-col gap-8">
+          {summary}
+          {eligible}
+          {needsInfo}
+          {nearMiss}
+          {footnote}
+        </div>
+        <aside className="flex flex-col gap-6">
+          {toAnswer}
+          {unlocks}
+          {later}
+          {whyNot}
+        </aside>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {summary}
+      {eligible}
+      {toAnswer}
+      {needsInfo}
+      {nearMiss}
+      {unlocks}
+      {later}
+      {whyNot}
+      {footnote}
     </>
   );
 }

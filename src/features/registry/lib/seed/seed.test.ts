@@ -35,11 +35,19 @@ describe("Phase 0 seed data", () => {
   });
 
   it("notes rules that are summaries or have no quote yet", () => {
-    const m2 = PHASE0_SCHEMES.find((s) => s.trackerId === "M2")!;
-    const notes = seedNotes(m2, schemeDraftSchema.parse(m2));
-    expect(notes).toContain("Rule 4 (MH.cap_admission) is a summary: paste the exact wording.");
-    expect(notes).toContain("Rule 6 (MH.stay) needs a quote.");
-    expect(notes).not.toContain("Rule 1 (domicile_state)");
+    const notesFor = (id: string) => {
+      const s = PHASE0_SCHEMES.find((s) => s.trackerId === id)!;
+      return seedNotes(s, schemeDraftSchema.parse(s));
+    };
+    expect(notesFor("KA2")).toContain("Rule 2 (category) is a summary: paste the exact wording.");
+    expect(notesFor("DL3")).toContain("Rule 3 (domicile_state) needs a quote.");
+    expect(notesFor("DL3")).not.toContain("Rule 1 (class12_pct)");
+  });
+
+  it("quotes every rule of the verified schemes", () => {
+    for (const s of PHASE0_SCHEMES.filter((s) => s.quality === "verified")) {
+      for (const r of s.rules) expect((r.quote ?? "").trim(), `${s.trackerId} ${r.field}`).not.toBe("");
+    }
   });
 });
 

@@ -39,7 +39,7 @@ Adding a new **value** to an existing choice field (a new entrance exam, a new p
 
 - Add `checkRule` cases in `src/domain/match.test.ts`: pass, fail, unanswered (must be `unknown`, never `fail`), and a near-miss if numeric.
 - The PRD section 5 worked example (`src/lib/fixtures/section5.ts`) must still pass unchanged.
-- `npm test`, `npm run lint`, `npm run typecheck`, `npm run build`.
+- `npm test`, `npm run lint`, `npm run typecheck`, `npm run build`, `npm run e2e`.
 
 ## 4. Ship
 

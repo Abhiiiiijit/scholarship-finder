@@ -54,6 +54,6 @@ Follow the `add-scheme` skill for each scheme, with `provider: "STATE"` and the 
 
 ## 6. Test and ship
 
-- `npm test`, `npm run lint`, `npm run typecheck`, `npm run build`.
+- `npm test`, `npm run lint`, `npm run typecheck`, `npm run build`, `npm run e2e`.
 - Add a test in `src/features/eligibility/lib/student.test.ts` or `match.test.ts` for a student from the new state.
 - Open a PR. After merge, the migration must be applied to live Neon (`npm run db:migrate` with the unpooled URL) **before** any rule using the new keys is saved there, and only with the owner's go-ahead. Then update the PRD's state coverage and task checklist.

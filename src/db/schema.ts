@@ -9,10 +9,12 @@ import {
   integer,
   interval,
   jsonb,
+  pgEnum,
   pgTable,
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
+import { RULE_FIELD_KEYS } from "../lib/rules/fields";
 import { OPERATORS } from "../lib/rules/schema";
 
 const inList = (values: readonly string[]) => sql.raw(values.map((v) => `'${v}'`).join(", "));
@@ -20,6 +22,11 @@ const inList = (values: readonly string[]) => sql.raw(values.map((v) => `'${v}'`
 export const PROVIDERS = ["CENTRAL", "AICTE", "STATE", "PRIVATE"] as const;
 export const STATUSES = ["DRAFT", "PUBLISHED", "ON_HOLD", "RETIRED"] as const;
 export const SOURCE_FORMATS = ["HTML", "PDF"] as const;
+
+// Rule fields and operators are Postgres enums, so the database refuses a key the app doesn't know.
+// Labels for people live in src/lib/registry/options.ts (fieldLabel, OPERATOR_LABELS, valueLabel).
+export const ruleField = pgEnum("rule_field", RULE_FIELD_KEYS);
+export const ruleOp = pgEnum("rule_op", OPERATORS);
 
 export const scholarships = pgTable(
   "scholarships",
@@ -68,8 +75,8 @@ export const rules = pgTable(
       .notNull()
       .references(() => scholarships.id, { onDelete: "cascade" }),
     group: integer().notNull(),
-    field: text().notNull(),
-    op: text().notNull(),
+    field: ruleField().notNull(),
+    op: ruleOp().notNull(),
     value: jsonb().notNull(),
     // Empty while drafting; the editor refuses to publish until every rule has both.
     quote: text().notNull().default(""),
@@ -78,7 +85,6 @@ export const rules = pgTable(
     ambiguous: boolean().notNull().default(false),
   },
   (t) => [
-    check("rules_op_check", sql`${t.op} IN (${inList(OPERATORS)})`),
     index("rules_scholarship_idx").on(t.scholarshipId),
   ],
 );

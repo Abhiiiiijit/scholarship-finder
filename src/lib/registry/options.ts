@@ -67,16 +67,34 @@ export const EDITOR_OPERATORS = ["EQ", "IN", "LTE", "GTE", "BETWEEN", "IS_TRUE"]
 const NATIONAL_CATEGORIES = [o("general", "General"), o("sc", "SC"), o("st", "ST"), o("obc", "OBC"), o("ews", "EWS")];
 const ALL_STATE_CODES = STATES.map((s) => o(s.code, s.name));
 
+// What people see for each stored value. The `satisfies` checks keep these in step with the profile lists.
+const labelled = <T extends string>(labels: Record<T, string>): Option[] =>
+  (Object.entries(labels) as [T, string][]).map(([value, label]) => o(value, label));
+
 const CHOICES: Partial<Record<RuleField, Option[]>> = {
-  gender: GENDERS.map((g) => o(g)),
-  minority: MINORITIES.map((m) => o(m)),
+  gender: labelled({ female: "Female", male: "Male", other: "Other" } satisfies Record<(typeof GENDERS)[number], string>),
+  minority: labelled({
+    none: "None", muslim: "Muslim", christian: "Christian", sikh: "Sikh", buddhist: "Buddhist", jain: "Jain", parsi: "Parsi",
+  } satisfies Record<(typeof MINORITIES)[number], string>),
   course: [o("be_btech", "B.E. / B.Tech")],
-  year: YEARS.map((y) => o(y)),
-  fresh_or_renewal: [o("fresh"), o("renewal")],
-  institution_type: INSTITUTION_TYPES.map((i) => o(i)),
-  parent_occupation: PARENT_OCCUPATIONS.map((p) => o(p)),
-  special_status: SPECIAL_STATUSES.map((s) => o(s)),
-  entrance_exam: ENTRANCE_EXAMS.map((e) => o(e)),
+  year: labelled({
+    "1": "1st year", "2": "2nd year", "2_lateral": "2nd year (lateral entry)", "3": "3rd year", "4": "4th year", "5": "5th year",
+  } satisfies Record<(typeof YEARS)[number], string>),
+  fresh_or_renewal: [o("fresh", "Fresh"), o("renewal", "Renewal")],
+  institution_type: labelled({
+    govt: "Government", aided: "Government-aided", unaided: "Private unaided", deemed: "Deemed university", central: "Central institute",
+  } satisfies Record<(typeof INSTITUTION_TYPES)[number], string>),
+  parent_occupation: labelled({
+    farmer: "Farmer", labourer: "Labourer", armed_forces: "Armed forces", ex_serviceman: "Ex-serviceman",
+    capf: "CAPF or Assam Rifles", none: "None of these",
+  } satisfies Record<(typeof PARENT_OCCUPATIONS)[number], string>),
+  special_status: labelled({
+    orphan: "Orphan", single_girl: "Single girl child", first_gen: "First-generation learner", none: "None of these",
+  } satisfies Record<(typeof SPECIAL_STATUSES)[number], string>),
+  entrance_exam: labelled({
+    jee_main: "JEE Main", jee_adv: "JEE Advanced", mht_cet: "MHT CET", kcet: "KCET", ts_eapcet: "TS EAPCET", ojee: "OJEE",
+    other: "Other", none: "None",
+  } satisfies Record<(typeof ENTRANCE_EXAMS)[number], string>),
   domicile_state: ALL_STATE_CODES,
 };
 
@@ -103,4 +121,17 @@ export function editorFields(stateCode: string | null): FieldInfo[] {
     (q): FieldInfo => ({ key: `${state!.code}.${q.key}`, label: `${state!.code}: ${q.label}`, kind: "choice", options: q.options }),
   );
   return [...common, ...stateKeys];
+}
+
+// Display text for a rule's field and value, e.g. "Year of study" and "1st year, 2nd year".
+export function fieldLabel(key: string, stateCode: string | null = null): string {
+  const code = key.match(/^([A-Z]{2})\./)?.[1] ?? stateCode;
+  return editorFields(code).find((f) => f.key === key)?.label ?? key;
+}
+
+export function valueLabel(key: string, value: unknown, stateCode: string | null = null): string {
+  const code = key.match(/^([A-Z]{2})\./)?.[1] ?? stateCode;
+  const options = editorFields(code).find((f) => f.key === key)?.options ?? [];
+  const one = (v: unknown) => options.find((opt) => opt.value === String(v))?.label ?? String(v);
+  return Array.isArray(value) ? value.map(one).join(", ") : one(value);
 }

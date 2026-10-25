@@ -6,10 +6,10 @@ import { useEffect } from "react";
 import { ChoiceGroup } from "@/components/student/controls";
 import { Column, Screen, StepHeader, StickyCTA } from "@/components/student/layout";
 import { UnlockQuestions } from "@/components/student/Unlocks";
-import type { Profile } from "@/lib/profile";
+import type { Profile } from "@/domain/profile";
 import { isLive } from "@/lib/student/answers";
 import { useAnswers } from "@/lib/student/use-answers";
-import { STATE_BY_CODE, stateName, type StateConfig, type StateQuestion } from "@/lib/states";
+import { STATE_BY_CODE, stateName, type StateConfig, type StateQuestion } from "@/domain/states";
 
 // S03 State questions, or S04 State not live yet when the student's state has no checked schemes.
 

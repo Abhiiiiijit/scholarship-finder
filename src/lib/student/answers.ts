@@ -1,5 +1,5 @@
-import { profileSchema, type Profile } from "../profile";
-import { STATE_BY_CODE } from "../states";
+import { profileSchema, type Profile } from "@/domain/profile";
+import { STATE_BY_CODE } from "@/domain/states";
 
 // A student's answers live only in this browser's localStorage. Nothing here talks to a server.
 

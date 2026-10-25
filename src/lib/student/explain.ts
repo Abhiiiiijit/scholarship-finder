@@ -1,8 +1,8 @@
-import type { GroupCheck, RuleCheck } from "../match";
-import type { Profile } from "../profile";
-import { RULE_FIELDS, fieldTier, isStateKey, type RuleField } from "../rules/fields";
-import type { PublishableRule } from "../rules/schema";
-import { NATIONAL_CATEGORIES, STATE_BY_CODE, STATES, stateName } from "../states";
+import type { GroupCheck, RuleCheck } from "@/domain/match";
+import type { Profile } from "@/domain/profile";
+import { RULE_FIELDS, fieldTier, isStateKey, type RuleField } from "@/domain/rules/fields";
+import type { PublishableRule } from "@/domain/rules/schema";
+import { NATIONAL_CATEGORIES, STATE_BY_CODE, STATES, stateName } from "@/domain/states";
 import { formatINR, formatLakh } from "../format";
 import {
   AICTE_OPTIONS,

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { exampleStudent, NOW, section5Snapshot, TODAY } from "../fixtures/section5";
-import { match } from "../match";
-import type { Profile } from "../profile";
-import type { PublishableRule } from "../rules/schema";
+import { match } from "@/domain/match";
+import type { Profile } from "@/domain/profile";
+import type { PublishableRule } from "@/domain/rules/schema";
 import { gapText, missText, reasonRows, ruleText, yourAnswer } from "./explain";
 import { answer, questionFor } from "./questions";
 import { buildResults, counts, mainReason } from "./results";

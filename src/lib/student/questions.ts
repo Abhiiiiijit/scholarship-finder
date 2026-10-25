@@ -1,6 +1,6 @@
-import type { Profile } from "../profile";
-import { isStateKey } from "../rules/fields";
-import { STATE_BY_CODE, categoriesFor } from "../states";
+import type { Profile } from "@/domain/profile";
+import { isStateKey } from "@/domain/rules/fields";
+import { STATE_BY_CODE, categoriesFor } from "@/domain/states";
 import { GENDER_OPTIONS, INSTITUTION_OPTIONS, YEAR_OPTIONS, type Option } from "./labels";
 
 // The inline QuestionCard on S06 for an unanswered field that blocks a result. It reuses the

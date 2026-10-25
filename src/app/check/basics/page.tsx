@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { ChoiceGroup, SelectField } from "@/components/student/controls";
 import { Column, Screen, StepHeader, StickyCTA } from "@/components/student/layout";
 import { IncomeField, PercentField } from "@/components/student/NumberFields";
-import type { Profile } from "@/lib/profile";
+import type { Profile } from "@/domain/profile";
 import { isLive, withState } from "@/lib/student/answers";
 import { AICTE_OPTIONS, COURSE_OPTIONS, GENDER_OPTIONS, INSTITUTION_OPTIONS, YEAR_OPTIONS } from "@/lib/student/labels";
 import { useAnswers } from "@/lib/student/use-answers";
-import { categoriesFor, OTHER_STATES, STATES, stateName } from "@/lib/states";
+import { categoriesFor, OTHER_STATES, STATES, stateName } from "@/domain/states";
 
 // S02 Basics: the state first, then the common questions. Every answer saves on change.
 

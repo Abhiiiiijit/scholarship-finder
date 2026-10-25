@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { STATES } from "@/lib/states";
+import { STATES } from "@/domain/states";
 
 export function StateFilter({ value }: { value: string }) {
   const router = useRouter();

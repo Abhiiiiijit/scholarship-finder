@@ -7,7 +7,7 @@ description: Add a new eligibility rule field (or a new value of an existing one
 
 The field list is locked on purpose: every field is a question a student may be asked. Add one only when a real, quoted rule needs it and no existing field means the same thing. Confirm with the owner first if the field means a new question on the student screens.
 
-A state-only question (one state's portal, certificate or counselling route) is not a rule field: add it to that state's `questions` in `src/lib/states.ts` instead and skip to step 3.
+A state-only question (one state's portal, certificate or counselling route) is not a rule field: add it to that state's `questions` in `src/domain/states.ts` instead and skip to step 3.
 
 ## 1. Decide the shape
 
@@ -22,10 +22,10 @@ A state-only question (one state's portal, certificate or counselling route) is 
 
 | Step | File | Change |
 | --- | --- | --- |
-| Field list | `src/lib/rules/fields.ts` | Add to `RULE_FIELDS` with label, kind, tier |
+| Field list | `src/domain/rules/fields.ts` | Add to `RULE_FIELDS` with label, kind, tier |
 | Enum migration | `drizzle/` | `npm run db:generate`; check the SQL only adds a `rule_field` value |
-| Profile | `src/lib/profile.ts` | Add the answer to `profileSchema` (optional), plus a `const` values list for choices |
-| Matcher | `src/lib/match.ts` | Map it in `resolveField()` (`num`, `one`, `many`, or a range for banded answers) |
+| Profile | `src/domain/profile.ts` | Add the answer to `profileSchema` (optional), plus a `const` values list for choices |
+| Matcher | `src/domain/match.ts` | Map it in `resolveField()` (`num`, `one`, `many`, or a range for banded answers) |
 | Admin labels | `src/lib/registry/options.ts` | Add choice labels to `CHOICES` with `satisfies Record<...>` so typecheck catches gaps |
 | Student labels | `src/lib/student/labels.ts`, `explain.ts` | Option labels; how the rule and the student's answer read in plain English |
 | Inline question | `src/lib/student/questions.ts` | `questionFor()` case if it can be answered on the results screen |
@@ -37,7 +37,7 @@ Adding a new **value** to an existing choice field (a new entrance exam, a new p
 
 ## 3. Test
 
-- Add `checkRule` cases in `src/lib/match.test.ts`: pass, fail, unanswered (must be `unknown`, never `fail`), and a near-miss if numeric.
+- Add `checkRule` cases in `src/domain/match.test.ts`: pass, fail, unanswered (must be `unknown`, never `fail`), and a near-miss if numeric.
 - The PRD section 5 worked example (`src/lib/fixtures/section5.ts`) must still pass unchanged.
 - `npm test`, `npm run lint`, `npm run typecheck`, `npm run build`.
 

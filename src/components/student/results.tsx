@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { RuleRow } from "@/components/RuleRow";
 import { StatusBadge } from "@/components/StatusBadge";
-import type { MatchStatus } from "@/lib/match";
+import type { MatchStatus } from "@/domain/match";
 import type { RowResult } from "@/lib/student/explain";
 import type { Question } from "@/lib/student/questions";
 import { IncomeField, PercentField } from "./NumberFields";

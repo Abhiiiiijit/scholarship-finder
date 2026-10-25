@@ -1,6 +1,6 @@
-import { ENTRANCE_EXAMS, GENDERS, INSTITUTION_TYPES, MINORITIES, PARENT_OCCUPATIONS, SPECIAL_STATUSES, YEARS } from "../profile";
-import { RULE_FIELDS, type RuleField } from "../rules/fields";
-import { STATE_BY_CODE, STATES } from "../states";
+import { ENTRANCE_EXAMS, GENDERS, INSTITUTION_TYPES, MINORITIES, PARENT_OCCUPATIONS, SPECIAL_STATUSES, YEARS } from "@/domain/profile";
+import { RULE_FIELDS, type RuleField } from "@/domain/rules/fields";
+import { STATE_BY_CODE, STATES } from "@/domain/states";
 
 // Option lists for the scheme editor (A02), from the screen spec's "Admin field values".
 

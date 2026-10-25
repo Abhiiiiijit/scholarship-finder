@@ -1,5 +1,5 @@
 import { Brand, Column, Footnote, Screen } from "@/components/student/layout";
-import { STATES } from "@/lib/states";
+import { STATES } from "@/domain/states";
 import { StartButton } from "./StartButton";
 
 // S01 Landing.

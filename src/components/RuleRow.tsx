@@ -1,4 +1,4 @@
-import type { RuleOutcome } from "@/lib/match";
+import type { RuleOutcome } from "@/domain/match";
 
 const ICONS: Record<RuleOutcome | "confirm", { label: string; color: string; path: string }> = {
   pass: { label: "Pass", color: "text-pass", path: "M5 12.5l4.5 4.5L19 7.5" },

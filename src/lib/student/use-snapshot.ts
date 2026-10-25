@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { snapshotSchema, type Snapshot } from "../rules/snapshot";
+import { snapshotSchema, type Snapshot } from "@/domain/rules/snapshot";
 
 // Downloads the published rules once per visit. Results are never shown from an old copy: if the
 // download fails, the screen says so and offers a retry (S09).

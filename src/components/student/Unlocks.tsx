@@ -1,6 +1,6 @@
 "use client";
 
-import type { Profile } from "@/lib/profile";
+import type { Profile } from "@/domain/profile";
 import {
   DISABILITY_OPTIONS,
   ENTRANCE_OPTIONS,

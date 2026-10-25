@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
-import { EmailCapture } from "@/components/student/EmailCapture";
 import { Column, Footnote, Screen } from "@/components/student/layout";
 import { Checking, CountTile, LoadFailed, QuestionCard, ResultCard } from "@/components/student/results";
 import { UNLOCK_FIELDS, UnlockQuestions, unansweredUnlocks, type UnlockKey } from "@/components/student/Unlocks";
@@ -220,10 +219,9 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
       )}
 
       {nothing && (
-        <EmailCapture
-          label="Email me when a new scheme fits me"
-          detail="We add schemes every week. Your answers stay on this phone."
-        />
+        <p className="m-0 text-[13px] leading-[18px] text-slate">
+          We add schemes every week. Your answers stay on this phone, so checking again later takes one tap.
+        </p>
       )}
 
       <WhyNot results={results} />

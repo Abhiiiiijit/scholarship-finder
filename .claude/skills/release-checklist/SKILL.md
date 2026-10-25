@@ -10,7 +10,8 @@ description: Checklist for shipping a Paatra change safely, from PR to live (CI,
 ## Before opening a PR
 
 - [ ] One focused change, branched from the latest `main`. Never stack a PR on another PR's branch.
-- [ ] `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` all pass locally (CI runs the same four).
+- [ ] `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, `npm run e2e` all pass locally (CI runs the same five). A lint error about a restricted import means the code is in the wrong layer: move it, don't loosen `eslint.config.mjs`.
+- [ ] Changed a student screen's wording or flow? Update `e2e/happy-path.spec.ts` in the same PR.
 - [ ] Matcher, snapshot or publish-gate changes come with tests; the section 5 worked example passes unchanged.
 - [ ] Schema change? `npm run db:generate` ran and the new `drizzle/` file is committed. Applied migrations are never edited.
 - [ ] No rule without a quote and link. No paraphrased quotes. None of the three publish gates weakened.

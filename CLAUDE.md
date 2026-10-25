@@ -29,7 +29,7 @@ Context for AI agents working in this repo. Read this first, then the file you a
 | Data | PostgreSQL via Drizzle ORM: Docker locally, Neon in production. PGlite in tests |
 | Validation | Zod 4, shared by the editor, the snapshot and the matcher |
 | Auth | Auth.js (next-auth v5) with GitHub; only logins in `ADMIN_GITHUB_LOGINS` (default `Abhiiiiijit`) get in |
-| Tests | Vitest |
+| Tests | Vitest; Playwright for the student happy path (`e2e/`) |
 | Hosting | Vercel (Hobby) + Neon (free) |
 
 ## How it fits together
@@ -65,7 +65,8 @@ student phone ──GET /api/rules/latest──▶ latest snapshot (cached)
 | `src/domain/registry/` | `scheme-input.ts` (editor schema, `publishProblems`), `status.ts` (A01 badges) |
 | `src/components/ui/` | Shared UI used by both features: `Button`, `Chip`, `Alert`, `StatusBadge`, `RuleRow`, form fields |
 | `src/server/` | Server-only code (each file imports `server-only`): `env.ts` (checked settings), `db/` (Drizzle client, `schema.ts`), `repositories/` (`scheme-repo.ts`, `snapshot-repo.ts`: queries only), `services/` (`publish-service.ts`: quote gate + snapshot; `url-check.ts`), `auth/` (Auth.js, allowlist, `requireAdmin()`) |
-| `src/lib/fixtures/section5.ts` | PRD section 5 worked example, the matcher's reference test |
+| `src/lib/fixtures/section5.ts` | PRD section 5 worked example, the matcher's reference test and the e2e test's snapshot |
+| `e2e/`, `playwright.config.ts` | Playwright happy path S01 → results → scheme page on a phone viewport |
 | `src/server/db/schema.ts`, `drizzle/` | Drizzle schema and generated SQL migrations (never edit an applied migration) |
 | `src/server/auth/`, `src/proxy.ts` | Admin sign-in, allowlist, `requireAdmin()` |
 | `public/brand/` | Paatra logos (light/dark), mark, tagline |
@@ -78,12 +79,13 @@ npm test              # Vitest; registry tests run migrations on in-memory PGlit
 npm run lint
 npm run typecheck
 npm run build
+npm run e2e           # Playwright happy path against `npm run start` (build first); serves its own snapshot, no database
 npm run db:generate   # after editing src/server/db/schema.ts, fields.ts or a state's questions
 npm run db:migrate    # apply migrations (DATABASE_URL picks the database)
 npm run db:seed       # load Phase 0 schemes as drafts; `-- --sql` prints SQL instead
 ```
 
-CI (`.github/workflows/ci.yml`) runs lint, typecheck, test and build on every PR. Run all four before pushing.
+CI (`.github/workflows/ci.yml`) runs lint, typecheck, test, build and e2e on every PR. Run them all before pushing.
 
 ## Conventions
 
@@ -94,6 +96,7 @@ CI (`.github/workflows/ci.yml`) runs lint, typecheck, test and build on every PR
 - **Copy.** Plain, short English for a first-year student on a phone. Say what to do next. Name the product Paatra.
 - **Brand.** Navy `#1B3A6B`, green `#1F8A4C` (`#4CC38A` on navy), gold `#E9A23B`.
 - **Tests.** Change the matcher, snapshot or publish gate only with a test. The section 5 test must keep passing unchanged unless the PRD changes.
+- **Folder boundaries.** `eslint.config.mjs` enforces who may import whom: `src/domain` imports only Zod; `src/components` never imports a feature or the server; `src/server` never imports UI or a feature; routes in `src/app` use a feature only through its `index.ts`; a feature never imports another feature, and reaches `src/server` only from its `actions/` and tests (type imports are fine anywhere). If lint blocks an import, move the code to the right layer rather than loosening the rule.
 - **Git.** One focused PR per change into `main`. Never stack PRs on another PR's branch (GitHub does not retarget them reliably).
 
 ## Skills

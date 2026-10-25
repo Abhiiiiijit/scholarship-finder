@@ -117,7 +117,7 @@ flowchart TD
 | Database | PostgreSQL (Docker locally, Neon in production), Drizzle ORM. Rule fields and operators are Postgres enums |
 | Rules | Zod schemas in `src/domain/rules`, shared by the admin editor, the snapshot and the matcher |
 | Admin sign-in | Auth.js with GitHub, allowlisted logins only |
-| Tests | Vitest (registry tests run migrations on in-memory PGlite, no Docker needed) |
+| Tests | Vitest (registry tests run migrations on in-memory PGlite, no Docker needed); Playwright for the student happy path |
 | Hosting | Vercel + Neon free tiers, about $0 a month |
 
 ## Run locally
@@ -164,6 +164,7 @@ On Vercel, set the same three variables and add the production callback URL to t
 | --- | --- |
 | `npm run dev:local` | Postgres up, migrations, dev server |
 | `npm test` | Unit tests |
+| `npm run e2e` | Playwright happy path on a phone viewport (run `npm run build` first; first time: `npx playwright install chromium`) |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
 | `npm run build` | Production build (works without a database) |
 | `npm run db:generate` | Create a migration after editing `src/server/db/schema.ts`, a rule field or a state question |
@@ -172,7 +173,7 @@ On Vercel, set the same three variables and add the production callback URL to t
 | `npm run db:seed` | Load the Phase 0 schemes as drafts (skips any already there; `-- --sql` prints the SQL instead) |
 | `npm run db:down` | Stop Postgres (data is kept in a Docker volume) |
 
-CI runs lint, typecheck, tests and build on every pull request.
+CI runs lint, typecheck, tests, build and the e2e test on every pull request. Lint also enforces the folder boundaries below (for example, `src/domain` cannot import React or the database).
 
 </details>
 
@@ -195,6 +196,7 @@ src/features/eligibility/ student screens (views), widgets, hooks, on-phone stor
                          results assembly and plain-language reasons
 src/server/              server-only: env check, Drizzle client and schema, repositories,
                          publish service, admin auth
+e2e/                     Playwright happy path (serves the PRD section 5 snapshot, no database)
 drizzle/                 generated SQL migrations
 public/brand/            Paatra logos and mark
 ```

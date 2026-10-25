@@ -17,6 +17,10 @@ export const snapshotSchemeSchema = z.object({
   deadline: isoDate.nullable(),
   lastVerifiedAt: z.iso.datetime({ offset: true }),
   rules: z.array(publishableRuleSchema).min(1),
+  // For the scheme page (S08). Optional so snapshots published before they were added still load.
+  appliesVia: z.string().nullable().optional(),
+  benefitTypes: z.array(z.string()).optional(),
+  documents: z.array(z.string()).optional(),
 });
 
 // The published file students download: rules-<version>.json.
@@ -57,6 +61,9 @@ export function buildSnapshot(schemes: SnapshotInput[], version: number, now: Da
         deadline: s.deadline,
         lastVerifiedAt: s.lastVerifiedAt!.toISOString(),
         rules: s.rules,
+        appliesVia: s.appliesVia ?? null,
+        benefitTypes: s.benefitTypes ?? [],
+        documents: s.documents ?? [],
       })),
   });
 }

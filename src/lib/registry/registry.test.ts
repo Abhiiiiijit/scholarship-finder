@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { editorFields } from "./options";
 import { publishProblems, schemeDraftSchema } from "./scheme-input";
-import { schemeBadge } from "./status";
+import { matchesStatus, schemeBadge } from "./status";
 import { checkOfficialUrl } from "./url-check";
 
 const base = {
@@ -60,6 +60,16 @@ describe("schemeBadge", () => {
     ["retired", { ...live, status: "RETIRED" }],
   ])("%s", (badge, s) => {
     expect(schemeBadge(s, today, now)).toBe(badge);
+  });
+});
+
+describe("matchesStatus", () => {
+  it("counts schemes due a re-check as Live, and an empty filter matches everything", () => {
+    expect(matchesStatus("recheck", "live")).toBe(true);
+    expect(matchesStatus("recheck", "recheck")).toBe(true);
+    expect(matchesStatus("closed", "live")).toBe(false);
+    expect(matchesStatus("closed", "closed")).toBe(true);
+    expect(matchesStatus("draft", "")).toBe(true);
   });
 });
 

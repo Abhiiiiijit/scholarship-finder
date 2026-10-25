@@ -36,6 +36,13 @@
       "when": 1792874229171,
       "tag": "0004_review_notes",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792906070093,
+      "tag": "0005_rule_enums",
+      "breakpoints": true
     }
   ]
 }

@@ -48,7 +48,7 @@ export function seedStatement(s: SeedScheme, verifiedOn = PHASE0_VERIFIED_ON): s
   const insert = `INSERT INTO scholarships (${scheme.map(([c]) => c).join(", ")}) VALUES (${scheme.map(([, v]) => v).join(", ")}) ON CONFLICT DO NOTHING RETURNING id`;
   if (d.rules.length === 0) return insert;
   const rows = d.rules.map(
-    (r) => `(${r.group}, ${text(r.field)}, ${text(r.op)}, ${json(r.value)}, ${text(r.quote.trim())}, ${text(r.sourceUrl.trim())}, ${r.ambiguous})`,
+    (r) => `(${r.group}, ${text(r.field)}::rule_field, ${text(r.op)}::rule_op, ${json(r.value)}, ${text(r.quote.trim())}, ${text(r.sourceUrl.trim())}, ${r.ambiguous})`,
   );
   return `WITH s AS (${insert}) INSERT INTO rules (scholarship_id, "group", field, op, value, quote, source_url, ambiguous) SELECT s.id, r.* FROM s, (VALUES ${rows.join(", ")}) AS r("group", field, op, value, quote, source_url, ambiguous)`;
 }

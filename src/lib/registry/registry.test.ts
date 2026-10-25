@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { editorFields } from "./options";
+import { editorFields, fieldLabel, valueLabel } from "./options";
 import { publishProblems, schemeDraftSchema } from "./scheme-input";
 import { matchesStatus, schemeBadge } from "./status";
 import { checkOfficialUrl } from "./url-check";
@@ -97,5 +97,17 @@ describe("checkOfficialUrl", () => {
       throw new TypeError("fetch failed");
     }) as unknown as typeof fetch;
     expect(await checkOfficialUrl("https://x.gov.in/", down)).toEqual({ ok: false, reason: "The official URL could not be reached" });
+  });
+});
+
+describe("display labels", () => {
+  it("shows people a label instead of the stored key", () => {
+    expect(fieldLabel("family_income")).toBe("Annual family income");
+    expect(fieldLabel("MH.cap_admission")).toBe("MH: Admitted through CAP");
+    expect(fieldLabel("unknown_key")).toBe("unknown_key");
+    expect(valueLabel("year", ["1", "2_lateral"])).toBe("1st year, 2nd year (lateral entry)");
+    expect(valueLabel("institution_type", "govt")).toBe("Government");
+    expect(valueLabel("category", "vjnt", "MH")).toBe("VJNT");
+    expect(valueLabel("DL.delhi_univ", "iiitd")).toBe("IIIT-Delhi");
   });
 });

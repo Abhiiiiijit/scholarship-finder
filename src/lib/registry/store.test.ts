@@ -1,5 +1,5 @@
 import { PGlite } from "@electric-sql/pglite";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -102,5 +102,16 @@ describe("database publish gate", () => {
   it("refuses to flip a scheme with an unquoted rule to published", async () => {
     const id = await saveScheme(db, draft({ rules: [{ group: 1, field: "gender", op: "EQ", value: "female" }] }));
     await expect(db.update(scholarships).set({ status: "PUBLISHED" }).where(eq(scholarships.id, id))).rejects.toThrow();
+  });
+});
+
+describe("rule field and operator enums", () => {
+  it("refuses a field or operator the app doesn't know, and accepts a state's own key", async () => {
+    const id = await saveScheme(db, draft());
+    const insert = (field: string, op: string) =>
+      db.execute(sql`insert into rules (scholarship_id, "group", field, op, value) values (${id}, 3, ${field}, ${op}, '"yes"')`);
+    await expect(insert("hostel_type", "EQ")).rejects.toThrow();
+    await expect(insert("gender", "NOT_EQ")).rejects.toThrow();
+    await expect(insert("MH.cap_admission", "EQ")).resolves.toBeDefined();
   });
 });

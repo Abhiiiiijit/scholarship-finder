@@ -18,9 +18,11 @@ import {
   DOCUMENTS,
   EDITOR_OPERATORS,
   editorFields,
+  fieldLabel,
   OPERATOR_LABELS,
   PROVIDER_OPTIONS,
   sourceOptions,
+  valueLabel,
   type FieldInfo,
 } from "@/lib/registry/options";
 import { publishProblems, type SchemeDraft } from "@/lib/registry/scheme-input";
@@ -329,7 +331,7 @@ export function SchemeEditor({ initial }: { initial?: EditorScheme }) {
                   {test.groups.flatMap((g) =>
                     g.checks.map((c, j) => (
                       <RuleRow key={`${g.group}-${j}`} result={g.outcome === "confirm" && c.outcome !== "pass" ? "confirm" : c.outcome}
-                        text={`${c.rule.field} ${OPERATOR_LABELS[c.rule.op]} ${showValue(c.rule)}`} detail={gapNote(c, test.failed === c)} />
+                        text={`${fieldLabel(c.rule.field, draft.stateCode || null)} ${OPERATOR_LABELS[c.rule.op]} ${showValue(c.rule, draft.stateCode || null)}`} detail={gapNote(c, test.failed === c)} />
                     )),
                   )}
                 </ul>
@@ -374,10 +376,10 @@ export function SchemeEditor({ initial }: { initial?: EditorScheme }) {
   );
 }
 
-function showValue(r: PublishableRule): string {
+function showValue(r: PublishableRule, stateCode: string | null): string {
   if (r.op === "IS_TRUE") return "";
   if (r.op === "BETWEEN") return `${r.value[0]}–${r.value[1]}`;
-  if (r.op === "IN") return r.value.join(", ");
+  if (r.op === "EQ" || r.op === "IN") return valueLabel(r.field, r.value, stateCode);
   return String(r.value);
 }
 
@@ -450,7 +452,7 @@ function RuleEditor({
         <TextField fieldId={`${id}-group`} label="Group" type="number" min={1} value={rule.group} error={err("group")}
           onChange={(e) => onChange({ group: Number(e.target.value) })} />
         <SelectField fieldId={`${id}-field`} label="Field" error={err("field")}
-          groups={[{ options: fields.map((f) => ({ value: f.key, label: f.key })) }, ...(info ? [] : [{ options: [{ value: rule.field, label: `${rule.field} (not allowed here)` }] }])]}
+          groups={[{ options: fields.map((f) => ({ value: f.key, label: f.label })) }, ...(info ? [] : [{ options: [{ value: rule.field, label: `${rule.field} (not allowed here)` }] }])]}
           value={rule.field}
           onChange={(e) => {
             const f = fields.find((x) => x.key === e.target.value);
@@ -458,7 +460,7 @@ function RuleEditor({
             onChange({ field: e.target.value, op, value: defaultValue(f, op) });
           }} />
         <SelectField fieldId={`${id}-op`} label="Operator" error={err("op")}
-          groups={[{ options: ops.map((o) => ({ value: o, label: `${o} · ${OPERATOR_LABELS[o]}` })) }]}
+          groups={[{ options: ops.map((o) => ({ value: o, label: OPERATOR_LABELS[o] })) }]}
           value={rule.op} onChange={(e) => onChange({ op: e.target.value, value: defaultValue(info, e.target.value) })} />
         <ValueEditor id={id} rule={rule} info={info} error={err("value")} onChange={(value) => onChange({ value })} />
       </div>

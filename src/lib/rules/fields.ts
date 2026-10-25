@@ -1,3 +1,5 @@
+import { STATES, stateFieldKeys } from "../states";
+
 // The locked rule fields from the PRD's Phase 0 data plan, as the screen spec's "Rule field"
 // select lists them. Each maps to one profile answer (see resolveField in ../match).
 //
@@ -35,6 +37,13 @@ export const RULE_FIELDS = {
 } as const satisfies Record<string, { label: string; kind: FieldKind; tier: FieldTier }>;
 
 export type RuleField = keyof typeof RULE_FIELDS;
+
+// Every key a stored rule may use: the locked list plus each state's own questions. The database
+// holds these as the rule_field enum, so a new state question needs a migration (npm run db:generate).
+export const RULE_FIELD_KEYS = [
+  ...(Object.keys(RULE_FIELDS) as RuleField[]),
+  ...STATES.flatMap((s) => stateFieldKeys(s.code)),
+] as [string, ...string[]];
 
 const STATE_KEY = /^[A-Z]{2}\.[a-z0-9_]+$/;
 

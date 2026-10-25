@@ -41,6 +41,11 @@ describe("buildSnapshot", () => {
     expect(snap.schemes[0].rules[0].ambiguous).toBe(false);
   });
 
+  it("carries the documents list for the scheme page", () => {
+    const snap = buildSnapshot([scheme({ documents: ["Fee receipt"], appliesVia: "State portal" })], 1, now);
+    expect(snap.schemes[0]).toMatchObject({ documents: ["Fee receipt"], benefitTypes: [], appliesVia: "State portal" });
+  });
+
   it("refuses to publish a rule without a quote", () => {
     expect(() => buildSnapshot([scheme({ rules: [{ ...rule, quote: "" }] })], 1, now)).toThrow();
   });

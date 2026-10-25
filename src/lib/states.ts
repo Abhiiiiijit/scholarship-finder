@@ -6,6 +6,8 @@ export interface StateQuestion {
   key: string;
   label: string;
   options: { value: string; label: string }[];
+  // Asked only for these categories; for others S03 shows a grey note instead.
+  onlyFor?: string[];
 }
 
 export interface StateConfig {
@@ -31,7 +33,8 @@ const HAVE = opts("yes Have one · no Don't have one");
 const STAY = opts("hostel Hostel · day Day scholar");
 const NATIONAL = "General · SC · ST · OBC · EWS";
 
-const q = (key: string, label: string, options = YES_NO_UNSURE): StateQuestion => ({ key, label, options });
+const q = (key: string, label: string, options = YES_NO_UNSURE, onlyFor?: string[]): StateQuestion =>
+  onlyFor ? { key, label, options, onlyFor } : { key, label, options };
 const residence = (label: string) => q("residence", label, YES_NO_APPLIED);
 
 export const STATES: StateConfig[] = [
@@ -96,8 +99,8 @@ export const STATES: StateConfig[] = [
     questions: [
       residence("Maharashtra domicile certificate"),
       q("cap_admission", "Admitted through CAP", opts("yes Yes, through CAP rounds · no No, institute or management quota · unknown Not sure")),
-      q("caste_validity", "Caste validity certificate", YES_NO_APPLIED),
-      q("ncl", "Non-creamy layer certificate", YES_NO_APPLIED),
+      q("caste_validity", "Caste validity certificate", YES_NO_APPLIED, ["sc", "st", "obc", "vjnt", "sbc", "sebc"]),
+      q("ncl", "Non-creamy layer certificate", YES_NO_APPLIED, ["obc", "vjnt", "sbc"]),
       q("stay", "Hostel or day scholar", STAY),
     ],
   },
@@ -140,6 +143,28 @@ export const STATES: StateConfig[] = [
 ];
 
 export const STATE_BY_CODE = new Map(STATES.map((s) => [s.code, s]));
+
+// States and UTs whose own schemes are not checked yet: students there see central, AICTE and
+// private schemes only (S04). A state moves to STATES once its rules are confirmed.
+export const OTHER_STATES: { code: string; name: string }[] = [
+  ["AN", "Andaman & Nicobar Islands"], ["AP", "Andhra Pradesh"], ["AR", "Arunachal Pradesh"], ["AS", "Assam"],
+  ["CH", "Chandigarh"], ["CT", "Chhattisgarh"], ["DH", "Dadra & Nagar Haveli and Daman & Diu"], ["GJ", "Gujarat"],
+  ["JH", "Jharkhand"], ["KL", "Kerala"], ["MN", "Manipur"], ["ML", "Meghalaya"], ["MZ", "Mizoram"],
+  ["NL", "Nagaland"], ["PY", "Puducherry"], ["PB", "Punjab"], ["RJ", "Rajasthan"], ["UK", "Uttarakhand"],
+  ["UP", "Uttar Pradesh"], ["WB", "West Bengal"],
+].map(([code, name]) => ({ code, name }));
+
+export const NATIONAL_CATEGORIES = cats(NATIONAL);
+
+export function stateName(code: string | null | undefined): string | undefined {
+  if (!code) return undefined;
+  return STATE_BY_CODE.get(code)?.name ?? OTHER_STATES.find((s) => s.code === code)?.name;
+}
+
+// The category chips a student sees: the state's own list, or the national list elsewhere.
+export function categoriesFor(code: string | null | undefined) {
+  return (code && STATE_BY_CODE.get(code)?.categories) || NATIONAL_CATEGORIES;
+}
 
 export function stateFieldKeys(code: string | null | undefined): string[] {
   const state = code ? STATE_BY_CODE.get(code) : undefined;

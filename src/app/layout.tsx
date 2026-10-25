@@ -15,9 +15,9 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Scholarship Finder",
+  title: "Paatra: scholarships you can actually get",
   description:
-    "Find the scholarships an Indian B.E./B.Tech student qualifies for, with the official rule quoted for every result.",
+    "Find the scholarships an Indian B.E./B.Tech student qualifies for, with the official rule quoted for every result. Your answers stay on your phone.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "48x48" },

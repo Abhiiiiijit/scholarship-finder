@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { editorFields, fieldLabel, valueLabel } from "./options";
 import { publishProblems, schemeDraftSchema } from "./scheme-input";
 import { matchesStatus, schemeBadge } from "./status";
-import { checkOfficialUrl } from "./url-check";
+import { checkOfficialUrl } from "@/server/services/url-check";
 
 const base = {
   slug: "aicte-pragati",

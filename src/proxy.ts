@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
-import { isAdmin } from "@/lib/auth/allowlist";
+import { auth } from "@/server/auth/auth";
+import { isAdmin } from "@/server/auth/allowlist";
 
 // First gate for /admin: a plain redirect before anything renders. Layouts render in parallel
 // with their pages, so every admin page and server action still calls requireAdmin() itself.

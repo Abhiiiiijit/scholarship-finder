@@ -1,6 +1,6 @@
 import { connection } from "next/server";
-import { db } from "@/db";
-import { latestSnapshot } from "@/lib/registry/store";
+import { db } from "@/server/db/client";
+import { latestSnapshot } from "@/server/repositories/snapshot-repo";
 
 // The published rules snapshot the student's phone downloads and matches against locally.
 export async function GET() {

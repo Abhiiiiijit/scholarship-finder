@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { signOut } from "@/auth";
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { signOut } from "@/server/auth/auth";
+import { requireAdmin } from "@/server/auth/require-admin";
 
 // Admin pages read the session on every request; nothing here is worth prerendering.
 export const instant = false;

@@ -3,9 +3,10 @@ import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { beforeEach, describe, expect, it } from "vitest";
-import * as schema from "../../../db/schema";
+import * as schema from "@/server/db/schema";
 import { schemeDraftSchema } from "../scheme-input";
-import { getScheme, listSchemes, type Db } from "../store";
+import type { Db } from "@/server/db/types";
+import { getScheme, listSchemes } from "@/server/repositories/scheme-repo";
 import { seedNotes, seedStatement, seedStatements } from ".";
 import { PHASE0_SCHEMES } from "./phase0";
 

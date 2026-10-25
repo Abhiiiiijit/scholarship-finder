@@ -1,4 +1,4 @@
-import { signIn } from "@/auth";
+import { signIn } from "@/server/auth/auth";
 
 export const metadata = { title: "Admin sign-in · Scholarship Finder" };
 

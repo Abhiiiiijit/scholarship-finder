@@ -14,8 +14,8 @@ import {
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
-import { RULE_FIELD_KEYS } from "../lib/rules/fields";
-import { OPERATORS } from "../lib/rules/schema";
+import { RULE_FIELD_KEYS } from "../../lib/rules/fields";
+import { OPERATORS } from "../../lib/rules/schema";
 
 const inList = (values: readonly string[]) => sql.raw(values.map((v) => `'${v}'`).join(", "));
 

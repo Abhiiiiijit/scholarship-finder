@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
-import { isAdmin } from "./lib/auth/allowlist";
+import { isAdmin } from "./allowlist";
 
 // Admin sign-in only. Sessions are JWT cookies, so nothing about the admin is stored in Postgres.
 // Reads AUTH_SECRET, AUTH_GITHUB_ID and AUTH_GITHUB_SECRET from the environment.

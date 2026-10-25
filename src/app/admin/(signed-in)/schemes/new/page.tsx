@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requireAdmin } from "@/server/auth/require-admin";
 import { SchemeEditor } from "../SchemeEditor";
 
 export const metadata = { title: "Add scheme · Scholarship Finder admin" };

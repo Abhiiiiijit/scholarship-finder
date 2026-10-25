@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
-import { db } from "@/db";
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { db } from "@/server/db/client";
+import { requireAdmin } from "@/server/auth/require-admin";
 import { todayInIndia } from "@/lib/format";
 import { schemeBadge } from "@/lib/registry/status";
-import { getScheme } from "@/lib/registry/store";
+import { getScheme } from "@/server/repositories/scheme-repo";
 import { SchemeEditor, type EditorScheme } from "../SchemeEditor";
 
 export const metadata = { title: "Edit scheme · Scholarship Finder admin" };

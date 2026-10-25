@@ -8,7 +8,7 @@ import "dotenv/config";
 import { sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { databaseUrl } from "../src/db/url";
+import { databaseUrl } from "../src/server/db/url";
 import { PHASE0_SCHEMES } from "../src/lib/registry/seed/phase0";
 import { seedStatement } from "../src/lib/registry/seed";
 

@@ -1,7 +1,7 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
-import { auth } from "@/auth";
+import { auth } from "./auth";
 import { isAdmin } from "./allowlist";
 
 // Call at the top of every admin page and server action. The allowlist is checked again here,

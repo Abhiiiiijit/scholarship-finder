@@ -5,8 +5,9 @@ export type AppLocale = (typeof ALL_LOCALES)[number];
 export const DEFAULT_LOCALE: AppLocale = "en";
 
 // A language reaches the live site only after a native speaker has read every screen on a phone.
-// Until then it is served on preview deploys and locally, never in production.
-const REVIEWED: Record<AppLocale, boolean> = { en: true, hi: false };
+// Until then it is served on preview deploys and locally, never in production. Hindi went live on
+// 2026-10-25 at the owner's call, before that review: fix its wording as feedback comes in.
+const REVIEWED: Record<AppLocale, boolean> = { en: true, hi: true };
 const production = process.env.PAATRA_DEPLOY === "production";
 export const LOCALES: readonly AppLocale[] = ALL_LOCALES.filter((l) => REVIEWED[l] || !production);
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysAgo, formatDate, formatINR, formatLakh, todayInIndia } from "./format";
+import { daysAgo, daysUntil, formatDate, formatINR, formatLakh, todayInIndia } from "./format";
 
 describe("format", () => {
   it("writes rupees the Indian way", () => {
@@ -16,5 +16,8 @@ describe("format", () => {
     expect(formatDate("2027-03-31", "hi")).toBe("31 मार्च 2027");
     // 20:00 UTC is already the next day in India.
     expect(todayInIndia(now)).toBe("2026-10-25");
+    expect(daysUntil("2026-10-25", "2026-10-30")).toBe(5);
+    expect(daysUntil("2026-10-25", "2026-10-25")).toBe(0);
+    expect(daysUntil("2026-10-25", "2026-10-05")).toBe(-20);
   });
 });

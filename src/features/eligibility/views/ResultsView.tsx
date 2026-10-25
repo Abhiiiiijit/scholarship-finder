@@ -17,7 +17,7 @@ import { fieldLabel, gapText, reasonRows } from "@/features/eligibility/lib/expl
 import { joinList, type T } from "@/features/eligibility/lib/i18n";
 import { labelOf } from "@/features/eligibility/lib/labels";
 import { answer, questionFor } from "@/features/eligibility/lib/questions";
-import { buildResults, counts, mainReason, type Results } from "@/features/eligibility/lib/results";
+import { buildResults, counts, deadlineLine, mainReason, type Results } from "@/features/eligibility/lib/results";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
 import { useMediaQuery } from "@/features/eligibility/hooks/use-media-query";
 import { useSnapshot } from "@/features/eligibility/hooks/use-snapshot";
@@ -39,7 +39,8 @@ export function ResultsView() {
   const results = useMemo(() => {
     if (!profile || snap.status !== "ready") return null;
     const now = new Date();
-    return buildResults(t, profile, snap.snapshot, todayInIndia(now), now);
+    const today = todayInIndia(now);
+    return { today, ...buildResults(t, profile, snap.snapshot, today, now) };
   }, [t, profile, snap]);
 
   if (!profile?.domicile_state) return <Screen />;
@@ -94,13 +95,12 @@ function providerLabel(t: T, s: SnapshotScheme): string {
   return t(({ CENTRAL: "results.providerCentral", AICTE: "results.providerAicte", PRIVATE: "results.providerPrivate" } as const)[s.provider]);
 }
 
-function meta(t: T, locale: string, s: SnapshotScheme): string {
-  return [providerLabel(t, s), s.amountText, s.deadline ? t("results.closes", { date: formatDate(s.deadline, locale) }) : undefined]
-    .filter(Boolean)
-    .join(" · ");
+function meta(t: T, s: SnapshotScheme): string {
+  return [providerLabel(t, s), s.amountText].filter(Boolean).join(" · ");
 }
 
-function Card({ m, profile }: { m: SchemeMatch; profile: Profile }) {
+// `closed` shows a scheme whose deadline has passed: a grey "Closed" badge instead of its match.
+function Card({ m, profile, today, closed = false }: { m: SchemeMatch; profile: Profile; today: string; closed?: boolean }) {
   const t = useTranslations();
   const locale = useLocale();
   const rows = reasonRows(t, m.groups, profile).map((r) =>
@@ -112,9 +112,10 @@ function Card({ m, profile }: { m: SchemeMatch; profile: Profile }) {
   const nearIncome = failed?.rule.field === "family_income" && failed.rule.op === "LTE";
   return (
     <ResultCard
-      status={m.status as Exclude<SchemeMatch["status"], "notEligible">}
+      status={closed ? "closed" : (m.status as Exclude<SchemeMatch["status"], "notEligible">)}
       schemeName={m.scheme.name}
-      meta={meta(t, locale, m.scheme)}
+      meta={meta(t, m.scheme)}
+      deadline={deadlineLine(t, locale, m.scheme, today)}
       headline={failed ? gapText(t, failed, profile) : undefined}
       rules={rows}
       note={
@@ -123,7 +124,7 @@ function Card({ m, profile }: { m: SchemeMatch; profile: Profile }) {
           : undefined
       }
       verified={formatDate(m.scheme.lastVerifiedAt.slice(0, 10), locale)}
-      linkLabel={m.status === "eligible" ? t("results.rulesAndDocuments") : t("results.seeRules")}
+      linkLabel={m.status === "eligible" && !closed ? t("results.rulesAndDocuments") : t("results.seeRules")}
       href={`/scheme/${m.scheme.slug}`}
     />
   );
@@ -143,7 +144,15 @@ function Cards({ children }: { children: React.ReactNode }) {
   return <div className="grid gap-2.5 md:grid-cols-2 md:gap-4">{children}</div>;
 }
 
-function Found({ results, profile, update }: { results: Results; profile: Profile; update: (fn: (p: Profile) => Profile) => void }) {
+function Found({
+  results,
+  profile,
+  update,
+}: {
+  results: Results & { today: string };
+  profile: Profile;
+  update: (fn: (p: Profile) => Profile) => void;
+}) {
   const t = useTranslations();
   const wide = useMediaQuery("(min-width: 1024px)");
   const c = counts(results);
@@ -189,7 +198,7 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
     <Group id="eligible" title={t("results.eligibleGroup")}>
       <Cards>
         {of("eligible").map((m) => (
-          <Card key={m.scheme.slug} m={m} profile={profile} />
+          <Card key={m.scheme.slug} m={m} profile={profile} today={results.today} />
         ))}
       </Cards>
     </Group>
@@ -213,7 +222,7 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
     <Group id={questions.length > 0 ? undefined : "answers"} title={t("results.needsInfoGroup")}>
       <Cards>
         {of("needsInfo").map((m) => (
-          <Card key={m.scheme.slug} m={m} profile={profile} />
+          <Card key={m.scheme.slug} m={m} profile={profile} today={results.today} />
         ))}
       </Cards>
     </Group>
@@ -223,10 +232,27 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
     <Group id="near" title={t("results.nearMissGroup")}>
       <Cards>
         {of("nearMiss").map((m) => (
-          <Card key={m.scheme.slug} m={m} profile={profile} />
+          <Card key={m.scheme.slug} m={m} profile={profile} today={results.today} />
         ))}
       </Cards>
     </Group>
+  );
+
+  // Collapsed, so closed schemes never crowd out the ones open now.
+  const closed = results.closed.length > 0 && (
+    <details id="closed" className="flex flex-col rounded-[14px] border border-line bg-white px-4 py-3.5">
+      <summary className="min-h-6 cursor-pointer text-[15px] leading-[22px] font-semibold">
+        {t("results.closedGroup", { count: results.closed.length })}
+      </summary>
+      <div className="mt-2.5 flex flex-col gap-3">
+        <p className="m-0 text-sm leading-5 text-slate">{t("results.closedIntro")}</p>
+        <Cards>
+          {results.closed.map((m) => (
+            <Card key={m.scheme.slug} m={m} profile={profile} today={results.today} closed />
+          ))}
+        </Cards>
+      </div>
+    </details>
   );
 
   const unanswered = unansweredUnlocks(t, profile);
@@ -265,6 +291,7 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
           {eligible}
           {needsInfo}
           {nearMiss}
+          {closed}
           {footnote}
         </div>
         <aside className="flex flex-col gap-6">
@@ -284,6 +311,7 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
       {toAnswer}
       {needsInfo}
       {nearMiss}
+      {closed}
       {unlocks}
       {later}
       {whyNot}

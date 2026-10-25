@@ -8,7 +8,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { BackIcon, Column, Footnote, Screen } from "@/features/eligibility/components/layout";
 import { Checking, LoadFailed } from "@/features/eligibility/components/results";
 import { LanguageSwitch } from "@/features/eligibility/components/LanguageSwitch";
-import { formatDate } from "@/lib/format";
+import { formatDate, todayInIndia } from "@/lib/format";
 import { match, type GroupCheck, type RuleCheck } from "@/domain/match";
 import type { Profile } from "@/domain/profile";
 import { fieldTier } from "@/domain/rules/fields";
@@ -83,10 +83,11 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
   const portal = scheme.stateCode ? STATE_BY_CODE.get(scheme.stateCode)?.portal : undefined;
   const type = [t(`scheme.${PROVIDER[scheme.provider]}`), ...(scheme.benefitTypes ?? [])].join(" · ");
   const applyVia = scheme.appliesVia === "State portal" && portal ? portal : scheme.appliesVia;
+  const closed = scheme.deadline !== null && scheme.deadline < todayInIndia(new Date());
 
   const facts = [
     [t("scheme.amount"), scheme.amountText ?? t("scheme.seeOfficial")],
-    [t("scheme.deadline"), scheme.deadline ? formatDate(scheme.deadline, locale) : t("scheme.seeOfficial")],
+    [t("scheme.deadline"), scheme.deadline ? formatDate(scheme.deadline, locale) : t("scheme.deadlineUnknown")],
     [t("scheme.type"), type],
     [t("scheme.applyThrough"), applyVia ?? t("scheme.officialSite")],
   ];
@@ -105,7 +106,7 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
   return (
     <>
       <header className="flex flex-col items-start gap-2">
-        <StatusBadge status={m.status} label={t(`status.${m.status}`)} />
+        <StatusBadge status={closed ? "closed" : m.status} label={t(closed ? "status.closed" : `status.${m.status}`)} />
         <h1 className="m-0 text-[26px] leading-8 font-semibold tracking-tight lg:text-[32px] lg:leading-10">{scheme.name}</h1>
         <div className="flex items-center gap-1.5 text-[13px] leading-[18px] text-slate">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -120,6 +121,11 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
           apply button on the right. */}
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start lg:gap-10">
         <div className="flex flex-col gap-6">
+          {closed && (
+            <Alert tone="warning" title={t("scheme.closedTitle", { date: formatDate(scheme.deadline, locale) })}>
+              {t("scheme.closedBody")}
+            </Alert>
+          )}
           {m.failed && <Alert tone="warning" title={gapText(t, m.failed, profile) ?? t("scheme.oneRuleNotMet")} />}
 
           {factList("lg:hidden")}
@@ -165,7 +171,7 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
               rel="noopener noreferrer"
               className="flex h-[52px] items-center justify-center gap-2 rounded-xl bg-navy text-[17px] font-semibold text-white no-underline hover:bg-ink"
             >
-              {t("scheme.apply")}
+              {closed ? t("scheme.checkOfficial") : t("scheme.apply")}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5" />
               </svg>
@@ -178,8 +184,10 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
   );
 }
 
+// A failed disputed rule shows as failed, and its detail line says sources differ.
 function rowResult(c: RuleCheck): "pass" | "fail" | "unknown" | "confirm" {
   if (c.outcome === "pass") return "pass";
+  if (c.outcome === "fail" && c.rule.ambiguous) return "fail";
   if (c.rule.ambiguous || c.rule.op === "PERCENTILE_GTE" || fieldTier(c.rule.field) === "notAsked") return "confirm";
   return c.outcome;
 }
@@ -200,7 +208,7 @@ function RuleGroup({ group, profile }: { group: GroupCheck; profile: Profile }) 
               ? t("scheme.sourcesDiffer")
               : t("scheme.notAsked")
             : yours
-              ? t("scheme.you", { answer: yours })
+              ? t(result === "fail" && c.rule.ambiguous ? "scheme.youDisputed" : "scheme.you", { answer: yours })
               : t("scheme.notAnswered");
         return (
           <div key={i} className="flex flex-col gap-2">

@@ -2,7 +2,7 @@ import { isFresh, type Snapshot, type SnapshotScheme } from "@/domain/rules/snap
 import { match, matchAll, type MatchSummary, type RuleCheck, type SchemeMatch } from "@/domain/match";
 import type { Profile } from "@/domain/profile";
 import { fieldLabel, missText } from "./explain";
-import { formatLakh } from "@/lib/format";
+import { daysUntil, formatDate, formatLakh } from "@/lib/format";
 import type { T } from "./i18n";
 
 // Everything S06 and S07 show, computed on the phone from the downloaded snapshot.
@@ -18,6 +18,9 @@ export interface Results extends MatchSummary {
   farMisses: FarMiss[];
   // Waiting on an optional question before they are checked at all.
   hidden: SchemeMatch[];
+  // Would fit, but the deadline has passed: shown under "Closed for this year" so a scheme the
+  // student has heard of never just disappears. Most recently closed first.
+  closed: SchemeMatch[];
 }
 
 // State schemes are only matched for the student's own domicile state; a state that is not live
@@ -46,7 +49,13 @@ export function buildResults(t: T, p: Profile, snapshot: Snapshot, today: string
     .sort((a, b) => a.scheme.name.localeCompare(b.scheme.name));
   const hidden = all.filter((m) => m.status !== "notEligible" && m.hiddenUntil.length > 0);
 
-  return { ...summary, farMisses, hidden };
+  const closed = mine.schemes
+    .filter((s) => s.deadline !== null && s.deadline < today && isFresh(s.lastVerifiedAt, now))
+    .map((s) => match(p, s))
+    .filter((m) => m.status !== "notEligible" && m.hiddenUntil.length === 0)
+    .sort((a, b) => b.scheme.deadline!.localeCompare(a.scheme.deadline!) || a.scheme.name.localeCompare(b.scheme.name));
+
+  return { ...summary, farMisses, hidden, closed };
 }
 
 export function counts(r: Results) {
@@ -79,4 +88,20 @@ export function mainReason(t: T, r: Results, p: Profile): string {
     return t("results.mainIncome", { range, yours: formatLakh(p.family_income) });
   }
   return t("results.mainField", { field: fieldLabel(t, top).toLowerCase() });
+}
+
+// Two weeks or less before the deadline, the card says how many days are left, in the warning colour.
+export const URGENT_DAYS = 14;
+
+// The deadline line on a result card: "Apply by 30 Sep 2026 · 5 days left", "Deadline not
+// announced yet" or "Closed on 5 Oct 2026".
+export function deadlineLine(t: T, locale: string, s: SnapshotScheme, today: string): { text: string; urgent: boolean } {
+  if (s.deadline === null) return { text: t("results.noDeadline"), urgent: false };
+  const date = formatDate(s.deadline, locale);
+  const left = daysUntil(today, s.deadline);
+  if (left < 0) return { text: t("results.closedOn", { date }), urgent: false };
+  const applyBy = t("results.applyBy", { date });
+  return left <= URGENT_DAYS
+    ? { text: `${applyBy} · ${t("results.daysLeft", { count: left })}`, urgent: true }
+    : { text: applyBy, urgent: false };
 }

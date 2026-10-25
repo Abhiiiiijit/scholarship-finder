@@ -1,24 +1,24 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { ChoiceGroup, SelectField } from "@/features/eligibility/components/controls";
 import { Column, FormLayout, Screen, StepHeader, StickyCTA } from "@/features/eligibility/components/layout";
 import { IncomeField, PercentField } from "@/features/eligibility/components/NumberFields";
 import type { Profile } from "@/domain/profile";
 import { isLive, withState } from "@/features/eligibility/store/answers";
-import { AICTE_OPTIONS, COURSE_OPTIONS, GENDER_OPTIONS, INSTITUTION_OPTIONS, YEAR_OPTIONS } from "@/features/eligibility/lib/labels";
+import { aicteOptions, courseOptions, genderOptions, institutionOptions, yearOptions } from "@/features/eligibility/lib/labels";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
 import { categoriesFor, OTHER_STATES, STATES, stateName } from "@/domain/states";
 
 // S02 Basics: the state first, then the common questions. Every answer saves on change.
 
 const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name);
-const STATE_GROUPS = [
-  { label: `State schemes available (${STATES.length})`, options: [...STATES].sort(byName).map((s) => ({ value: s.code, label: s.name })) },
-  { label: `Central and private schemes only (${OTHER_STATES.length})`, options: [...OTHER_STATES].sort(byName).map((s) => ({ value: s.code, label: s.name })) },
-];
+const LIVE = [...STATES].sort(byName).map((s) => ({ value: s.code, label: s.name }));
+const OTHER = [...OTHER_STATES].sort(byName).map((s) => ({ value: s.code, label: s.name }));
 
 export function BasicsView() {
+  const t = useTranslations();
   const [profile, update] = useAnswers();
   const [undo, setUndo] = useState<{ previous: Profile; from: string } | null>(null);
 
@@ -54,31 +54,34 @@ export function BasicsView() {
   return (
     <Screen>
       <Column>
-        <StepHeader label="Step 1 of 2 · Basics" progress={50} backHref="/" />
+        <StepHeader label={t("basics.step")} progress={50} backHref="/" />
       </Column>
       <Column className="flex-1 pt-[22px] pb-6 lg:pt-10 lg:pb-12">
         <FormLayout
           intro={
             <>
-              <h1 className="m-0 text-2xl leading-[30px] font-semibold lg:text-[32px] lg:leading-10">About you</h1>
+              <h1 className="m-0 text-2xl leading-[30px] font-semibold lg:text-[32px] lg:leading-10">{t("basics.title")}</h1>
               <p className="m-0 text-sm leading-5 text-slate lg:text-base lg:leading-6">
-                Skip anything you are unsure of. A skipped answer shows as &ldquo;needs info&rdquo;, never as a no.
+                {t("basics.intro")}
               </p>
             </>
           }
         >
           <SelectField
-            label="Domicile state"
-            hint="The state on your domicile certificate, not where you study. It decides the category list below and your next few questions."
-            groups={STATE_GROUPS}
-            placeholder="Choose your state"
+            label={t("basics.stateLabel")}
+            hint={t("basics.stateHint")}
+            groups={[
+              { label: t("basics.liveGroup", { count: LIVE.length }), options: LIVE },
+              { label: t("basics.otherGroup", { count: OTHER.length }), options: OTHER },
+            ]}
+            placeholder={t("basics.statePlaceholder")}
             value={state ?? ""}
             onChange={(e) => chooseState(e.target.value)}
           />
 
           {undo && (
             <div role="status" className="flex items-center justify-between gap-3 rounded-xl bg-ink px-4 py-2 text-sm text-white">
-              <span>Cleared your category and {undo.from} answers.</span>
+              <span>{t("basics.cleared", { state: undo.from })}</span>
               <button
                 type="button"
                 className="min-h-11 px-2 font-semibold underline"
@@ -87,50 +90,50 @@ export function BasicsView() {
                   setUndo(null);
                 }}
               >
-                Undo
+                {t("basics.undo")}
               </button>
             </div>
           )}
 
-          <IncomeField hint="All earning members, as on your income certificate." value={profile.family_income} onChange={set("family_income")} />
+          <IncomeField hint={t("basics.incomeHint")} value={profile.family_income} onChange={set("family_income")} />
 
           <ChoiceGroup
-            legend={state && live ? `Category (${stateName(state)}'s list)` : "Category"}
-            hint={state ? undefined : "Choose your state first to see its category list."}
+            legend={state && live ? t("basics.categoryOfState", { state: stateName(state) ?? state }) : t("basics.category")}
+            hint={state ? undefined : t("basics.categoryHint")}
             options={categoriesFor(state)}
             value={profile.category}
             onChange={set("category")}
           />
 
-          <ChoiceGroup legend="Gender" hint="Some schemes are for girls only." options={GENDER_OPTIONS} value={profile.gender} onChange={set("gender")} />
+          <ChoiceGroup legend={t("basics.gender")} hint={t("basics.genderHint")} options={genderOptions(t)} value={profile.gender} onChange={set("gender")} />
 
           <SelectField
-            label="Course"
-            groups={[{ options: COURSE_OPTIONS }]}
+            label={t("basics.course")}
+            groups={[{ options: courseOptions(t) }]}
             value={profile.course ?? "be_btech"}
             onChange={() => set("course")("be_btech")}
           />
 
-          <ChoiceGroup legend="Year of study" options={YEAR_OPTIONS} value={profile.year} onChange={set("year")} />
+          <ChoiceGroup legend={t("basics.year")} options={yearOptions(t)} value={profile.year} onChange={set("year")} />
 
-          <PercentField label="Class 12 (HSC) percentage" value={profile.class12_pct} onChange={set("class12_pct")} />
+          <PercentField label={t("basics.class12")} value={profile.class12_pct} onChange={set("class12_pct")} />
 
-          <ChoiceGroup legend="Your college is" layout="grid2" options={INSTITUTION_OPTIONS} value={profile.institution_type} onChange={set("institution_type")} />
+          <ChoiceGroup legend={t("basics.institution")} layout="grid2" options={institutionOptions(t)} value={profile.institution_type} onChange={set("institution_type")} />
 
           <ChoiceGroup
-            legend="Is your course AICTE-approved?"
-            hint="Most B.E./B.Tech courses are. Your college's website or admission letter says so."
-            options={AICTE_OPTIONS}
+            legend={t("basics.aicte")}
+            hint={t("basics.aicteHint")}
+            options={aicteOptions(t)}
             value={profile.aicte_approved}
             onChange={set("aicte_approved")}
           />
         </FormLayout>
       </Column>
       <StickyCTA
-        label="Continue"
+        label={t("basics.continue")}
         href="/check/state"
         disabled={!state}
-        note="Saved on this phone only. We never ask for Aadhaar or documents."
+        note={t("basics.privacyNote")}
       />
     </Screen>
   );

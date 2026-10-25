@@ -7,7 +7,18 @@ const ICONS: Record<RuleOutcome | "confirm", { label: string; color: string; pat
   confirm: { label: "Confirm on the official site", color: "text-info", path: "M12 8v5M12 16h.01" },
 };
 
-export function RuleRow({ result, text, detail }: { result: RuleOutcome | "confirm"; text: string; detail?: string }) {
+// `label` replaces the icon's English name for screen readers, e.g. in the student's language.
+export function RuleRow({
+  result,
+  text,
+  detail,
+  label,
+}: {
+  result: RuleOutcome | "confirm";
+  text: string;
+  detail?: string;
+  label?: string;
+}) {
   const icon = ICONS[result];
   return (
     <li className="flex gap-2 text-sm leading-5">
@@ -21,7 +32,7 @@ export function RuleRow({ result, text, detail }: { result: RuleOutcome | "confi
         strokeLinecap="round"
         strokeLinejoin="round"
         role="img"
-        aria-label={icon.label}
+        aria-label={label ?? icon.label}
         className={`mt-px flex-none ${icon.color}`}
       >
         <path d={icon.path} />

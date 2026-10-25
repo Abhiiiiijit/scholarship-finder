@@ -1,7 +1,8 @@
 import type { Profile } from "@/domain/profile";
 import { isStateKey } from "@/domain/rules/fields";
 import { STATE_BY_CODE, categoriesFor } from "@/domain/states";
-import { GENDER_OPTIONS, INSTITUTION_OPTIONS, YEAR_OPTIONS, type Option } from "./labels";
+import type { T } from "./i18n";
+import { aicteOptions, genderOptions, institutionOptions, yearOptions, type Option } from "./labels";
 
 // The inline QuestionCard on S06 for an unanswered field that blocks a result. It reuses the
 // field's own values; "Not sure" is left out because it would leave the result unchanged.
@@ -10,7 +11,7 @@ export type Question =
   | { field: string; question: string; kind: "choice"; options: Option[] }
   | { field: string; question: string; kind: "income" | "percent" };
 
-export function questionFor(field: string, p: Profile): Question | undefined {
+export function questionFor(t: T, field: string, p: Profile): Question | undefined {
   if (isStateKey(field)) {
     const [code, key] = field.split(".");
     const q = STATE_BY_CODE.get(code)?.questions.find((x) => x.key === key);
@@ -19,26 +20,23 @@ export function questionFor(field: string, p: Profile): Question | undefined {
   }
   switch (field) {
     case "family_income":
-      return { field, question: "Annual family income", kind: "income" };
+      return { field, question: t("questions.family_income"), kind: "income" };
     case "class12_pct":
-      return { field, question: "Class 12 percentage", kind: "percent" };
+      return { field, question: t("questions.class12_pct"), kind: "percent" };
     case "category":
-      return { field, question: "Category", kind: "choice", options: categoriesFor(p.domicile_state) };
+      return { field, question: t("questions.category"), kind: "choice", options: categoriesFor(p.domicile_state) };
     case "gender":
-      return { field, question: "Gender", kind: "choice", options: GENDER_OPTIONS };
+      return { field, question: t("questions.gender"), kind: "choice", options: genderOptions(t) };
     case "year":
-      return { field, question: "Year of study", kind: "choice", options: YEAR_OPTIONS };
+      return { field, question: t("questions.year"), kind: "choice", options: yearOptions(t) };
     case "institution_type":
-      return { field, question: "Your college is", kind: "choice", options: INSTITUTION_OPTIONS };
+      return { field, question: t("questions.institution_type"), kind: "choice", options: institutionOptions(t) };
     case "aicte_approved":
       return {
         field,
-        question: "Is your course AICTE-approved?",
+        question: t("questions.aicte_approved"),
         kind: "choice",
-        options: [
-          { value: "yes", label: "Yes" },
-          { value: "no", label: "No" },
-        ],
+        options: aicteOptions(t).filter((o) => o.value !== "unknown"),
       };
     default:
       return undefined;

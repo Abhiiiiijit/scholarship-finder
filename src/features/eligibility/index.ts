@@ -7,3 +7,4 @@ export { SchemeView } from "./views/SchemeView";
 export { StartButton } from "./components/StartButton";
 export { Brand, Column, Footnote, Screen } from "./components/layout";
 export { Checking } from "./components/results";
+export { joinList } from "./lib/i18n";

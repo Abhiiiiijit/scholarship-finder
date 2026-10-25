@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { Column, Footnote, Screen } from "@/features/eligibility/components/layout";
 import { Checking, CountTile, LoadFailed, QuestionCard, ResultCard } from "@/features/eligibility/components/results";
@@ -12,7 +13,8 @@ import type { Profile } from "@/domain/profile";
 import type { SnapshotScheme } from "@/domain/rules/snapshot";
 import { isLive } from "@/features/eligibility/store/answers";
 import { fieldLabel, gapText, reasonRows } from "@/features/eligibility/lib/explain";
-import { labelOf, YEAR_OPTIONS } from "@/features/eligibility/lib/labels";
+import { joinList, type T } from "@/features/eligibility/lib/i18n";
+import { labelOf } from "@/features/eligibility/lib/labels";
 import { answer, questionFor } from "@/features/eligibility/lib/questions";
 import { buildResults, counts, mainReason, type Results } from "@/features/eligibility/lib/results";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
@@ -23,6 +25,7 @@ import { categoriesFor, STATE_BY_CODE, stateName } from "@/domain/states";
 // S05 Checking, S06 Results, S07 Nothing fits yet and S09 Offline, all matched on this phone.
 
 export function ResultsView() {
+  const t = useTranslations();
   const [profile, update] = useAnswers();
   const [snap, retry] = useSnapshot();
   const router = useRouter();
@@ -34,12 +37,12 @@ export function ResultsView() {
   const results = useMemo(() => {
     if (!profile || snap.status !== "ready") return null;
     const now = new Date();
-    return buildResults(profile, snap.snapshot, todayInIndia(now), now);
-  }, [profile, snap]);
+    return buildResults(t, profile, snap.snapshot, todayInIndia(now), now);
+  }, [t, profile, snap]);
 
   if (!profile?.domicile_state) return <Screen />;
   const state = profile.domicile_state;
-  const sources = isLive(state) ? `central, AICTE, ${stateName(state)} and private schemes` : "central, AICTE and private schemes";
+  const sources = isLive(state) ? t("results.sourcesLive", { state: stateName(state) ?? state }) : t("results.sourcesOther");
 
   if (snap.status === "failed") {
     return (
@@ -55,12 +58,12 @@ export function ResultsView() {
     <Screen>
       <Column className="gap-2.5 pt-5 lg:pt-10">
         <div className="flex items-center justify-between">
-          <h1 className="m-0 text-2xl leading-[30px] font-semibold lg:text-[32px] lg:leading-10">{results ? "Your scholarships" : "Checking your schemes"}</h1>
+          <h1 className="m-0 text-2xl leading-[30px] font-semibold lg:text-[32px] lg:leading-10">{results ? t("results.title") : t("results.checkingTitle")}</h1>
           <Link href="/check/basics" className="flex min-h-11 items-center text-sm font-semibold text-navy">
-            Edit answers
+            {t("common.editAnswers")}
           </Link>
         </div>
-        <div className="font-mono text-[13px] leading-[18px] text-slate">{summaryLine(profile)}</div>
+        <div className="font-mono text-[13px] leading-[18px] text-slate">{summaryLine(t, profile)}</div>
       </Column>
       <Column className="flex-1 gap-6 pt-4 pb-8 lg:gap-8 lg:pt-6 lg:pb-12">
         {results ? <Found results={results} profile={profile} update={update} /> : <Checking sources={sources} />}
@@ -69,31 +72,35 @@ export function ResultsView() {
   );
 }
 
-function summaryLine(p: Profile): string {
-  const year = labelOf(YEAR_OPTIONS, p.year);
+function summaryLine(t: T, p: Profile): string {
   return [
     stateName(p.domicile_state),
     p.family_income !== undefined ? formatINR(p.family_income) : undefined,
     labelOf(categoriesFor(p.domicile_state), p.category),
-    year ? `B.Tech ${year.replace(/ \(.*\)$/, "")} yr` : "B.Tech",
-    p.class12_pct !== undefined ? `12th ${p.class12_pct}%` : undefined,
+    p.year ? t("results.summaryYear", { year: t(`options.yearShort.${p.year}`) }) : t("results.summaryCourse"),
+    p.class12_pct !== undefined ? t("results.summaryClass12", { pct: String(p.class12_pct) }) : undefined,
   ]
     .filter(Boolean)
     .join(" · ");
 }
 
-function providerLabel(s: SnapshotScheme): string {
-  if (s.provider === "STATE") return (s.stateCode && STATE_BY_CODE.get(s.stateCode)?.portal) || "State";
-  return { CENTRAL: "Central", AICTE: "AICTE", PRIVATE: "Private" }[s.provider];
+function providerLabel(t: T, s: SnapshotScheme): string {
+  if (s.provider === "STATE") return (s.stateCode && STATE_BY_CODE.get(s.stateCode)?.portal) || t("results.providerState");
+  return t(({ CENTRAL: "results.providerCentral", AICTE: "results.providerAicte", PRIVATE: "results.providerPrivate" } as const)[s.provider]);
 }
 
-function meta(s: SnapshotScheme): string {
-  return [providerLabel(s), s.amountText, s.deadline ? `closes ${formatDate(s.deadline)}` : undefined].filter(Boolean).join(" · ");
+function meta(t: T, s: SnapshotScheme): string {
+  return [providerLabel(t, s), s.amountText, s.deadline ? t("results.closes", { date: formatDate(s.deadline) }) : undefined]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 function Card({ m, profile }: { m: SchemeMatch; profile: Profile }) {
-  const rows = reasonRows(m.groups, profile).map((r) =>
-    r.result === "unknown" ? { ...r, text: `${r.text}: ${questionFor(r.field, profile) ? "answer above" : "answer in Edit answers"}` } : r,
+  const t = useTranslations();
+  const rows = reasonRows(t, m.groups, profile).map((r) =>
+    r.result === "unknown"
+      ? { ...r, text: t(questionFor(t, r.field, profile) ? "results.answerAbove" : "results.answerInEdit", { rule: r.text }) }
+      : r,
   );
   const failed = m.failed;
   const nearIncome = failed?.rule.field === "family_income" && failed.rule.op === "LTE";
@@ -101,16 +108,16 @@ function Card({ m, profile }: { m: SchemeMatch; profile: Profile }) {
     <ResultCard
       status={m.status as Exclude<SchemeMatch["status"], "notEligible">}
       schemeName={m.scheme.name}
-      meta={meta(m.scheme)}
-      headline={failed ? gapText(failed, profile) : undefined}
+      meta={meta(t, m.scheme)}
+      headline={failed ? gapText(t, failed, profile) : undefined}
       rules={rows}
       note={
         nearIncome
-          ? `The limit is checked against your income certificate. If it shows ${formatINR(failed!.rule.value as number)} or less, you pass this rule.`
+          ? t("results.incomeNote", { limit: formatINR(failed!.rule.value as number) })
           : undefined
       }
       verified={formatDate(m.scheme.lastVerifiedAt.slice(0, 10))}
-      linkLabel={m.status === "eligible" ? "Rules and documents" : "See the rules"}
+      linkLabel={m.status === "eligible" ? t("results.rulesAndDocuments") : t("results.seeRules")}
       href={`/scheme/${m.scheme.slug}`}
     />
   );
@@ -131,19 +138,20 @@ function Cards({ children }: { children: React.ReactNode }) {
 }
 
 function Found({ results, profile, update }: { results: Results; profile: Profile; update: (fn: (p: Profile) => Profile) => void }) {
+  const t = useTranslations();
   const wide = useMediaQuery("(min-width: 1024px)");
   const c = counts(results);
   const of = (s: SchemeMatch["status"]) => results.results.filter((m) => m.status === s);
   const nothing = c.eligible === 0 && c.nearMiss === 0;
 
   const questions = results.questions
-    .map((q) => ({ q, card: questionFor(q.field, profile) }))
+    .map((q) => ({ q, card: questionFor(t, q.field, profile) }))
     .filter((x) => x.card !== undefined);
   const asked = new Set(questions.map((x) => x.q.field));
   const decided = results.results.filter((m) => m.unknownFields.some((f) => asked.has(f))).length;
   const why = (field: string) => {
     const names = results.results.filter((m) => m.unknownFields.includes(field)).map((m) => m.scheme.name);
-    return names.length === 1 ? `Decides ${names[0]}` : `Decides ${names.length} schemes`;
+    return names.length === 1 ? t("results.decidesOne", { scheme: names[0] }) : t("results.decidesMany", { count: names.length });
   };
 
   // Optional questions that would let hidden schemes be checked, with how many each unlocks.
@@ -155,13 +163,13 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
   const unlockKeys = [...unlockCounts.keys()];
   const more = (k: UnlockKey) => {
     const n = unlockCounts.get(k);
-    return n ? `checks ${n} more scheme${n === 1 ? "" : "s"}` : undefined;
+    return n ? t("unlocks.checksMore", { count: n }) : undefined;
   };
 
   const summary = nothing ? (
     <section className="flex flex-col gap-2">
-      <h2 className="m-0 text-xl leading-7 font-semibold">Nothing you can apply for right now</h2>
-      <p className="m-0 text-[15px] leading-[22px] text-muted">{mainReason(results, profile)}</p>
+      <h2 className="m-0 text-xl leading-7 font-semibold">{t("results.nothingTitle")}</h2>
+      <p className="m-0 text-[15px] leading-[22px] text-muted">{mainReason(t, results, profile)}</p>
     </section>
   ) : (
     <div className="grid grid-cols-3 gap-2 md:gap-3">
@@ -172,7 +180,7 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
   );
 
   const eligible = c.eligible > 0 && (
-    <Group id="eligible" title="Eligible to apply">
+    <Group id="eligible" title={t("results.eligibleGroup")}>
       <Cards>
         {of("eligible").map((m) => (
           <Card key={m.scheme.slug} m={m} profile={profile} />
@@ -185,9 +193,9 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
     <section id="answers" className="flex scroll-mt-4 flex-col gap-2.5 rounded-[14px] bg-info-tint p-4">
       <div className="flex flex-col gap-0.5">
         <h2 className="m-0 text-[17px] leading-6 font-semibold">
-          Answer {questions.length} question{questions.length === 1 ? "" : "s"} to check {decided} more
+          {t("results.answerQuestions", { count: questions.length, decided })}
         </h2>
-        <p className="m-0 text-[13px] leading-[18px] text-info">Results update as soon as you tap.</p>
+        <p className="m-0 text-[13px] leading-[18px] text-info">{t("results.updatesOnTap")}</p>
       </div>
       {questions.map(({ q, card }) => (
         <QuestionCard key={q.field} question={card!} why={why(q.field)} onAnswer={(v) => update((p) => answer(p, q.field, v))} />
@@ -196,7 +204,7 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
   );
 
   const needsInfo = c.needsInfo > 0 && (
-    <Group id={questions.length > 0 ? undefined : "answers"} title="Needs an answer or a check">
+    <Group id={questions.length > 0 ? undefined : "answers"} title={t("results.needsInfoGroup")}>
       <Cards>
         {of("needsInfo").map((m) => (
           <Card key={m.scheme.slug} m={m} profile={profile} />
@@ -206,7 +214,7 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
   );
 
   const nearMiss = c.nearMiss > 0 && (
-    <Group id="near" title="Near misses: one rule away">
+    <Group id="near" title={t("results.nearMissGroup")}>
       <Cards>
         {of("nearMiss").map((m) => (
           <Card key={m.scheme.slug} m={m} profile={profile} />
@@ -215,14 +223,15 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
     </Group>
   );
 
-  const unlocks = (nothing ? unansweredUnlocks(profile).length > 0 : unlockKeys.length > 0) && (
-    <Group title={nothing ? "Ways to find more" : "Optional: check more schemes"}>
-      <UnlockQuestions profile={profile} update={update} only={nothing ? unansweredUnlocks(profile) : unlockKeys} detailFor={more} />
+  const unanswered = unansweredUnlocks(t, profile);
+  const unlocks = (nothing ? unanswered.length > 0 : unlockKeys.length > 0) && (
+    <Group title={nothing ? t("results.waysToFindMore") : t("results.checkMore")}>
+      <UnlockQuestions profile={profile} update={update} only={nothing ? unanswered : unlockKeys} detailFor={more} />
       {nothing && (
         <p className="m-0 text-[13px] leading-[18px] text-slate">
-          Check your income figure too: use the amount on your income certificate.{" "}
+          {t("results.checkIncome")}{" "}
           <Link href="/check/basics" className="font-semibold text-navy underline">
-            Edit answers
+            {t("common.editAnswers")}
           </Link>
         </p>
       )}
@@ -231,16 +240,13 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
 
   const later = nothing && (
     <p className="m-0 text-[13px] leading-[18px] text-slate">
-      We add schemes every week. Your answers stay on this phone, so checking again later takes one tap.
+      {t("results.later")}
     </p>
   );
 
   const whyNot = <WhyNot results={results} />;
   const footnote = (
-    <Footnote>
-      Eligibility is decided by the scheme. Always confirm on the official page before applying. Schemes not verified in
-      the last 90 days are not shown.
-    </Footnote>
+    <Footnote>{t("results.footnote")}</Footnote>
   );
 
   const side = [toAnswer, unlocks, later].some(Boolean) || results.farMisses.length > 0 || results.hidden.length > 0;
@@ -281,10 +287,11 @@ function Found({ results, profile, update }: { results: Results; profile: Profil
 }
 
 function WhyNot({ results }: { results: Results }) {
+  const t = useTranslations();
   if (results.farMisses.length === 0 && results.hidden.length === 0) return null;
   return (
     <details className="rounded-[14px] border border-line bg-white px-4 py-3.5">
-      <summary className="min-h-6 cursor-pointer text-[15px] leading-[22px] font-semibold">Why aren&apos;t other schemes here?</summary>
+      <summary className="min-h-6 cursor-pointer text-[15px] leading-[22px] font-semibold">{t("results.whyNot")}</summary>
       <div className="mt-2.5 flex flex-col gap-2.5 text-sm leading-5 text-slate">
         {results.farMisses.map((m) => (
           <p key={m.scheme.slug} className="m-0">
@@ -296,8 +303,14 @@ function WhyNot({ results }: { results: Results }) {
         ))}
         {results.hidden.map((m) => (
           <p key={m.scheme.slug} className="m-0">
-            <b className="font-semibold text-ink">{m.scheme.name}</b>: hidden until you answer{" "}
-            {m.hiddenUntil.map((f) => `the ${fieldLabel(f).toLowerCase()} question`).join(" and ")}.
+            <b className="font-semibold text-ink">{m.scheme.name}</b>
+            {t("results.hiddenUntil", {
+              questions: joinList(
+                t,
+                m.hiddenUntil.map((f) => t("results.theQuestion", { field: fieldLabel(t, f).toLowerCase() })),
+                "and",
+              ),
+            })}
           </p>
         ))}
       </div>

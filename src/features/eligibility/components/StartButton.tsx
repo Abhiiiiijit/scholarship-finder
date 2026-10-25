@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { hasAnswers } from "@/features/eligibility/store/answers";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
 
 // "Check my eligibility", or "Continue where you left off" when this phone has saved answers.
 export function StartButton() {
+  const t = useTranslations("landing");
   const [profile] = useAnswers();
   const resume = hasAnswers(profile);
   const href = resume && profile?.domicile_state ? "/check/state" : "/check/basics";
@@ -14,7 +16,7 @@ export function StartButton() {
       href={href}
       className="flex h-[52px] items-center justify-center rounded-xl bg-navy text-[17px] font-semibold text-white no-underline hover:bg-ink"
     >
-      {resume ? "Continue where you left off" : "Check my eligibility"}
+      {resume ? t("resume") : t("start")}
     </Link>
   );
 }

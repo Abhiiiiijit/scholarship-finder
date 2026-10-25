@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { TextField } from "./controls";
 
@@ -14,7 +15,7 @@ export function groupIndian(digits: string): string {
 
 // Rupees, whole numbers, shown in Indian grouping.
 export function IncomeField({
-  label = "Annual family income",
+  label,
   hint,
   value,
   onChange,
@@ -24,6 +25,7 @@ export function IncomeField({
   value: number | undefined;
   onChange: (v: number | undefined) => void;
 }) {
+  const t = useTranslations("fields");
   const [text, setText] = useState(value === undefined ? "" : groupIndian(String(value)));
   const [error, setError] = useState<string>();
   // Follow outside changes (an undo, a QuestionCard) without fighting the student's typing.
@@ -35,13 +37,13 @@ export function IncomeField({
 
   return (
     <TextField
-      label={label}
+      label={label ?? t("income")}
       hint={hint}
       error={error}
       prefix="₹"
       inputMode="numeric"
       autoComplete="off"
-      placeholder="e.g. 3,00,000"
+      placeholder={t("incomePlaceholder")}
       value={text}
       onChange={(e) => {
         const shown = groupIndian(e.target.value);
@@ -53,7 +55,7 @@ export function IncomeField({
           return onChange(undefined);
         }
         const n = Number(digits);
-        if (n > INCOME_MAX) return setError("That is more than ₹99,99,99,999. Check the figure.");
+        if (n > INCOME_MAX) return setError(t("incomeTooHigh"));
         setError(undefined);
         setSeen(n);
         onChange(n);
@@ -74,8 +76,9 @@ export function PercentField({
   value: number | undefined;
   onChange: (v: number | undefined) => void;
 }) {
+  const t = useTranslations("fields");
   return (
-    <DecimalField label={label} hint={hint} value={value} onChange={onChange} suffix="%" max={100} placeholder="e.g. 78.5" decimals={1} />
+    <DecimalField label={label} hint={hint} value={value} onChange={onChange} suffix="%" max={100} example="78.5" placeholder={t("percentPlaceholder")} decimals={1} />
   );
 }
 
@@ -87,6 +90,7 @@ export function DecimalField({
   suffix,
   max,
   placeholder,
+  example,
   decimals = 2,
 }: {
   label: string;
@@ -96,8 +100,11 @@ export function DecimalField({
   suffix?: string;
   max?: number;
   placeholder?: string;
+  // Shown in "Use a number like 78.5" when the format is wrong.
+  example?: string;
   decimals?: number;
 }) {
+  const t = useTranslations("fields");
   const [text, setText] = useState(value === undefined ? "" : String(value));
   const [error, setError] = useState<string>();
   const [seen, setSeen] = useState(value);
@@ -118,16 +125,16 @@ export function DecimalField({
       placeholder={placeholder}
       value={text}
       onChange={(e) => {
-        const t = e.target.value.replace(",", ".").trim();
-        setText(t);
-        if (!t) {
+        const typed = e.target.value.replace(",", ".").trim();
+        setText(typed);
+        if (!typed) {
           setError(undefined);
           setSeen(undefined);
           return onChange(undefined);
         }
-        if (!pattern.test(t)) return setError(`Use a number like ${placeholder?.replace("e.g. ", "") ?? "78.5"}`);
-        const n = Number(t);
-        if (max !== undefined && n > max) return setError(`Enter a number from 0 to ${max}`);
+        if (!pattern.test(typed)) return setError(t("numberLike", { example: example ?? "78.5" }));
+        const n = Number(typed);
+        if (max !== undefined && n > max) return setError(t("numberRange", { max }));
         setError(undefined);
         setSeen(n);
         onChange(n);

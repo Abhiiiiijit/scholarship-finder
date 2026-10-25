@@ -194,7 +194,9 @@ export const PHASE0_SCHEMES: SeedScheme[] = [
         ...firstYearOrRenewal(3, "\"Students admitted in AICTE approved institutions in 1st year of Degree/ Diploma level course\" or \"2nd year of Degree/ Diploma level course through lateral entry\" (PIB)", pib, true),
         rule(4, "aicte_approved", "IS_TRUE", true, "\"meritorious girls taking admission in AICTE approved Technical institution at Degree/ Diploma\"", index),
       ],
+      deadline: "2026-10-31",
       gaps: [
+        "2026-27 AICTE notice (19.06.2026, seen as a copy on thapar.edu): \"the last date for submission of online applications is 31 .10.2026\" on NSP. Confirm on the AICTE site.",
         "The income limit comes from a 2021 PIB release: check the 2025 guidelines PDF.",
         "Not checked by the matcher: \"Maximum two girls per family.\"",
         "Gap years, documents, renewal, combining rule and current dates not opened.",
@@ -211,7 +213,11 @@ export const PHASE0_SCHEMES: SeedScheme[] = [
       rule(2, "aicte_approved", "IS_TRUE", true, "\"Differently abled students taking admission in AICTE approved Technical institution at Degree/ Diploma\"",
         "https://aicte.gov.in/schemes/students-development-schemes"),
     ],
-    gaps: ["The 40% disability threshold is assumed, not quoted: confirm it.", "Income limit, number, renewal, documents and dates not opened."],
+    deadline: "2026-10-31",
+    gaps: [
+      "2026-27 AICTE notice (19.06.2026, seen as a copy on thapar.edu): \"the last date for submission of online applications is 31 .10.2026\" on NSP. Confirm on the AICTE site.",
+      "The 40% disability threshold is assumed, not quoted: confirm it.", "Income limit, number, renewal, documents and dates not opened.",
+    ],
   },
   {
     trackerId: "A3", quality: "partial", slug: "aicte-swanath-degree", name: "AICTE Swanath (orphans and others, degree)",
@@ -223,7 +229,9 @@ export const PHASE0_SCHEMES: SeedScheme[] = [
         "\"Orphan\"; \"Either or both parents died due to Covid-19\"; \"Wards of Armed Forces and Central Paramilitary Forces martyred in action (Shaheed)\"",
         "https://aicte.gov.in/schemes/students-development-schemes"),
     ],
+    deadline: "2026-10-31",
     gaps: [
+      "2026-27 AICTE notice (19.06.2026, seen as a copy on thapar.edu): \"the last date for submission of online applications is 31 .10.2026\" on NSP. Confirm on the AICTE site.",
       "The profile can only answer \"orphan\": students who lost a parent to Covid-19, or whose parent was martyred in action, are missed until the profile asks.",
       "Scheme Guidelines 2025 link could not be read: income limit, number, course year, renewal, documents and dates missing.",
     ],
@@ -261,13 +269,13 @@ export const PHASE0_SCHEMES: SeedScheme[] = [
         mhDomicile(1, "\"Candidate should be Domicile of Maharashtra State.\"", src),
         rule(2, "family_income", "LTE", 800000, "\"should not be more than 8 Lakhs\"", src),
         rule(3, "category", "IN", ["open", "ews", "sebc"], "\"admission under the General category and SEBC Category\"", src),
-        rule(4, "MH.cap_admission", "IS_TRUE", true, "CAP", src),
+        rule(4, "MH.cap_admission", "IS_TRUE", true, "\"Candidate should be admitted through Centralized Admission Process (CAP).\"", src),
         rule(5, "institution_type", "IN", NOT_DEEMED, "\"Deemed University and Private university are not applicable.\"", src),
-        rule(6, "MH.stay", "EQ", "hostel", "", src),
+        rule(6, "MH.stay", "EQ", "hostel", "\"Hosteller documents (In case of private hostel or Paying Guest, an agreement with the owner will be required).\"", src),
       ],
       gaps: [
         "EWS is read as part of \"General category\": confirm.",
-        "The hostel rule is inferred from the documents list (hostel or PG agreement).",
+        "The eligibility list does not name hostel stay; the rule comes from the scheme's name (hostel allowance), the \"Residence Allowance\" benefit and the hosteller documents.",
         "The page does not say the amounts are per year.",
         "Not checked by the matcher: gap of 2 or more years; \"only 2 children from the family\".",
         MH_ONE_PAYOUT,
@@ -345,10 +353,10 @@ export const PHASE0_SCHEMES: SeedScheme[] = [
       rules: [
         rule(1, "category", "EQ", "st", "\"Applicable for ST only\"", src),
         rule(2, "family_income", "LTE", 250000, "\"If Family Income <= 2,50,000, he will get the scholarship\"", src),
-        mhDomicile(3, "", src),
+        rule(3, "domicile_state", "EQ", "MH", "\"Are you Domicile of Maharashtra?\" (asked in every MahaDBT applicant profile; the scheme page itself states no residence rule)", src, true),
       ],
       gaps: [
-        "The page does not state domicile as a rule, but MahaDBT serves Maharashtra students.",
+        "The page does not state domicile as a rule, so the matcher asks students to confirm it.",
         "Not checked by the matcher: \"Back to back drop for 2 years he/she will not be allowed to fill form\".",
         MH_ONE_PAYOUT,
       ],
@@ -363,9 +371,9 @@ export const PHASE0_SCHEMES: SeedScheme[] = [
       rules: [
         rule(1, "category", "EQ", "st", "\"Applicable for ST only\"", src),
         rule(2, "family_income", "GTE", 250001, "\"Family annual income limit is RS. > 2,50,000\"", src),
-        mhDomicile(3, "", src),
+        rule(3, "domicile_state", "EQ", "MH", "\"Are you Domicile of Maharashtra?\" (asked in every MahaDBT applicant profile; the scheme page itself states no residence rule)", src, true),
       ],
-      gaps: ["For ST families above the M7 income limit.", "The page does not state domicile as a rule, but MahaDBT serves Maharashtra students.", MH_ONE_PAYOUT],
+      gaps: ["For ST families above the M7 income limit.", "The page says \"This is state sponsored scheme.\" but states no residence rule, so the matcher asks students to confirm it.", MH_ONE_PAYOUT],
     };
   })(),
   (() => {
@@ -551,13 +559,14 @@ export const PHASE0_SCHEMES: SeedScheme[] = [
       amountText: "Fees at government rates and hostel allowance", benefitTypes: ["Tuition fee", "Exam fee", "Hostel allowance"],
       rules: [
         rule(1, "family_income", "LTE", 250000, "Up to Rs. 2.50 lakh", src),
-        rule(2, "category", "IN", ["bc", "bcm", "mbc_dnc"], "", src),
+        rule(2, "category", "IN", ["bc", "bcm", "mbc_dnc"], "\"scholarships are sanctioned to Backward Classes, Most Backward Classes and Denotified Communities students\"", src),
         rule(3, "domicile_state", "EQ", "TN", "must be a native of Tamil Nadu who studied in a TN government school", src, true),
       ],
       gaps: [
         "This row covers three schemes on one page (PM-YASASVI UG professional, State Post-Matric, and UG/PG in central institutions): split it before publishing.",
           "Not checked by the matcher: \"First Graduate in the family\" (PM-YASASVI); government and aided colleges only (State PMS).",
         "Students apply on the Unified State Scholarship Portal (umis.tn.gov.in).",
+        "The page does not name Backward Class Muslims separately; BCM is read as part of Backward Classes: confirm.",
       ],
     };
   })(),

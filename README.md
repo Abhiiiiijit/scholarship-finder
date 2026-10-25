@@ -184,12 +184,13 @@ CI runs lint, typecheck, tests and build on every pull request.
 ```
 src/app/                 student screens (/, /check/*, /results, /scheme/[slug]), admin under /admin,
                          snapshot at /api/rules/latest
-src/components/          shared UI from the design's component list
+src/components/ui/       shared UI from the design's component list
 src/domain/rules/        rule schema (operators, publish requirement), rule fields, published snapshot
 src/domain/match.ts      match(): eligible / near miss / needs info, runs in the browser
 src/domain/profile.ts    the student's answers
 src/domain/states.ts     the 16 live states' portals, category lists and state questions
-src/lib/registry/        scheme editor input, publish checklist, admin labels, Phase 0 seed
+src/domain/registry/     scheme editor input, publish checklist, admin status badges
+src/features/registry/   admin views (registry, editor), server actions, labels, Phase 0 seed
 src/features/eligibility/ student screens (views), widgets, hooks, on-phone storage,
                          results assembly and plain-language reasons
 src/server/              server-only: env check, Drizzle client and schema, repositories,

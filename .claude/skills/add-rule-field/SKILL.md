@@ -26,7 +26,7 @@ A state-only question (one state's portal, certificate or counselling route) is 
 | Enum migration | `drizzle/` | `npm run db:generate`; check the SQL only adds a `rule_field` value |
 | Profile | `src/domain/profile.ts` | Add the answer to `profileSchema` (optional), plus a `const` values list for choices |
 | Matcher | `src/domain/match.ts` | Map it in `resolveField()` (`num`, `one`, `many`, or a range for banded answers) |
-| Admin labels | `src/lib/registry/options.ts` | Add choice labels to `CHOICES` with `satisfies Record<...>` so typecheck catches gaps |
+| Admin labels | `src/features/registry/lib/options.ts` | Add choice labels to `CHOICES` with `satisfies Record<...>` so typecheck catches gaps |
 | Student labels | `src/features/eligibility/lib/labels.ts`, `explain.ts` | Option labels; how the rule and the student's answer read in plain English |
 | Inline question | `src/features/eligibility/lib/questions.ts` | `questionFor()` case if it can be answered on the results screen |
 | Question UI | `src/features/eligibility/views/BasicsView.tsx` (common), or `UNLOCK_FIELDS` and `ROWS` in `src/features/eligibility/components/Unlocks.tsx` (unlock) | Ask it |

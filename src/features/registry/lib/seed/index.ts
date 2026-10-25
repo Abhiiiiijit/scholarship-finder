@@ -1,4 +1,4 @@
-import { schemeDraftSchema, type SchemeDraft } from "../scheme-input";
+import { schemeDraftSchema, type SchemeDraft } from "@/domain/registry/scheme-input";
 import { PHASE0_VERIFIED_ON, type SeedScheme } from "./phase0";
 
 // Loads the Phase 0 schemes as drafts. Each scheme is one INSERT that does nothing if its tracker

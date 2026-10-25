@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { editorFields, fieldLabel, valueLabel } from "./options";
-import { publishProblems, schemeDraftSchema } from "./scheme-input";
-import { matchesStatus, schemeBadge } from "./status";
+import { publishProblems, schemeDraftSchema } from "@/domain/registry/scheme-input";
+import { matchesStatus, schemeBadge } from "@/domain/registry/status";
 import { checkOfficialUrl } from "@/server/services/url-check";
 
 const base = {

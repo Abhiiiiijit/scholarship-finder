@@ -4,7 +4,7 @@ import { drizzle } from "drizzle-orm/pglite";
 import { migrate } from "drizzle-orm/pglite/migrator";
 import { beforeEach, describe, expect, it } from "vitest";
 import * as schema from "@/server/db/schema";
-import { schemeDraftSchema } from "../scheme-input";
+import { schemeDraftSchema } from "@/domain/registry/scheme-input";
 import type { Db } from "@/server/db/types";
 import { getScheme, listSchemes } from "@/server/repositories/scheme-repo";
 import { seedNotes, seedStatement, seedStatements } from ".";

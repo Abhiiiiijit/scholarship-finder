@@ -30,7 +30,7 @@ In `src/domain/states.ts`:
    - `cats()` turns labels into keys (`"MBC/DNC"` → `mbc_dnc`). Rules must use those keys.
    - Reuse the option sets (`YES_NO`, `YES_NO_UNSURE`, `YES_NO_APPLIED`, `HAVE`, `STAY`). Keep a `unknown` "Not sure" option where students may not know: it counts as unanswered, never as a no.
    - Use `onlyFor` for questions that apply to some categories only.
-3. If the state's OBC-like categories should match national OBC rules, check `OBC_LIKE` in `src/lib/registry/seed/phase0.ts` and add the new keys.
+3. If the state's OBC-like categories should match national OBC rules, check `OBC_LIKE` in `src/features/registry/lib/seed/phase0.ts` and add the new keys.
 4. Update the comment at the top of `states.ts` if the count is mentioned.
 
 ## 3. Migrate the enum

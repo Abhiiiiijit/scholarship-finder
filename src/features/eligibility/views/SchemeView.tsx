@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Alert } from "@/components/Alert";
-import { RuleRow } from "@/components/RuleRow";
-import { StatusBadge } from "@/components/StatusBadge";
+import { Alert } from "@/components/ui/Alert";
+import { RuleRow } from "@/components/ui/RuleRow";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { BackIcon, Column, Footnote, Screen } from "@/features/eligibility/components/layout";
 import { Checking, LoadFailed } from "@/features/eligibility/components/results";
 import { formatDate } from "@/lib/format";

@@ -4,6 +4,13 @@ Find the scholarships an Indian B.E./B.Tech student qualifies for, with the offi
 
 The MVP covers 16 states and UTs and about 65 hand-verified schemes (central, AICTE, state and private). Every rule in the registry carries a verbatim quote and a link to the official page, and anything not re-verified in 90 days is hidden from results.
 
+## Live
+
+| | |
+| --- | --- |
+| Student site | https://scholarship-finder-umber-phi.vercel.app |
+| Admin (registry and scheme editor, GitHub sign-in) | https://scholarship-finder-umber-phi.vercel.app/admin |
+
 ## Stack
 
 | Layer | Choice |

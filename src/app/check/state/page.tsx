@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { ChoiceGroup } from "@/components/student/controls";
-import { EmailCapture } from "@/components/student/EmailCapture";
 import { Column, Screen, StepHeader, StickyCTA } from "@/components/student/layout";
 import { UnlockQuestions } from "@/components/student/Unlocks";
 import type { Profile } from "@/lib/profile";
@@ -133,7 +132,6 @@ function NotLive({
             <li>Private and CSR scholarships open to your state</li>
           </ul>
         </div>
-        <EmailCapture label={`Email me when ${name} goes live`} />
         <section className="flex flex-col gap-2.5">
           <div className="flex flex-col gap-1">
             <h2 className="m-0 text-[17px] leading-6 font-semibold">Optional: unlock more schemes</h2>

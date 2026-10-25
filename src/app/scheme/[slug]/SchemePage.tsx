@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Alert } from "@/components/Alert";
 import { RuleRow } from "@/components/RuleRow";
 import { StatusBadge } from "@/components/StatusBadge";
-import { EmailCapture } from "@/components/student/EmailCapture";
 import { BackIcon, Column, Footnote, Screen } from "@/components/student/layout";
 import { Checking, LoadFailed } from "@/components/student/results";
 import { formatDate } from "@/lib/format";
@@ -133,14 +132,6 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
           {missing.length === 0 && <Alert tone="success" title="You have every document on the list." />}
         </section>
       )}
-
-      <section className="flex flex-col gap-2">
-        <EmailCapture
-          label="Remind me before the deadline"
-          detail="One email 14 days before and one 3 days before. Nothing else."
-          buttonLabel="Save and remind me"
-        />
-      </section>
 
       <div className="flex flex-col gap-3">
         <a

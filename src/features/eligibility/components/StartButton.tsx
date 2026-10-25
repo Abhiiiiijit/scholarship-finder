@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { hasAnswers } from "@/features/eligibility/store/answers";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";

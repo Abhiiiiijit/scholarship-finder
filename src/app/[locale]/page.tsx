@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { Brand, Column, Footnote, joinList, Screen, StartButton } from "@/features/eligibility";
+import { Brand, Column, Footnote, joinList, LanguageSwitch, Screen, StartButton, stateLabel } from "@/features/eligibility";
 import { STATES } from "@/domain/states";
 
 // S01 Landing.
@@ -17,7 +17,10 @@ export default function Landing() {
       <Column className="flex-1 gap-7 pt-5 pb-6 lg:gap-10 lg:pb-12">
         <header className="flex items-center justify-between">
           <Brand />
-          <span className="rounded-full border border-disabled px-2.5 py-1 text-xs leading-4 text-slate">{t("landing.scope")}</span>
+          <div className="flex items-center gap-2">
+            <LanguageSwitch />
+            <span className="rounded-full border border-disabled px-2.5 py-1 text-xs leading-4 text-slate">{t("landing.scope")}</span>
+          </div>
         </header>
 
         {/* Phone: one column in the designed order. Laptop: the pitch and start button beside what makes it trustworthy. */}
@@ -62,7 +65,7 @@ export default function Landing() {
               count: STATES.length,
               names: joinList(
                 t,
-                STATES.map((s) => s.name),
+                STATES.map((s) => stateLabel(t, s.code) ?? s.name),
                 "and",
               ),
             })}

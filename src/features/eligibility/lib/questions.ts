@@ -1,6 +1,7 @@
 import type { Profile } from "@/domain/profile";
 import { isStateKey } from "@/domain/rules/fields";
-import { STATE_BY_CODE, categoriesFor } from "@/domain/states";
+import { STATE_BY_CODE } from "@/domain/states";
+import { localCategories, optionLabel, questionLabel } from "./domain-labels";
 import type { T } from "./i18n";
 import { aicteOptions, genderOptions, institutionOptions, yearOptions, type Option } from "./labels";
 
@@ -16,7 +17,12 @@ export function questionFor(t: T, field: string, p: Profile): Question | undefin
     const [code, key] = field.split(".");
     const q = STATE_BY_CODE.get(code)?.questions.find((x) => x.key === key);
     if (!q || code !== p.domicile_state) return undefined;
-    return { field, question: q.label, kind: "choice", options: q.options.filter((o) => o.value !== "unknown") };
+    return {
+      field,
+      question: questionLabel(t, code, q),
+      kind: "choice",
+      options: q.options.filter((o) => o.value !== "unknown").map((o) => ({ value: o.value, label: optionLabel(t, code, q, o) })),
+    };
   }
   switch (field) {
     case "family_income":
@@ -24,7 +30,7 @@ export function questionFor(t: T, field: string, p: Profile): Question | undefin
     case "class12_pct":
       return { field, question: t("questions.class12_pct"), kind: "percent" };
     case "category":
-      return { field, question: t("questions.category"), kind: "choice", options: categoriesFor(p.domicile_state) };
+      return { field, question: t("questions.category"), kind: "choice", options: localCategories(t, p.domicile_state) };
     case "gender":
       return { field, question: t("questions.gender"), kind: "choice", options: genderOptions(t) };
     case "year":

@@ -1,6 +1,7 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
+import { LanguageSwitch } from "./LanguageSwitch";
 
 // Page chrome for the student screens: a column on the grey ground, StepHeader and StickyCTA from
 // the screen spec, and the Paatra mark. Phones get the designed single column; wider screens get a
@@ -64,7 +65,8 @@ export function StepHeader({ label, progress, backHref }: { label: string; progr
         <Link href={backHref} aria-label={t("back")} className="-ml-3 flex size-11 items-center justify-center text-ink">
           <BackIcon />
         </Link>
-        <div className="text-sm text-slate">{label}</div>
+        <div className="flex-1 text-sm text-slate">{label}</div>
+        <LanguageSwitch />
       </div>
       <div
         role="progressbar"

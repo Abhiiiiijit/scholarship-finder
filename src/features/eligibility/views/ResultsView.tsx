@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 import { Column, Footnote, Screen } from "@/features/eligibility/components/layout";
 import { Checking, CountTile, LoadFailed, QuestionCard, ResultCard } from "@/features/eligibility/components/results";
+import { LanguageSwitch } from "@/features/eligibility/components/LanguageSwitch";
 import { UNLOCK_FIELDS, UnlockQuestions, unansweredUnlocks, type UnlockKey } from "@/features/eligibility/components/Unlocks";
 import { formatDate, formatINR, todayInIndia } from "@/lib/format";
 import type { SchemeMatch } from "@/domain/match";
@@ -20,7 +21,8 @@ import { buildResults, counts, mainReason, type Results } from "@/features/eligi
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
 import { useMediaQuery } from "@/features/eligibility/hooks/use-media-query";
 import { useSnapshot } from "@/features/eligibility/hooks/use-snapshot";
-import { categoriesFor, STATE_BY_CODE, stateName } from "@/domain/states";
+import { STATE_BY_CODE } from "@/domain/states";
+import { localCategories, stateLabel } from "@/features/eligibility/lib/domain-labels";
 
 // S05 Checking, S06 Results, S07 Nothing fits yet and S09 Offline, all matched on this phone.
 
@@ -42,7 +44,7 @@ export function ResultsView() {
 
   if (!profile?.domicile_state) return <Screen />;
   const state = profile.domicile_state;
-  const sources = isLive(state) ? t("results.sourcesLive", { state: stateName(state) ?? state }) : t("results.sourcesOther");
+  const sources = isLive(state) ? t("results.sourcesLive", { state: stateLabel(t, state) ?? state }) : t("results.sourcesOther");
 
   if (snap.status === "failed") {
     return (
@@ -59,9 +61,12 @@ export function ResultsView() {
       <Column className="gap-2.5 pt-5 lg:pt-10">
         <div className="flex items-center justify-between">
           <h1 className="m-0 text-2xl leading-[30px] font-semibold lg:text-[32px] lg:leading-10">{results ? t("results.title") : t("results.checkingTitle")}</h1>
-          <Link href="/check/basics" className="flex min-h-11 items-center text-sm font-semibold text-navy">
-            {t("common.editAnswers")}
-          </Link>
+          <div className="flex items-center gap-1">
+            <LanguageSwitch />
+            <Link href="/check/basics" className="flex min-h-11 items-center text-sm font-semibold text-navy">
+              {t("common.editAnswers")}
+            </Link>
+          </div>
         </div>
         <div className="font-mono text-[13px] leading-[18px] text-slate">{summaryLine(t, profile)}</div>
       </Column>
@@ -74,9 +79,9 @@ export function ResultsView() {
 
 function summaryLine(t: T, p: Profile): string {
   return [
-    stateName(p.domicile_state),
+    stateLabel(t, p.domicile_state),
     p.family_income !== undefined ? formatINR(p.family_income) : undefined,
-    labelOf(categoriesFor(p.domicile_state), p.category),
+    labelOf(localCategories(t, p.domicile_state), p.category),
     p.year ? t("results.summaryYear", { year: t(`options.yearShort.${p.year}`) }) : t("results.summaryCourse"),
     p.class12_pct !== undefined ? t("results.summaryClass12", { pct: String(p.class12_pct) }) : undefined,
   ]
@@ -89,14 +94,15 @@ function providerLabel(t: T, s: SnapshotScheme): string {
   return t(({ CENTRAL: "results.providerCentral", AICTE: "results.providerAicte", PRIVATE: "results.providerPrivate" } as const)[s.provider]);
 }
 
-function meta(t: T, s: SnapshotScheme): string {
-  return [providerLabel(t, s), s.amountText, s.deadline ? t("results.closes", { date: formatDate(s.deadline) }) : undefined]
+function meta(t: T, locale: string, s: SnapshotScheme): string {
+  return [providerLabel(t, s), s.amountText, s.deadline ? t("results.closes", { date: formatDate(s.deadline, locale) }) : undefined]
     .filter(Boolean)
     .join(" · ");
 }
 
 function Card({ m, profile }: { m: SchemeMatch; profile: Profile }) {
   const t = useTranslations();
+  const locale = useLocale();
   const rows = reasonRows(t, m.groups, profile).map((r) =>
     r.result === "unknown"
       ? { ...r, text: t(questionFor(t, r.field, profile) ? "results.answerAbove" : "results.answerInEdit", { rule: r.text }) }
@@ -108,7 +114,7 @@ function Card({ m, profile }: { m: SchemeMatch; profile: Profile }) {
     <ResultCard
       status={m.status as Exclude<SchemeMatch["status"], "notEligible">}
       schemeName={m.scheme.name}
-      meta={meta(t, m.scheme)}
+      meta={meta(t, locale, m.scheme)}
       headline={failed ? gapText(t, failed, profile) : undefined}
       rules={rows}
       note={
@@ -116,7 +122,7 @@ function Card({ m, profile }: { m: SchemeMatch; profile: Profile }) {
           ? t("results.incomeNote", { limit: formatINR(failed!.rule.value as number) })
           : undefined
       }
-      verified={formatDate(m.scheme.lastVerifiedAt.slice(0, 10))}
+      verified={formatDate(m.scheme.lastVerifiedAt.slice(0, 10), locale)}
       linkLabel={m.status === "eligible" ? t("results.rulesAndDocuments") : t("results.seeRules")}
       href={`/scheme/${m.scheme.slug}`}
     />

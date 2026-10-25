@@ -3,11 +3,11 @@ import { Suspense } from "react";
 import { ButtonLink } from "@/components/Button";
 import { ChipLink } from "@/components/Chip";
 import { StatusBadge } from "@/components/StatusBadge";
-import { db } from "@/db";
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { db } from "@/server/db/client";
+import { requireAdmin } from "@/server/auth/require-admin";
 import { daysAgo, formatDate, todayInIndia } from "@/lib/format";
 import { matchesStatus, NEEDS_ATTENTION, schemeBadge, STATUS_FILTERS } from "@/lib/registry/status";
-import { listSchemes } from "@/lib/registry/store";
+import { listSchemes } from "@/server/repositories/scheme-repo";
 import { STATE_BY_CODE } from "@/lib/states";
 import { StateFilter } from "./StateFilter";
 

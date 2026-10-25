@@ -166,7 +166,7 @@ On Vercel, set the same three variables and add the production callback URL to t
 | `npm test` | Unit tests |
 | `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
 | `npm run build` | Production build (works without a database) |
-| `npm run db:generate` | Create a migration after editing `src/db/schema.ts`, a rule field or a state question |
+| `npm run db:generate` | Create a migration after editing `src/server/db/schema.ts`, a rule field or a state question |
 | `npm run db:migrate` | Apply migrations |
 | `npm run db:studio` | Browse the database |
 | `npm run db:seed` | Load the Phase 0 schemes as drafts (skips any already there; `-- --sql` prints the SQL instead) |
@@ -189,9 +189,10 @@ src/lib/rules/           rule schema (operators, publish requirement), rule fiel
 src/lib/match.ts         match(): eligible / near miss / needs info, runs in the browser
 src/lib/profile.ts       the student's answers
 src/lib/states.ts        the 16 live states' portals, category lists and state questions
-src/lib/registry/        scheme editor input, publish checklist, registry reads and writes, Phase 0 seed
+src/lib/registry/        scheme editor input, publish checklist, admin labels, Phase 0 seed
 src/lib/student/         results assembly, plain-language reasons, on-phone storage
-src/db/                  Drizzle schema and client
+src/server/               server-only: env check, Drizzle client and schema, repositories,
+                         publish service, admin auth
 drizzle/                 generated SQL migrations
 public/brand/            Paatra logos and mark
 ```

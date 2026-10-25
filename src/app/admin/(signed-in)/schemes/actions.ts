@@ -1,10 +1,11 @@
 "use server";
 
-import { db } from "@/db";
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { db } from "@/server/db/client";
+import { requireAdmin } from "@/server/auth/require-admin";
 import { issuesByPath, schemeDraftSchema } from "@/lib/registry/scheme-input";
-import { getScheme, publishScheme, PublishError, saveScheme, withdrawScheme } from "@/lib/registry/store";
-import { checkOfficialUrl } from "@/lib/registry/url-check";
+import { getScheme, saveScheme } from "@/server/repositories/scheme-repo";
+import { publishScheme, PublishError, withdrawScheme } from "@/server/services/publish-service";
+import { checkOfficialUrl } from "@/server/services/url-check";
 
 export type SaveResult = { ok: true; id: number } | { ok: false; errors: Record<string, string>; message: string };
 export type PublishResult = { ok: true; version: number; note?: string } | { ok: false; problems: string[] };

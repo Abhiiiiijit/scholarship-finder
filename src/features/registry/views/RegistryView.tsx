@@ -60,7 +60,7 @@ export function RegistryView({
         <ButtonLink href="/admin/schemes/new">Add scheme</ButtonLink>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(200px,100%),1fr))] gap-3">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Tile label="Entered" value={all.length} />
         <Tile label="Live" value={count("live") + count("recheck")} tone="text-pass" />
         <Tile label="Re-check due (deadline in 30 days)" value={count("recheck")} tone="text-info" />
@@ -89,8 +89,46 @@ export function RegistryView({
         ))}
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-line bg-white">
-        <table className="w-full min-w-[880px] border-collapse text-sm leading-5">
+      {/* A phone gets one card per scheme; the six-column table needs a tablet or wider. */}
+      <ul className="flex flex-col gap-2.5 md:hidden">
+        {rows.map(({ scheme, ruleCount, quotedCount, badge }) => (
+          <li key={scheme.id} className="flex flex-col gap-2 rounded-xl border border-line bg-white px-4 py-3.5 text-sm leading-5">
+            <div className="flex items-start justify-between gap-3">
+              <Link href={`/admin/schemes/${scheme.id}`} className="font-semibold text-navy hover:text-ink">
+                {scheme.trackerId && <span className="mr-2 font-mono text-slate">{scheme.trackerId}</span>}
+                {scheme.name}
+              </Link>
+              <StatusBadge status={badge} />
+            </div>
+            <div className="text-slate">{scheme.source ?? sourceFallback(scheme.provider, scheme.stateCode)}</div>
+            <dl className="grid grid-cols-3 gap-2 text-[13px]">
+              <div>
+                <dt className="text-slate">Quoted</dt>
+                <dd className={`font-mono ${quotedCount < ruleCount || ruleCount === 0 ? "font-semibold text-warn" : ""}`}>
+                  {quotedCount} / {ruleCount}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-slate">Verified</dt>
+                <dd className={badge === "stale" ? "font-semibold text-warn" : ""}>{daysAgo(scheme.lastVerifiedAt, now)}</dd>
+              </div>
+              <div>
+                <dt className="text-slate">Deadline</dt>
+                <dd>{formatDate(scheme.deadline)}</dd>
+              </div>
+            </dl>
+            {scheme.reviewNotes && <span className="text-xs font-semibold text-warn">Gaps noted</span>}
+          </li>
+        ))}
+        {rows.length === 0 && (
+          <li className="rounded-xl border border-line bg-white px-4 py-8 text-center text-sm text-slate">
+            {all.length === 0 ? "No schemes yet. Add the first one." : "No schemes match these filters."}
+          </li>
+        )}
+      </ul>
+
+      <div className="overflow-x-auto rounded-xl border border-line bg-white max-md:hidden">
+        <table className="w-full min-w-[720px] border-collapse text-sm leading-5">
           <thead>
             <tr className="text-left text-xs tracking-[0.04em] text-slate">
               {["SCHEME", "SOURCE", "RULES QUOTED", "LAST VERIFIED", "DEADLINE", "STATUS"].map((h) => (

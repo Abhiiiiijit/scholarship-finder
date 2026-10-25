@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ChoiceGroup, SelectField } from "@/features/eligibility/components/controls";
-import { Column, Screen, StepHeader, StickyCTA } from "@/features/eligibility/components/layout";
+import { Column, FormLayout, Screen, StepHeader, StickyCTA } from "@/features/eligibility/components/layout";
 import { IncomeField, PercentField } from "@/features/eligibility/components/NumberFields";
 import type { Profile } from "@/domain/profile";
 import { isLive, withState } from "@/features/eligibility/store/answers";
@@ -56,71 +56,75 @@ export function BasicsView() {
       <Column>
         <StepHeader label="Step 1 of 2 · Basics" progress={50} backHref="/" />
       </Column>
-      <Column className="flex-1 gap-[22px] pt-[22px] pb-6">
-        <div className="flex flex-col gap-1.5">
-          <h1 className="m-0 text-2xl leading-[30px] font-semibold">About you</h1>
-          <p className="m-0 text-sm leading-5 text-slate">
-            Skip anything you are unsure of. A skipped answer shows as &ldquo;needs info&rdquo;, never as a no.
-          </p>
-        </div>
+      <Column className="flex-1 pt-[22px] pb-6 lg:pt-10 lg:pb-12">
+        <FormLayout
+          intro={
+            <>
+              <h1 className="m-0 text-2xl leading-[30px] font-semibold lg:text-[32px] lg:leading-10">About you</h1>
+              <p className="m-0 text-sm leading-5 text-slate lg:text-base lg:leading-6">
+                Skip anything you are unsure of. A skipped answer shows as &ldquo;needs info&rdquo;, never as a no.
+              </p>
+            </>
+          }
+        >
+          <SelectField
+            label="Domicile state"
+            hint="The state on your domicile certificate, not where you study. It decides the category list below and your next few questions."
+            groups={STATE_GROUPS}
+            placeholder="Choose your state"
+            value={state ?? ""}
+            onChange={(e) => chooseState(e.target.value)}
+          />
 
-        <SelectField
-          label="Domicile state"
-          hint="The state on your domicile certificate, not where you study. It decides the category list below and your next few questions."
-          groups={STATE_GROUPS}
-          placeholder="Choose your state"
-          value={state ?? ""}
-          onChange={(e) => chooseState(e.target.value)}
-        />
+          {undo && (
+            <div role="status" className="flex items-center justify-between gap-3 rounded-xl bg-ink px-4 py-2 text-sm text-white">
+              <span>Cleared your category and {undo.from} answers.</span>
+              <button
+                type="button"
+                className="min-h-11 px-2 font-semibold underline"
+                onClick={() => {
+                  update(() => undo.previous);
+                  setUndo(null);
+                }}
+              >
+                Undo
+              </button>
+            </div>
+          )}
 
-        {undo && (
-          <div role="status" className="flex items-center justify-between gap-3 rounded-xl bg-ink px-4 py-2 text-sm text-white">
-            <span>Cleared your category and {undo.from} answers.</span>
-            <button
-              type="button"
-              className="min-h-11 px-2 font-semibold underline"
-              onClick={() => {
-                update(() => undo.previous);
-                setUndo(null);
-              }}
-            >
-              Undo
-            </button>
-          </div>
-        )}
+          <IncomeField hint="All earning members, as on your income certificate." value={profile.family_income} onChange={set("family_income")} />
 
-        <IncomeField hint="All earning members, as on your income certificate." value={profile.family_income} onChange={set("family_income")} />
+          <ChoiceGroup
+            legend={state && live ? `Category (${stateName(state)}'s list)` : "Category"}
+            hint={state ? undefined : "Choose your state first to see its category list."}
+            options={categoriesFor(state)}
+            value={profile.category}
+            onChange={set("category")}
+          />
 
-        <ChoiceGroup
-          legend={state && live ? `Category (${stateName(state)}'s list)` : "Category"}
-          hint={state ? undefined : "Choose your state first to see its category list."}
-          options={categoriesFor(state)}
-          value={profile.category}
-          onChange={set("category")}
-        />
+          <ChoiceGroup legend="Gender" hint="Some schemes are for girls only." options={GENDER_OPTIONS} value={profile.gender} onChange={set("gender")} />
 
-        <ChoiceGroup legend="Gender" hint="Some schemes are for girls only." options={GENDER_OPTIONS} value={profile.gender} onChange={set("gender")} />
+          <SelectField
+            label="Course"
+            groups={[{ options: COURSE_OPTIONS }]}
+            value={profile.course ?? "be_btech"}
+            onChange={() => set("course")("be_btech")}
+          />
 
-        <SelectField
-          label="Course"
-          groups={[{ options: COURSE_OPTIONS }]}
-          value={profile.course ?? "be_btech"}
-          onChange={() => set("course")("be_btech")}
-        />
+          <ChoiceGroup legend="Year of study" options={YEAR_OPTIONS} value={profile.year} onChange={set("year")} />
 
-        <ChoiceGroup legend="Year of study" options={YEAR_OPTIONS} value={profile.year} onChange={set("year")} />
+          <PercentField label="Class 12 (HSC) percentage" value={profile.class12_pct} onChange={set("class12_pct")} />
 
-        <PercentField label="Class 12 (HSC) percentage" value={profile.class12_pct} onChange={set("class12_pct")} />
+          <ChoiceGroup legend="Your college is" layout="grid2" options={INSTITUTION_OPTIONS} value={profile.institution_type} onChange={set("institution_type")} />
 
-        <ChoiceGroup legend="Your college is" layout="grid2" options={INSTITUTION_OPTIONS} value={profile.institution_type} onChange={set("institution_type")} />
-
-        <ChoiceGroup
-          legend="Is your course AICTE-approved?"
-          hint="Most B.E./B.Tech courses are. Your college's website or admission letter says so."
-          options={AICTE_OPTIONS}
-          value={profile.aicte_approved}
-          onChange={set("aicte_approved")}
-        />
+          <ChoiceGroup
+            legend="Is your course AICTE-approved?"
+            hint="Most B.E./B.Tech courses are. Your college's website or admission letter says so."
+            options={AICTE_OPTIONS}
+            value={profile.aicte_approved}
+            onChange={set("aicte_approved")}
+          />
+        </FormLayout>
       </Column>
       <StickyCTA
         label="Continue"

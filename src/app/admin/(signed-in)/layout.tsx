@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
             </Link>
           </nav>
           <span className="flex-1" />
-          <span className="text-sm text-[#c9d3e3]">{login}</span>
+          <span className="text-sm text-[#c9d3e3] max-sm:hidden">{login}</span>
           <form
             action={async () => {
               "use server";

@@ -11,7 +11,7 @@ import { listSchemes } from "@/server/repositories/scheme-repo";
 import { STATE_BY_CODE } from "@/domain/states";
 import { StateFilter } from "./StateFilter";
 
-export const metadata = { title: "Registry · Scholarship Finder admin" };
+export const metadata = { title: "Registry · Admin" };
 
 const KINDS = [
   ["", "All"],

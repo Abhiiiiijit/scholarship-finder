@@ -1,6 +1,3 @@
-"use client";
-
-import { useCallback, useEffect, useState } from "react";
 import { snapshotSchema, type Snapshot } from "@/domain/rules/snapshot";
 
 // Downloads the published rules once per visit. Results are never shown from an old copy: if the
@@ -18,7 +15,7 @@ const REUSE_MS = 5 * 60 * 1000;
 
 let memo: { snapshot: Snapshot; at: number } | null = null;
 
-async function download(): Promise<SnapshotState> {
+export async function downloadSnapshot(): Promise<SnapshotState> {
   if (memo && Date.now() - memo.at < REUSE_MS) return { status: "ready", snapshot: memo.snapshot };
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
@@ -36,23 +33,4 @@ async function download(): Promise<SnapshotState> {
   } finally {
     clearTimeout(timer);
   }
-}
-
-export function useSnapshot(): [SnapshotState, () => void] {
-  const [state, setState] = useState<SnapshotState>({ status: "loading" });
-  const [attempt, setAttempt] = useState(0);
-
-  useEffect(() => {
-    let live = true;
-    download().then((s) => live && setState(s));
-    return () => {
-      live = false;
-    };
-  }, [attempt]);
-
-  const retry = useCallback(() => {
-    setState({ status: "loading" });
-    setAttempt((n) => n + 1);
-  }, []);
-  return [state, retry];
 }

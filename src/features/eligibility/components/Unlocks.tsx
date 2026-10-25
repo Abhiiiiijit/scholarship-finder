@@ -8,7 +8,7 @@ import {
   MINORITY_OPTIONS,
   PARENT_OCCUPATION_OPTIONS,
   SPECIAL_STATUS_OPTIONS,
-} from "@/lib/student/labels";
+} from "@/features/eligibility/lib/labels";
 import { CheckList, ChoiceGroup } from "./controls";
 import { DecimalField, PercentField } from "./NumberFields";
 import { UnlockRow } from "./UnlockRow";

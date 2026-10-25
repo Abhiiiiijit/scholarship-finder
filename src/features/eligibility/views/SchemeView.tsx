@@ -4,20 +4,20 @@ import Link from "next/link";
 import { Alert } from "@/components/Alert";
 import { RuleRow } from "@/components/RuleRow";
 import { StatusBadge } from "@/components/StatusBadge";
-import { BackIcon, Column, Footnote, Screen } from "@/components/student/layout";
-import { Checking, LoadFailed } from "@/components/student/results";
+import { BackIcon, Column, Footnote, Screen } from "@/features/eligibility/components/layout";
+import { Checking, LoadFailed } from "@/features/eligibility/components/results";
 import { formatDate } from "@/lib/format";
 import { match, type GroupCheck, type RuleCheck } from "@/domain/match";
 import type { Profile } from "@/domain/profile";
 import { fieldTier } from "@/domain/rules/fields";
 import type { SnapshotScheme } from "@/domain/rules/snapshot";
-import { useDocumentTicks } from "@/lib/student/documents";
-import { gapText, ruleText, yourAnswer } from "@/lib/student/explain";
-import { useAnswers } from "@/lib/student/use-answers";
-import { useSnapshot } from "@/lib/student/use-snapshot";
+import { useDocumentTicks } from "@/features/eligibility/store/documents";
+import { gapText, ruleText, yourAnswer } from "@/features/eligibility/lib/explain";
+import { useAnswers } from "@/features/eligibility/hooks/use-answers";
+import { useSnapshot } from "@/features/eligibility/hooks/use-snapshot";
 import { STATE_BY_CODE } from "@/domain/states";
 
-export function SchemePage({ slug }: { slug: string }) {
+export function SchemeView({ slug }: { slug: string }) {
   const [profile] = useAnswers();
   const [snap, retry] = useSnapshot();
 

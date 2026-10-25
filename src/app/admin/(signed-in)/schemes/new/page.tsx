@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/server/auth/require-admin";
 import { SchemeEditor } from "../SchemeEditor";
 
-export const metadata = { title: "Add scheme · Scholarship Finder admin" };
+export const metadata = { title: "Add scheme · Admin" };
 
 export default async function NewScheme() {
   await requireAdmin();

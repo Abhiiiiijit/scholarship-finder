@@ -1,6 +1,5 @@
-import { Brand, Column, Footnote, Screen } from "@/components/student/layout";
+import { Brand, Column, Footnote, Screen, StartButton } from "@/features/eligibility";
 import { STATES } from "@/domain/states";
-import { StartButton } from "./StartButton";
 
 // S01 Landing.
 

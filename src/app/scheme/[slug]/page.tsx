@@ -1,7 +1,5 @@
 import { Suspense } from "react";
-import { Column, Screen } from "@/components/student/layout";
-import { Checking } from "@/components/student/results";
-import { SchemePage } from "./SchemePage";
+import { Checking, Column, SchemeView, Screen } from "@/features/eligibility";
 
 // S08 Scheme page. The scheme comes from the same downloaded snapshot as the results.
 
@@ -23,5 +21,5 @@ export default function Page({ params }: PageProps<"/scheme/[slug]">) {
 
 async function WithSlug({ params }: { params: PageProps<"/scheme/[slug]">["params"] }) {
   const { slug } = await params;
-  return <SchemePage slug={slug} />;
+  return <SchemeView slug={slug} />;
 }

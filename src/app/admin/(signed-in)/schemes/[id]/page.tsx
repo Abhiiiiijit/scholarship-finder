@@ -6,7 +6,7 @@ import { schemeBadge } from "@/lib/registry/status";
 import { getScheme } from "@/server/repositories/scheme-repo";
 import { SchemeEditor, type EditorScheme } from "../SchemeEditor";
 
-export const metadata = { title: "Edit scheme · Scholarship Finder admin" };
+export const metadata = { title: "Edit scheme · Admin" };
 
 export default async function EditScheme({ params }: PageProps<"/admin/schemes/[id]">) {
   await requireAdmin();

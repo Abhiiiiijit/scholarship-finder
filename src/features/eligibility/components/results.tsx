@@ -5,8 +5,8 @@ import { useState } from "react";
 import { RuleRow } from "@/components/RuleRow";
 import { StatusBadge } from "@/components/StatusBadge";
 import type { MatchStatus } from "@/domain/match";
-import type { RowResult } from "@/lib/student/explain";
-import type { Question } from "@/lib/student/questions";
+import type { RowResult } from "@/features/eligibility/lib/explain";
+import type { Question } from "@/features/eligibility/lib/questions";
 import { IncomeField, PercentField } from "./NumberFields";
 
 // ResultCard, QuestionCard and CountTile from the screen spec, plus the S05 and S09 states.

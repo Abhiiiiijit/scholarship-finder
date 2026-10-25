@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { hasAnswers } from "@/lib/student/answers";
-import { useAnswers } from "@/lib/student/use-answers";
+import { hasAnswers } from "@/features/eligibility/store/answers";
+import { useAnswers } from "@/features/eligibility/hooks/use-answers";
 
 // "Check my eligibility", or "Continue where you left off" when this phone has saved answers.
 export function StartButton() {

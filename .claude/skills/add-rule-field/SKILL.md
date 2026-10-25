@@ -27,9 +27,9 @@ A state-only question (one state's portal, certificate or counselling route) is 
 | Profile | `src/domain/profile.ts` | Add the answer to `profileSchema` (optional), plus a `const` values list for choices |
 | Matcher | `src/domain/match.ts` | Map it in `resolveField()` (`num`, `one`, `many`, or a range for banded answers) |
 | Admin labels | `src/lib/registry/options.ts` | Add choice labels to `CHOICES` with `satisfies Record<...>` so typecheck catches gaps |
-| Student labels | `src/lib/student/labels.ts`, `explain.ts` | Option labels; how the rule and the student's answer read in plain English |
-| Inline question | `src/lib/student/questions.ts` | `questionFor()` case if it can be answered on the results screen |
-| Question UI | `src/app/check/basics/page.tsx` (common), or `UNLOCK_FIELDS` and `ROWS` in `src/components/student/Unlocks.tsx` (unlock) | Ask it |
+| Student labels | `src/features/eligibility/lib/labels.ts`, `explain.ts` | Option labels; how the rule and the student's answer read in plain English |
+| Inline question | `src/features/eligibility/lib/questions.ts` | `questionFor()` case if it can be answered on the results screen |
+| Question UI | `src/features/eligibility/views/BasicsView.tsx` (common), or `UNLOCK_FIELDS` and `ROWS` in `src/features/eligibility/components/Unlocks.tsx` (unlock) | Ask it |
 
 `notAsked` fields need only the first two rows plus admin labels.
 
@@ -45,4 +45,4 @@ Adding a new **value** to an existing choice field (a new entrance exam, a new p
 
 Open a PR. After merge, the migration is applied to live Neon (`npm run db:migrate` with the unpooled URL) with the owner's go-ahead, before any scheme using the field is saved in the live editor. Enum values cannot be removed easily, so get the key right first.
 
-Stored answers are checked by `sanitize()` in `src/lib/student/answers.ts` against `profileSchema`, so a new profile key needs nothing extra there. Answers stay on the phone: a new field is stored in `localStorage` with the rest of the profile, never sent to the server.
+Stored answers are checked by `sanitize()` in `src/features/eligibility/store/answers.ts` against `profileSchema`, so a new profile key needs nothing extra there. Answers stay on the phone: a new field is stored in `localStorage` with the rest of the profile, never sent to the server.

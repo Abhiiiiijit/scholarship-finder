@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, type ComponentProps, type ReactNode } from "react";
-import type { Option } from "@/lib/student/labels";
+import type { Option } from "@/features/eligibility/lib/labels";
 
 // The phone-sized form controls from the screen spec: Chip / OptionButton groups, TextField and
 // SelectField. Touch targets are at least 44px.

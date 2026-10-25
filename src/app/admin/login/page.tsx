@@ -1,6 +1,6 @@
 import { signIn } from "@/server/auth/auth";
 
-export const metadata = { title: "Admin sign-in · Scholarship Finder" };
+export const metadata = { title: "Admin sign-in" };
 
 // Admin pages read the session on every request; nothing here is worth prerendering.
 export const instant = false;

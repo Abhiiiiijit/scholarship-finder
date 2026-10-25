@@ -53,7 +53,8 @@ student phone ──GET /api/rules/latest──▶ latest snapshot (cached)
 
 | Path | What |
 | --- | --- |
-| `src/app/page.tsx`, `check/basics`, `check/state`, `results`, `scheme/[slug]` | Student screens S01–S09 |
+| `src/app/page.tsx`, `check/basics`, `check/state`, `results`, `scheme/[slug]` | Student routes S01–S09: thin pages that set the title and render a view; `error.tsx`, `not-found.tsx` |
+| `src/features/eligibility/` | The student feature. `views/` (client screens), `components/` (widgets, page chrome), `hooks/` (`useAnswers`, `useSnapshot`), `store/` (localStorage: answers, document ticks), `api/` (`snapshot-client.ts`), `lib/` (results, plain-language reasons in `explain.ts`, inline questions, labels). Routes import from its `index.ts` |
 | `src/app/admin/(signed-in)/` | A01 registry list, A02 scheme editor, server actions in `schemes/actions.ts` |
 | `src/app/api/rules/latest/route.ts` | Public snapshot endpoint |
 | `src/domain/` | Pure TypeScript shared by the browser and the server: no React, Next or database imports (Zod only) |
@@ -62,7 +63,6 @@ student phone ──GET /api/rules/latest──▶ latest snapshot (cached)
 | `src/domain/states.ts` | The 16 live states: portal, categories, state questions; `OTHER_STATES` |
 | `src/lib/registry/` | `scheme-input.ts` (editor schema, `publishProblems`), `options.ts` (labels), `status.ts` (A01 badges), `seed/phase0.ts` (Phase 0 schemes) |
 | `src/server/` | Server-only code (each file imports `server-only`): `env.ts` (checked settings), `db/` (Drizzle client, `schema.ts`), `repositories/` (`scheme-repo.ts`, `snapshot-repo.ts`: queries only), `services/` (`publish-service.ts`: quote gate + snapshot; `url-check.ts`), `auth/` (Auth.js, allowlist, `requireAdmin()`) |
-| `src/lib/student/` | Results assembly, plain-language reasons (`explain.ts`), inline questions, localStorage hooks |
 | `src/lib/fixtures/section5.ts` | PRD section 5 worked example, the matcher's reference test |
 | `src/server/db/schema.ts`, `drizzle/` | Drizzle schema and generated SQL migrations (never edit an applied migration) |
 | `src/server/auth/`, `src/proxy.ts` | Admin sign-in, allowlist, `requireAdmin()` |
@@ -88,7 +88,7 @@ CI (`.github/workflows/ci.yml`) runs lint, typecheck, test and build on every PR
 - **Code style.** Short comments that say why, naming the PRD section or screen id when it helps. Match the surrounding file; no new dependencies without a reason.
 - **Admin code.** Every admin page and server action calls `requireAdmin()` itself; `proxy.ts` is only the first gate.
 - **Server code.** Only `src/server/` touches the database or secrets, and each file there imports `server-only`. Pages and actions call repositories for reads and `publish-service.ts` for anything with a business rule; they never write queries themselves. Read settings from `src/server/env.ts`, not `process.env`.
-- **Labels.** Stored values are snake_case keys; people see labels from `src/lib/registry/options.ts` (admin) and `src/lib/student/labels.ts` / `explain.ts` (students). `satisfies Record<...>` keeps label maps in step with the profile enums, so a new value fails typecheck until it has a label.
+- **Labels.** Stored values are snake_case keys; people see labels from `src/lib/registry/options.ts` (admin) and `src/features/eligibility/lib/labels.ts` / `explain.ts` (students). `satisfies Record<...>` keeps label maps in step with the profile enums, so a new value fails typecheck until it has a label.
 - **Copy.** Plain, short English for a first-year student on a phone. Say what to do next. Name the product Paatra.
 - **Brand.** Navy `#1B3A6B`, green `#1F8A4C` (`#4CC38A` on navy), gold `#E9A23B`.
 - **Tests.** Change the matcher, snapshot or publish gate only with a test. The section 5 test must keep passing unchanged unless the PRD changes.

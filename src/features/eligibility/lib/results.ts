@@ -2,7 +2,7 @@ import { isFresh, type Snapshot, type SnapshotScheme } from "@/domain/rules/snap
 import { match, matchAll, type MatchSummary, type RuleCheck, type SchemeMatch } from "@/domain/match";
 import type { Profile } from "@/domain/profile";
 import { fieldLabel, missText } from "./explain";
-import { formatLakh } from "../format";
+import { formatLakh } from "@/lib/format";
 
 // Everything S06 and S07 show, computed on the phone from the downloaded snapshot.
 

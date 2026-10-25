@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { exampleStudent, NOW, section5Snapshot, TODAY } from "../fixtures/section5";
+import { exampleStudent, NOW, section5Snapshot, TODAY } from "@/lib/fixtures/section5";
 import { match } from "@/domain/match";
 import type { Profile } from "@/domain/profile";
 import type { PublishableRule } from "@/domain/rules/schema";

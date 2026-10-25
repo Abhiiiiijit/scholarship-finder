@@ -6,7 +6,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { db } from "@/db";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { daysAgo, formatDate, todayInIndia } from "@/lib/format";
-import { NEEDS_ATTENTION, schemeBadge } from "@/lib/registry/status";
+import { matchesStatus, NEEDS_ATTENTION, schemeBadge, STATUS_FILTERS } from "@/lib/registry/status";
 import { listSchemes } from "@/lib/registry/store";
 import { STATE_BY_CODE } from "@/lib/states";
 import { StateFilter } from "./StateFilter";
@@ -24,18 +24,28 @@ const KINDS = [
 
 export default async function Registry({ searchParams }: PageProps<"/admin">) {
   await requireAdmin();
-  const { kind = "", state = "" } = (await searchParams) as { kind?: string; state?: string };
+  const { kind = "", state = "", status = "" } = (await searchParams) as {
+    kind?: string;
+    state?: string;
+    status?: string;
+  };
   const now = new Date();
   const today = todayInIndia(now);
 
   const all = (await listSchemes(db)).map((r) => ({ ...r, badge: schemeBadge(r.scheme, today, now) }));
-  const rows = all.filter(({ scheme, badge }) => {
+  // Type and state narrow the list first, so each status chip counts what it would show.
+  const scoped = all.filter(({ scheme, badge }) => {
     if (state && scheme.stateCode !== state) return false;
     if (kind === "attention") return NEEDS_ATTENTION.includes(badge);
     return !kind || scheme.provider === kind.toUpperCase();
   });
+  const rows = scoped.filter(({ badge }) => matchesStatus(badge, status));
   const count = (b: string) => all.filter((r) => r.badge === b).length;
-  const href = (k: string) => `/admin?${new URLSearchParams({ ...(k && { kind: k }), ...(state && { state }) })}`;
+  const href = (p: { kind?: string; status?: string }) => {
+    const q = { kind, state, status, ...p };
+    const params = new URLSearchParams(Object.entries(q).filter(([, v]) => v) as [string, string][]);
+    return `/admin?${params}`;
+  };
 
   return (
     <>
@@ -58,11 +68,24 @@ export default async function Registry({ searchParams }: PageProps<"/admin">) {
 
       <div className="flex flex-wrap gap-2">
         {KINDS.map(([k, label]) => (
-          <ChipLink key={k} label={label} selected={kind === k} href={href(k)} />
+          <ChipLink key={k} label={label} selected={kind === k} href={href({ kind: k })} />
         ))}
         <Suspense>
           <StateFilter value={state} />
         </Suspense>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm text-slate">Status</span>
+        <ChipLink label={`Any (${scoped.length})`} selected={!status} href={href({ status: "" })} />
+        {STATUS_FILTERS.map(([s, label]) => (
+          <ChipLink
+            key={s}
+            label={`${label} (${scoped.filter((r) => matchesStatus(r.badge, s)).length})`}
+            selected={status === s}
+            href={href({ status: s })}
+          />
+        ))}
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-line bg-white">

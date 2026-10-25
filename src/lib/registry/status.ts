@@ -37,3 +37,19 @@ export function schemeBadge(
 
 // "Needs attention" on A01: anything a person has to act on.
 export const NEEDS_ATTENTION: SchemeBadge[] = ["draft", "recheck", "stale", "onHold"];
+
+// Status filter on A01. "Live" means reaching students, so it includes schemes due a re-check.
+export const STATUS_FILTERS = [
+  ["draft", "Draft", ["draft"]],
+  ["live", "Live", ["live", "recheck"]],
+  ["recheck", "Re-check due", ["recheck"]],
+  ["closed", "Closed", ["closed"]],
+  ["stale", "Hidden: stale", ["stale"]],
+  ["onHold", "On hold", ["onHold"]],
+  ["retired", "Retired", ["retired"]],
+] as const satisfies readonly (readonly [string, string, readonly SchemeBadge[]])[];
+
+export function matchesStatus(badge: SchemeBadge, filter: string): boolean {
+  const found = STATUS_FILTERS.find(([key]) => key === filter);
+  return !found || (found[2] as readonly SchemeBadge[]).includes(badge);
+}

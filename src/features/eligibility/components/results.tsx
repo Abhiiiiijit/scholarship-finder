@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { RuleRow } from "@/components/ui/RuleRow";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -34,22 +35,23 @@ export function ResultCard({
   linkLabel: string;
   href: string;
 }) {
+  const t = useTranslations();
   return (
     <article className="flex h-full flex-col gap-3 rounded-[14px] border border-line bg-white p-4">
       <div className="flex flex-col items-start gap-1.5">
-        <StatusBadge status={status} label={badgeLabel} />
+        <StatusBadge status={status} label={badgeLabel ?? t(`status.${status}`)} />
         <h3 className="m-0 text-lg leading-6 font-semibold">{schemeName}</h3>
         <div className="text-sm leading-5 text-slate">{meta}</div>
       </div>
       {headline && <div className="text-[15px] leading-[21px] font-semibold text-warn">{headline}</div>}
       <ul className="m-0 flex list-none flex-col gap-2 p-0">
         {rules.map((r, i) => (
-          <RuleRow key={i} result={r.result} text={r.text} />
+          <RuleRow key={i} result={r.result} text={r.text} label={t(`status.${r.result}`)} />
         ))}
       </ul>
       {note && <div className="rounded-lg bg-ground px-3 py-2.5 text-[13px] leading-[18px] text-slate">{note}</div>}
       <div className="mt-auto flex items-center justify-between gap-2 border-t border-line-soft pt-2.5">
-        <span className="text-xs leading-4 text-slate">Verified {verified}</span>
+        <span className="text-xs leading-4 text-slate">{t("results.verified", { date: verified })}</span>
         <Link href={href} className="flex min-h-11 items-center text-[15px] font-semibold text-navy">
           {linkLabel}
         </Link>
@@ -67,6 +69,7 @@ export function QuestionCard({
   why: string;
   onAnswer: (value: string | number) => void;
 }) {
+  const t = useTranslations("results");
   const [pending, setPending] = useState<number>();
   return (
     <div className="flex flex-col gap-2 rounded-[10px] bg-white p-3">
@@ -98,7 +101,7 @@ export function QuestionCard({
             onClick={() => pending !== undefined && onAnswer(pending)}
             className="min-h-11 rounded-[10px] bg-navy px-4 text-[15px] font-semibold text-white disabled:bg-disabled disabled:text-muted"
           >
-            Check
+            {t("check")}
           </button>
         </div>
       )}
@@ -107,28 +110,31 @@ export function QuestionCard({
 }
 
 const TILE = {
-  eligible: ["bg-pass-tint text-pass", "can apply"],
-  nearMiss: ["bg-warn-tint text-warn", "near misses"],
-  needsInfo: ["bg-info-tint text-info", "answers needed"],
+  eligible: ["bg-pass-tint text-pass", "canApply"],
+  nearMiss: ["bg-warn-tint text-warn", "nearMisses"],
+  needsInfo: ["bg-info-tint text-info", "answersNeeded"],
 } as const;
 
 export function CountTile({ kind, count, href }: { kind: keyof typeof TILE; count: number; href: string }) {
+  const t = useTranslations("results");
   const [tone, label] = TILE[kind];
   return (
     <a href={href} className={`flex flex-col gap-0.5 rounded-[10px] px-3 py-2.5 no-underline ${tone}`}>
       <b className="text-[22px] leading-[26px]">{count}</b>
-      <span className="text-xs leading-4">{label}</span>
+      <span className="text-xs leading-4">{t(label)}</span>
     </a>
   );
 }
 
-// S05 Checking: shown while the rules download; matching itself takes milliseconds.
-export function Checking({ sources }: { sources: string }) {
+// S05 Checking: shown while the rules download; matching itself takes milliseconds. Without
+// `sources` it is the scheme page's "Checking this scheme's rules".
+export function Checking({ sources }: { sources?: string }) {
+  const t = useTranslations("checking");
   const bar = (w: string, h = "h-3.5") => <div className={`${h} rounded-md bg-line-soft ${w}`} />;
   return (
     <div className="flex flex-col gap-4">
       <div role="status" className="text-sm leading-5 text-slate">
-        Checking {sources}, rule by rule.
+        {t("line", { sources: sources ?? t("schemeRules") })}
       </div>
       {[0, 1].map((i) => (
         <div key={i} className="flex animate-pulse flex-col gap-3 rounded-[14px] border border-line bg-white p-4 motion-reduce:animate-none">
@@ -144,22 +150,17 @@ export function Checking({ sources }: { sources: string }) {
         </div>
       ))}
       <p className="m-0 text-[13px] leading-[18px] text-slate">
-        This takes under a second. If the network is slow, your answers are already saved on this phone.
+        {t("note")}
       </p>
     </div>
   );
 }
 
-const FAILURES = {
-  offline: ["You're offline", "We couldn't load the latest schemes."],
-  slow: ["This is taking too long", "The network is slow and the latest schemes didn't arrive."],
-  error: ["Something went wrong", "We couldn't load the latest schemes."],
-  empty: ["No schemes are published yet", "Paatra is still checking its first schemes against the official pages."],
-} as const;
-
 // S09 Offline or error.
-export function LoadFailed({ reason, onRetry }: { reason: keyof typeof FAILURES; onRetry: () => void }) {
-  const [title, cause] = FAILURES[reason];
+export function LoadFailed({ reason, onRetry }: { reason: "offline" | "slow" | "error" | "empty"; onRetry: () => void }) {
+  const t = useTranslations();
+  const title = t(`failed.${reason}Title`);
+  const cause = t(`failed.${reason}Cause`);
   return (
     <div className="flex flex-1 flex-col items-start justify-center gap-5 py-10">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="text-slate">
@@ -167,17 +168,17 @@ export function LoadFailed({ reason, onRetry }: { reason: keyof typeof FAILURES;
       </svg>
       <div className="flex flex-col gap-2">
         <h1 className="m-0 text-2xl leading-[30px] font-semibold">{title}</h1>
-        <p className="m-0 text-[15px] leading-[22px] text-slate">{cause} Your answers are saved on this phone, so nothing is lost.</p>
+        <p className="m-0 text-[15px] leading-[22px] text-slate">{t("failed.saved", { cause })}</p>
       </div>
       <button
         type="button"
         onClick={onRetry}
         className="flex h-[52px] w-full items-center justify-center rounded-xl bg-navy text-[17px] font-semibold text-white hover:bg-ink"
       >
-        Try again
+        {t("common.tryAgain")}
       </button>
       <p className="m-0 text-[13px] leading-[18px] text-slate">
-        We don&apos;t show results from an old copy, because a scheme may have changed or closed since.
+        {t("failed.noOldCopy")}
       </p>
     </div>
   );

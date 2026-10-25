@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Alert } from "@/components/ui/Alert";
 import { RuleRow } from "@/components/ui/RuleRow";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -18,6 +19,7 @@ import { useSnapshot } from "@/features/eligibility/hooks/use-snapshot";
 import { STATE_BY_CODE } from "@/domain/states";
 
 export function SchemeView({ slug }: { slug: string }) {
+  const t = useTranslations("scheme");
   const [profile] = useAnswers();
   const [snap, retry] = useSnapshot();
 
@@ -26,14 +28,14 @@ export function SchemeView({ slug }: { slug: string }) {
       <Column className="pt-4 lg:pt-6">
         <Link href="/results" className="-ml-1 flex min-h-11 items-center gap-1 self-start text-[15px] font-semibold text-navy">
           <BackIcon />
-          All results
+          {t("allResults")}
         </Link>
       </Column>
       <Column className="flex-1 gap-6 pt-2 pb-8 lg:pb-12">
         {snap.status === "failed" ? (
           <LoadFailed reason={snap.reason} onRetry={retry} />
         ) : snap.status === "loading" || !profile ? (
-          <Checking sources="this scheme's rules" />
+          <Checking />
         ) : (
           <Found scheme={snap.snapshot.schemes.find((s) => s.slug === slug)} profile={profile} />
         )}
@@ -43,16 +45,16 @@ export function SchemeView({ slug }: { slug: string }) {
 }
 
 function Found({ scheme, profile }: { scheme: SnapshotScheme | undefined; profile: Profile }) {
+  const t = useTranslations("scheme");
   if (!scheme) {
     return (
       <div className="flex flex-col gap-3">
-        <h1 className="m-0 text-2xl leading-[30px] font-semibold">This scheme isn&apos;t listed right now</h1>
+        <h1 className="m-0 text-2xl leading-[30px] font-semibold">{t("notListedTitle")}</h1>
         <p className="m-0 text-[15px] leading-[22px] text-slate">
-          It may have closed for this cycle, or it is being re-checked against the official page. We only list schemes
-          verified in the last 90 days.
+          {t("notListedBody")}
         </p>
         <Link href="/results" className="font-semibold text-navy">
-          Back to your results
+          {t("backToResults")}
         </Link>
       </div>
     );
@@ -60,22 +62,28 @@ function Found({ scheme, profile }: { scheme: SnapshotScheme | undefined; profil
   return <Scheme scheme={scheme} profile={profile} />;
 }
 
-const PROVIDER = { CENTRAL: "Central government", AICTE: "AICTE", STATE: "State government", PRIVATE: "Private" } as const;
+const PROVIDER = {
+  CENTRAL: "providerCentral",
+  AICTE: "providerAicte",
+  STATE: "providerState",
+  PRIVATE: "providerPrivate",
+} as const;
 
 function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile }) {
+  const t = useTranslations();
   const m = match(profile, scheme);
   const [ticks, toggle] = useDocumentTicks(scheme.slug);
   const documents = scheme.documents ?? [];
   const missing = documents.filter((d) => !ticks.includes(d));
   const portal = scheme.stateCode ? STATE_BY_CODE.get(scheme.stateCode)?.portal : undefined;
-  const type = [PROVIDER[scheme.provider], ...(scheme.benefitTypes ?? [])].join(" · ");
+  const type = [t(`scheme.${PROVIDER[scheme.provider]}`), ...(scheme.benefitTypes ?? [])].join(" · ");
   const applyVia = scheme.appliesVia === "State portal" && portal ? portal : scheme.appliesVia;
 
   const facts = [
-    ["Amount", scheme.amountText ?? "See the official page"],
-    ["Deadline", scheme.deadline ? formatDate(scheme.deadline) : "See the official page"],
-    ["Type", type],
-    ["Apply through", applyVia ?? "The official site"],
+    [t("scheme.amount"), scheme.amountText ?? t("scheme.seeOfficial")],
+    [t("scheme.deadline"), scheme.deadline ? formatDate(scheme.deadline) : t("scheme.seeOfficial")],
+    [t("scheme.type"), type],
+    [t("scheme.applyThrough"), applyVia ?? t("scheme.officialSite")],
   ];
 
   const factList = (className: string) => (
@@ -92,14 +100,14 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
   return (
     <>
       <header className="flex flex-col items-start gap-2">
-        <StatusBadge status={m.status} />
+        <StatusBadge status={m.status} label={t(`status.${m.status}`)} />
         <h1 className="m-0 text-[26px] leading-8 font-semibold tracking-tight lg:text-[32px] lg:leading-10">{scheme.name}</h1>
         <div className="flex items-center gap-1.5 text-[13px] leading-[18px] text-slate">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="8" />
             <path d="M12 8v4l3 2" />
           </svg>
-          Last verified {formatDate(scheme.lastVerifiedAt.slice(0, 10))} against the official page
+          {t("scheme.lastVerified", { date: formatDate(scheme.lastVerifiedAt.slice(0, 10)) })}
         </div>
       </header>
 
@@ -107,12 +115,12 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
           apply button on the right. */}
       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:items-start lg:gap-10">
         <div className="flex flex-col gap-6">
-          {m.failed && <Alert tone="warning" title={gapText(m.failed, profile) ?? "One rule is not met yet."} />}
+          {m.failed && <Alert tone="warning" title={gapText(t, m.failed, profile) ?? t("scheme.oneRuleNotMet")} />}
 
           {factList("lg:hidden")}
 
           <section className="flex flex-col gap-3">
-            <h2 className="m-0 text-lg leading-6 font-semibold">The rules, and how you match</h2>
+            <h2 className="m-0 text-lg leading-6 font-semibold">{t("scheme.rulesTitle")}</h2>
             {m.groups.map((g) => (
               <RuleGroup key={g.group} group={g} profile={profile} />
             ))}
@@ -125,8 +133,8 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
           {documents.length > 0 && (
             <section className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
-                <h2 className="m-0 text-lg leading-6 font-semibold">Documents you&apos;ll need</h2>
-                <p className="m-0 text-[13px] leading-[18px] text-slate">Tick what you already have. Saved on this phone.</p>
+                <h2 className="m-0 text-lg leading-6 font-semibold">{t("scheme.documentsTitle")}</h2>
+                <p className="m-0 text-[13px] leading-[18px] text-slate">{t("scheme.documentsIntro")}</p>
               </div>
               <div className="flex flex-col rounded-[14px] border border-line bg-white">
                 {documents.map((d) => (
@@ -137,11 +145,11 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
                 ))}
               </div>
               {m.status === "eligible" && missing.length > 0 && (
-                <Alert tone="warning" title={`You qualify, but still need ${missing.length} document${missing.length === 1 ? "" : "s"}:`}>
-                  {missing.join(", ")}.
+                <Alert tone="warning" title={t("scheme.stillNeed", { count: missing.length })}>
+                  {missing.join(t("common.listSeparator"))}.
                 </Alert>
               )}
-              {missing.length === 0 && <Alert tone="success" title="You have every document on the list." />}
+              {missing.length === 0 && <Alert tone="success" title={t("scheme.haveAll")} />}
             </section>
           )}
 
@@ -152,7 +160,7 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
               rel="noopener noreferrer"
               className="flex h-[52px] items-center justify-center gap-2 rounded-xl bg-navy text-[17px] font-semibold text-white no-underline hover:bg-ink"
             >
-              Apply on the official site
+              {t("scheme.apply")}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5" />
               </svg>
@@ -172,31 +180,33 @@ function rowResult(c: RuleCheck): "pass" | "fail" | "unknown" | "confirm" {
 }
 
 function RuleGroup({ group, profile }: { group: GroupCheck; profile: Profile }) {
+  const t = useTranslations();
   const either = group.checks.length > 1;
   return (
     <div className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-white p-4">
-      {either && <div className="text-xs leading-4 font-semibold tracking-[0.06em] text-slate uppercase">Any one of these</div>}
+      {either && <div className="text-xs leading-4 font-semibold tracking-[0.06em] text-slate uppercase">{t("scheme.anyOne")}</div>}
       {group.checks.map((c, i) => {
         const result = rowResult(c);
-        const yours = yourAnswer(c.rule.field, profile);
+        const yours = yourAnswer(t, c.rule.field, profile);
         const detail =
           result === "confirm"
             ? c.rule.ambiguous
-              ? "Sources differ on this rule. Confirm on the official site."
-              : "We don't ask this yet. Confirm on the official site."
+              ? t("scheme.sourcesDiffer")
+              : t("scheme.notAsked")
             : yours
-              ? `You: ${yours}`
-              : "You haven't answered this yet.";
+              ? t("scheme.you", { answer: yours })
+              : t("scheme.notAnswered");
         return (
           <div key={i} className="flex flex-col gap-2">
             <ul className="m-0 list-none p-0">
-              <RuleRow result={result} text={ruleText(c.rule)} detail={detail} />
+              <RuleRow result={result} text={ruleText(t, c.rule)} detail={detail} label={t(`status.${result}`)} />
             </ul>
+            {/* The official wording, word for word in the source's language: never translated. */}
             <blockquote className="m-0 border-l-0 rounded-lg bg-ground px-3 py-2.5 text-[13px] leading-[19px] text-muted">
               &ldquo;{c.rule.quote}&rdquo;
               <br />
               <a href={c.rule.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-navy">
-                Source: official page
+                {t("scheme.source")}
               </a>
             </blockquote>
           </div>

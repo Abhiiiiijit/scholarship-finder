@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 // Page chrome for the student screens: a column on the grey ground, StepHeader and StickyCTA from
@@ -56,10 +57,11 @@ export function BackIcon() {
 }
 
 export function StepHeader({ label, progress, backHref }: { label: string; progress: number; backHref: string }) {
+  const t = useTranslations("common");
   return (
     <header className="flex flex-col gap-3 pt-4">
       <div className="flex items-center gap-2">
-        <Link href={backHref} aria-label="Back" className="-ml-3 flex size-11 items-center justify-center text-ink">
+        <Link href={backHref} aria-label={t("back")} className="-ml-3 flex size-11 items-center justify-center text-ink">
           <BackIcon />
         </Link>
         <div className="text-sm text-slate">{label}</div>
@@ -118,9 +120,10 @@ export function StickyCTA({
 }
 
 export function Footnote({ children }: { children?: ReactNode }) {
+  const t = useTranslations("common");
   return (
     <p className="m-0 max-w-3xl text-xs leading-[17px] text-slate">
-      {children ?? "Eligibility is decided by the scheme. Always confirm on the official page before applying."}
+      {children ?? t("footnote")}
     </p>
   );
 }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { ChoiceGroup } from "@/features/eligibility/components/controls";
 import { Column, FormLayout, Screen, StepHeader, StickyCTA } from "@/features/eligibility/components/layout";
@@ -14,6 +15,7 @@ import { STATE_BY_CODE, stateName, type StateConfig, type StateQuestion } from "
 // S03 State questions, or S04 State not live yet when the student's state has no checked schemes.
 
 export function StateView() {
+  const t = useTranslations("state");
   const [profile, update] = useAnswers();
   const router = useRouter();
   const code = profile?.domicile_state;
@@ -27,7 +29,7 @@ export function StateView() {
   return (
     <Screen>
       <Column>
-        <StepHeader label="Step 2 of 2 · Your state" progress={100} backHref="/check/basics" />
+        <StepHeader label={t("step")} progress={100} backHref="/check/basics" />
       </Column>
       {config && isLive(code) ? <StateQuestions config={config} profile={profile} update={update} /> : <NotLive name={stateName(code) ?? code} profile={profile} update={update} />}
     </Screen>
@@ -45,6 +47,7 @@ function StateQuestions({
   profile: Profile;
   update: (fn: (p: Profile) => Profile) => void;
 }) {
+  const t = useTranslations("state");
   const shown = config.questions.filter((q) => asked(q, profile));
   const skipped = config.questions.filter((q) => !asked(q, profile));
   const category = config.categories.find((c) => c.value === profile.category)?.label;
@@ -65,10 +68,10 @@ function StateQuestions({
           intro={
             <>
               <h1 className="m-0 text-2xl leading-[30px] font-semibold lg:text-[32px] lg:leading-10">
-                {n === 0 ? `Your ${config.name} answers` : `${n} question${n === 1 ? "" : "s"} for ${config.name}`}
+                {n === 0 ? t("noQuestions", { state: config.name }) : t("questions", { count: n, state: config.name })}
               </h1>
               <p className="m-0 text-sm leading-5 text-slate lg:text-base lg:leading-6">
-                These decide most {config.portal} results. Each state asks its own few.
+                {t("intro", { portal: config.portal })}
               </p>
             </>
           }
@@ -91,20 +94,20 @@ function StateQuestions({
           {skipped.length > 0 && (
             <div className="flex flex-col gap-1.5 rounded-xl bg-line-soft px-4 py-3.5">
               <div className="text-sm font-semibold">{skipped.map((q) => q.label).join(" / ")}</div>
-              <div className="text-[13px] leading-[18px] text-slate">Not needed for the {category} category.</div>
+              <div className="text-[13px] leading-[18px] text-slate">{t("notNeeded", { category: category ?? "" })}</div>
             </div>
           )}
 
           <section className="flex flex-col gap-2.5">
             <div className="flex flex-col gap-1">
-              <h2 className="m-0 text-[17px] leading-6 font-semibold">Optional: unlock more schemes</h2>
-              <p className="m-0 text-[13px] leading-[18px] text-slate">Answer only the ones that apply to you.</p>
+              <h2 className="m-0 text-[17px] leading-6 font-semibold">{t("unlockTitle")}</h2>
+              <p className="m-0 text-[13px] leading-[18px] text-slate">{t("unlockIntro")}</p>
             </div>
             <UnlockQuestions profile={profile} update={update} />
           </section>
         </FormLayout>
       </Column>
-      <StickyCTA label="See my scholarships" href="/results" />
+      <StickyCTA label={t("seeResults")} href="/results" />
     </>
   );
 }
@@ -118,43 +121,44 @@ function NotLive({
   profile: Profile;
   update: (fn: (p: Profile) => Profile) => void;
 }) {
+  const t = useTranslations("state");
   return (
     <>
       <Column className="flex-1 pt-[22px] pb-6 lg:pt-10 lg:pb-12">
         <FormLayout
           intro={
             <>
-              <h1 className="m-0 text-2xl leading-[30px] font-semibold lg:text-[32px] lg:leading-10">{name} schemes aren&apos;t checked yet</h1>
+              <h1 className="m-0 text-2xl leading-[30px] font-semibold lg:text-[32px] lg:leading-10">{t("notLiveTitle", { state: name })}</h1>
               <p className="m-0 text-[15px] leading-[22px] text-slate lg:text-base lg:leading-6">
-                We only show a state&apos;s schemes after a person has checked them against the official portal. Until then
-                you&apos;ll see every other scheme you can apply for.
+                {t("notLiveIntro")}
               </p>
             </>
           }
         >
           <div className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-white p-4">
-            <div className="text-[15px] leading-[21px] font-semibold">You&apos;ll still see</div>
+            <div className="text-[15px] leading-[21px] font-semibold">{t("stillSee")}</div>
             <ul className="m-0 flex flex-col gap-1 pl-5 text-[15px] leading-[21px] text-muted">
-              <li>Central schemes on NSP</li>
-              <li>AICTE schemes: Pragati, Saksham, Swanath</li>
-              <li>Private and CSR scholarships open to your state</li>
+              <li>{t("stillCentral")}</li>
+              <li>{t("stillAicte")}</li>
+              <li>{t("stillPrivate")}</li>
             </ul>
           </div>
           <section className="flex flex-col gap-2.5">
             <div className="flex flex-col gap-1">
-              <h2 className="m-0 text-[17px] leading-6 font-semibold">Optional: unlock more schemes</h2>
-              <p className="m-0 text-[13px] leading-[18px] text-slate">Answer only the ones that apply to you.</p>
+              <h2 className="m-0 text-[17px] leading-6 font-semibold">{t("unlockTitle")}</h2>
+              <p className="m-0 text-[13px] leading-[18px] text-slate">{t("unlockIntro")}</p>
             </div>
             <UnlockQuestions profile={profile} update={update} />
           </section>
           <p className="m-0 text-[13px] leading-[18px] text-slate">
-            Wrong state? <Link href="/check/basics" className="font-semibold text-navy underline">
-              Change it
+            {t("wrongState")}{" "}
+            <Link href="/check/basics" className="font-semibold text-navy underline">
+              {t("changeIt")}
             </Link>
           </p>
         </FormLayout>
       </Column>
-      <StickyCTA label="See central and private schemes" href="/results" />
+      <StickyCTA label={t("seeOthers")} href="/results" />
     </>
   );
 }

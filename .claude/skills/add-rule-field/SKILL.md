@@ -27,11 +27,11 @@ A state-only question (one state's portal, certificate or counselling route) is 
 | Profile | `src/domain/profile.ts` | Add the answer to `profileSchema` (optional), plus a `const` values list for choices |
 | Matcher | `src/domain/match.ts` | Map it in `resolveField()` (`num`, `one`, `many`, or a range for banded answers) |
 | Admin labels | `src/features/registry/lib/options.ts` | Add choice labels to `CHOICES` with `satisfies Record<...>` so typecheck catches gaps |
-| Student labels | `src/features/eligibility/lib/labels.ts`, `explain.ts` | Option labels; how the rule and the student's answer read in plain English |
+| Student labels | `src/i18n/messages/en.json` (`ruleFields`, `subjects`, `questions`, `options`), `src/features/eligibility/lib/labels.ts`, `explain.ts` | Option labels; how the rule and the student's answer read in plain English. Add the words to `en.json`, then use them through `t` |
 | Inline question | `src/features/eligibility/lib/questions.ts` | `questionFor()` case if it can be answered on the results screen |
 | Question UI | `src/features/eligibility/views/BasicsView.tsx` (common), or `UNLOCK_FIELDS` and `ROWS` in `src/features/eligibility/components/Unlocks.tsx` (unlock) | Ask it |
 
-`notAsked` fields need only the first two rows plus admin labels.
+`notAsked` fields need only the first two rows, admin labels, and a `ruleFields` entry in `en.json` (typecheck asks for it).
 
 Adding a new **value** to an existing choice field (a new entrance exam, a new parent occupation) is smaller: add it to the list in `profile.ts`, then fix the labels typecheck points to. No migration, because values live in `rules.value` (jsonb), not in the enum.
 

@@ -9,7 +9,7 @@ export default function Page({ params }: PageProps<"/scheme/[slug]">) {
       fallback={
         <Screen>
           <Column className="pt-5">
-            <Checking sources="this scheme's rules" />
+            <Checking />
           </Column>
         </Screen>
       }

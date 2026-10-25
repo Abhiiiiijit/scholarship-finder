@@ -2,7 +2,7 @@ import "server-only";
 import { asc, eq, sql } from "drizzle-orm";
 import { rules, scholarships } from "@/server/db/schema";
 import type { Db } from "@/server/db/types";
-import type { SchemeDraft } from "@/lib/registry/scheme-input";
+import type { SchemeDraft } from "@/domain/registry/scheme-input";
 
 // Scheme and rule reads and writes. Business rules (the publish gate) live in publish-service.ts.
 export type { Db };

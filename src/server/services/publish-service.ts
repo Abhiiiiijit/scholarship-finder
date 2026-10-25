@@ -1,6 +1,6 @@
 import "server-only";
 import { eq } from "drizzle-orm";
-import { publishProblems, type SchemeDraft } from "@/lib/registry/scheme-input";
+import { publishProblems, type SchemeDraft } from "@/domain/registry/scheme-input";
 import type { Snapshot } from "@/domain/rules/snapshot";
 import { scholarships } from "@/server/db/schema";
 import type { Db } from "@/server/db/types";

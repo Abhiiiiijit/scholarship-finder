@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
-import { Alert } from "@/components/Alert";
-import { Button } from "@/components/Button";
-import { Chip } from "@/components/Chip";
-import { SelectField, TextField } from "@/components/fields";
-import { RuleRow } from "@/components/RuleRow";
-import { StatusBadge } from "@/components/StatusBadge";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { Chip } from "@/components/ui/Chip";
+import { SelectField, TextField } from "@/components/ui/fields";
+import { RuleRow } from "@/components/ui/RuleRow";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { exampleStudent } from "@/lib/fixtures/section5";
 import { formatINR, formatLakh } from "@/lib/format";
 import { match, type RuleCheck } from "@/domain/match";
@@ -24,14 +24,14 @@ import {
   sourceOptions,
   valueLabel,
   type FieldInfo,
-} from "@/lib/registry/options";
-import { publishProblems, type SchemeDraft } from "@/lib/registry/scheme-input";
-import type { SchemeBadge } from "@/lib/registry/status";
+} from "@/features/registry/lib/options";
+import { publishProblems, type SchemeDraft } from "@/domain/registry/scheme-input";
+import type { SchemeBadge } from "@/domain/registry/status";
 import type { PublishableRule } from "@/domain/rules/schema";
 import { ruleValueSchema } from "@/domain/rules/schema";
 import type { SnapshotScheme } from "@/domain/rules/snapshot";
 import { STATES } from "@/domain/states";
-import { publishSchemeAction, saveSchemeAction, withdrawSchemeAction } from "./actions";
+import { publishSchemeAction, saveSchemeAction, withdrawSchemeAction } from "@/features/registry/actions/scheme-actions";
 
 type Op = (typeof EDITOR_OPERATORS)[number] | "PERCENTILE_GTE";
 
@@ -123,7 +123,7 @@ const toInput = (d: Draft) => ({
   })),
 });
 
-export function SchemeEditor({ initial }: { initial?: EditorScheme }) {
+export function SchemeEditorView({ initial }: { initial?: EditorScheme }) {
   const router = useRouter();
   const [draft, setDraft] = useState<Draft>(() => ({
     ...(initial?.draft ?? EMPTY),

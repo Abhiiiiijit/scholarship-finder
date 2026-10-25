@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 import { db } from "@/server/db/client";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { todayInIndia } from "@/lib/format";
-import { schemeBadge } from "@/lib/registry/status";
+import { schemeBadge } from "@/domain/registry/status";
 import { getScheme } from "@/server/repositories/scheme-repo";
-import { SchemeEditor, type EditorScheme } from "../SchemeEditor";
+import { SchemeEditorView, type EditorScheme } from "@/features/registry";
 
 export const metadata = { title: "Edit scheme · Admin" };
 
@@ -49,5 +49,5 @@ export default async function EditScheme({ params }: PageProps<"/admin/schemes/[
       })),
     },
   };
-  return <SchemeEditor initial={initial} />;
+  return <SchemeEditorView initial={initial} />;
 }

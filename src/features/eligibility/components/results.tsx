@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { RuleRow } from "@/components/RuleRow";
-import { StatusBadge } from "@/components/StatusBadge";
+import { RuleRow } from "@/components/ui/RuleRow";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { MatchStatus } from "@/domain/match";
 import type { RowResult } from "@/features/eligibility/lib/explain";
 import type { Question } from "@/features/eligibility/lib/questions";

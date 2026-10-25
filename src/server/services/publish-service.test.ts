@@ -7,7 +7,7 @@ import * as schema from "@/server/db/schema";
 import { rules, scholarships } from "@/server/db/schema";
 import { exampleStudent, TODAY } from "@/lib/fixtures/section5";
 import { matchAll } from "@/domain/match";
-import { schemeDraftSchema, type SchemeDraftInput } from "@/lib/registry/scheme-input";
+import { schemeDraftSchema, type SchemeDraftInput } from "@/domain/registry/scheme-input";
 import type { Db } from "@/server/db/types";
 import { getScheme, listSchemes, saveScheme } from "@/server/repositories/scheme-repo";
 import { latestSnapshot } from "@/server/repositories/snapshot-repo";

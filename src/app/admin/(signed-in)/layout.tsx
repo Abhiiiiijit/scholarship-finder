@@ -12,7 +12,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
       <header className="bg-ink text-white">
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3.5 sm:px-8">
           <div className="flex items-center gap-3">
-            <b>Scholarship Finder</b>
+            <b>Paatra</b>
             <span className="rounded-md bg-[#2c3e60] px-2 py-0.5 text-[13px]">Admin</span>
           </div>
           <nav className="flex gap-5 text-sm">

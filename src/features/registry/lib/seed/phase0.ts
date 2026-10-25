@@ -1,4 +1,4 @@
-import type { SchemeDraftInput } from "../scheme-input";
+import type { SchemeDraftInput } from "@/domain/registry/scheme-input";
 
 // The Phase 0 schemes as quoted in the PRD's "Quoted rules" tab on 2026-10-24, ready to load into
 // the registry as drafts. "verified" rows were fully quoted from a current official source;

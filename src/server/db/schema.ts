@@ -24,7 +24,7 @@ export const STATUSES = ["DRAFT", "PUBLISHED", "ON_HOLD", "RETIRED"] as const;
 export const SOURCE_FORMATS = ["HTML", "PDF"] as const;
 
 // Rule fields and operators are Postgres enums, so the database refuses a key the app doesn't know.
-// Labels for people live in src/lib/registry/options.ts (fieldLabel, OPERATOR_LABELS, valueLabel).
+// Labels for people live in src/features/registry/lib/options.ts (fieldLabel, OPERATOR_LABELS, valueLabel).
 export const ruleField = pgEnum("rule_field", RULE_FIELD_KEYS);
 export const ruleOp = pgEnum("rule_op", OPERATORS);
 

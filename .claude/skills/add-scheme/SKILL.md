@@ -11,7 +11,7 @@ Every rule a student sees must carry the official wording and a link. A wrong ru
 
 - Use the scheme owner's own page or PDF: the ministry, AICTE, the state portal (MahaDBT, SSP, ePASS…), NSP, or the private trust. Not news sites, coaching blogs or aggregators.
 - Check the scheme is in scope: B.E./B.Tech students, a central, AICTE or private scheme, or a state scheme from one of the live states in `src/domain/states.ts` (`STATES`). A scheme from another state waits for that state (see the `add-state` skill).
-- Check it isn't already in the registry: search `src/lib/registry/seed/phase0.ts` for the name, slug and tracker id (C1, M4, P2…), and ask the owner whether it exists in the live registry.
+- Check it isn't already in the registry: search `src/features/registry/lib/seed/phase0.ts` for the name, slug and tracker id (C1, M4, P2…), and ask the owner whether it exists in the live registry.
 - If the page will not open from this environment, say so. Never fill rules from memory.
 
 ## 2. Turn the eligibility text into rules
@@ -20,7 +20,7 @@ Each rule is `{ group, field, op, value, quote, sourceUrl, ambiguous }`.
 
 - **field**: one of `RULE_FIELDS` in `src/domain/rules/fields.ts`, or a key of the scheme's own state (`MH.cap_admission`). If nothing fits, stop and use the `add-rule-field` skill; do not bend a field to mean something else.
 - **op**: `EQ`, `IN`, `LTE`, `GTE`, `BETWEEN`, `IS_TRUE`. Not `PERCENTILE_GTE` (the editor refuses it until board tables exist); record percentile rules in review notes instead.
-- **value**: the stored keys, not labels. Income in rupees (`800000`), percentages as numbers (`60`), choices as profile values (`"female"`, `["1", "2_lateral"]`, category keys from the state's `categories`, e.g. `"obc"`, `"bc_a"`). Check `src/domain/profile.ts` and `src/lib/registry/options.ts` for valid values.
+- **value**: the stored keys, not labels. Income in rupees (`800000`), percentages as numbers (`60`), choices as profile values (`"female"`, `["1", "2_lateral"]`, category keys from the state's `categories`, e.g. `"obc"`, `"bc_a"`). Check `src/domain/profile.ts` and `src/features/registry/lib/options.ts` for valid values.
 - **group**: rules in one group are OR-ed, groups are AND-ed. "SC or ST" is one `IN` rule; "income ≤ 8 L, or any income for orphans" is two rules in the same group.
 - **quote**: copy the exact sentence from the source, in quote marks. Never paraphrase. A summary is allowed only in a draft and must say so in review notes.
 - **sourceUrl**: the page or PDF the quote is from (often the same as `officialUrl`).
@@ -33,7 +33,7 @@ Also fill: `slug` (lowercase-hyphen), `trackerId`, `name`, `provider` (`CENTRAL`
 ## 3. Enter it
 
 - **Through the admin editor (preferred for one scheme):** `/admin` → New scheme. Save as draft, then let the owner publish.
-- **In code (a batch):** add an entry to `PHASE0_SCHEMES` in `src/lib/registry/seed/phase0.ts` using the `rule()` helper, with `quality` (`verified` / `partial`) and `gaps`. `npm run db:seed` inserts drafts and skips any slug or tracker id already present, so it never overwrites admin edits.
+- **In code (a batch):** add an entry to `PHASE0_SCHEMES` in `src/features/registry/lib/seed/phase0.ts` using the `rule()` helper, with `quality` (`verified` / `partial`) and `gaps`. `npm run db:seed` inserts drafts and skips any slug or tracker id already present, so it never overwrites admin edits.
 
 ## 4. Test
 

@@ -1,9 +1,9 @@
 import { requireAdmin } from "@/server/auth/require-admin";
-import { SchemeEditor } from "../SchemeEditor";
+import { SchemeEditorView } from "@/features/registry";
 
 export const metadata = { title: "Add scheme · Admin" };
 
 export default async function NewScheme() {
   await requireAdmin();
-  return <SchemeEditor />;
+  return <SchemeEditorView />;
 }

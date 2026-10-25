@@ -5,7 +5,9 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Which deploy this is, for src/i18n/locales.ts: unreviewed languages stay off production. Set at
+  // build time so the server and the browser agree.
+  env: { PAATRA_DEPLOY: process.env.VERCEL_ENV ?? "development" },
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

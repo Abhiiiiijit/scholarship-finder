@@ -2,7 +2,7 @@
 
 /* Tokens from the design's UI kit. Components use these names, never raw hex. */
 @theme inline {
-  --font-sans: var(--font-plex-sans);
+  --font-sans: var(--font-plex-sans), var(--font-plex-devanagari), sans-serif;
   --font-mono: var(--font-plex-mono);
   --color-ink: #13213c;
   --color-navy: #1b3a6b;

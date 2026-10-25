@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { Alert } from "@/components/ui/Alert";
 import { RuleRow } from "@/components/ui/RuleRow";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { BackIcon, Column, Footnote, Screen } from "@/features/eligibility/components/layout";
 import { Checking, LoadFailed } from "@/features/eligibility/components/results";
+import { LanguageSwitch } from "@/features/eligibility/components/LanguageSwitch";
 import { formatDate } from "@/lib/format";
 import { match, type GroupCheck, type RuleCheck } from "@/domain/match";
 import type { Profile } from "@/domain/profile";
@@ -26,10 +27,13 @@ export function SchemeView({ slug }: { slug: string }) {
   return (
     <Screen>
       <Column className="pt-4 lg:pt-6">
-        <Link href="/results" className="-ml-1 flex min-h-11 items-center gap-1 self-start text-[15px] font-semibold text-navy">
-          <BackIcon />
-          {t("allResults")}
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link href="/results" className="-ml-1 flex min-h-11 items-center gap-1 text-[15px] font-semibold text-navy">
+            <BackIcon />
+            {t("allResults")}
+          </Link>
+          <LanguageSwitch />
+        </div>
       </Column>
       <Column className="flex-1 gap-6 pt-2 pb-8 lg:pb-12">
         {snap.status === "failed" ? (
@@ -71,6 +75,7 @@ const PROVIDER = {
 
 function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile }) {
   const t = useTranslations();
+  const locale = useLocale();
   const m = match(profile, scheme);
   const [ticks, toggle] = useDocumentTicks(scheme.slug);
   const documents = scheme.documents ?? [];
@@ -81,7 +86,7 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
 
   const facts = [
     [t("scheme.amount"), scheme.amountText ?? t("scheme.seeOfficial")],
-    [t("scheme.deadline"), scheme.deadline ? formatDate(scheme.deadline) : t("scheme.seeOfficial")],
+    [t("scheme.deadline"), scheme.deadline ? formatDate(scheme.deadline, locale) : t("scheme.seeOfficial")],
     [t("scheme.type"), type],
     [t("scheme.applyThrough"), applyVia ?? t("scheme.officialSite")],
   ];
@@ -107,7 +112,7 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
             <circle cx="12" cy="12" r="8" />
             <path d="M12 8v4l3 2" />
           </svg>
-          {t("scheme.lastVerified", { date: formatDate(scheme.lastVerifiedAt.slice(0, 10)) })}
+          {t("scheme.lastVerified", { date: formatDate(scheme.lastVerifiedAt.slice(0, 10), locale) })}
         </div>
       </header>
 
@@ -181,6 +186,7 @@ function rowResult(c: RuleCheck): "pass" | "fail" | "unknown" | "confirm" {
 
 function RuleGroup({ group, profile }: { group: GroupCheck; profile: Profile }) {
   const t = useTranslations();
+  const locale = useLocale();
   const either = group.checks.length > 1;
   return (
     <div className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-white p-4">
@@ -203,6 +209,8 @@ function RuleGroup({ group, profile }: { group: GroupCheck; profile: Profile }) 
             </ul>
             {/* The official wording, word for word in the source's language: never translated. */}
             <blockquote className="m-0 border-l-0 rounded-lg bg-ground px-3 py-2.5 text-[13px] leading-[19px] text-muted">
+              {/* Outside English, say plainly that the quote is the source's own words, not ours. */}
+              {locale !== "en" && <span className="mb-1 block text-xs font-semibold text-slate">{t("scheme.officialWording")}</span>}
               &ldquo;{c.rule.quote}&rdquo;
               <br />
               <a href={c.rule.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-navy">

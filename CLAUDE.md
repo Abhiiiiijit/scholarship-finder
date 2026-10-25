@@ -53,9 +53,9 @@ student phone ──GET /api/rules/latest──▶ latest snapshot (cached)
 
 | Path | What |
 | --- | --- |
-| `src/app/page.tsx`, `check/basics`, `check/state`, `results`, `scheme/[slug]` | Student routes S01–S09: thin pages that set the title and render a view; `error.tsx`, `not-found.tsx` |
+| `src/app/[locale]/`: `page.tsx`, `check/basics`, `check/state`, `results`, `scheme/[slug]` | Student routes S01–S09, once per language (`/results` English, `/hi/results` Hindi): thin pages that set the title and render a view; the student root layout, `error.tsx`, `not-found.tsx`, `[...rest]` (localized 404). `src/app/admin/layout.tsx` is the admin's own English root layout |
 | `src/features/eligibility/` | The student feature. `views/` (client screens), `components/` (widgets, page chrome), `hooks/` (`useAnswers`, `useSnapshot`), `store/` (localStorage: answers, document ticks), `api/` (`snapshot-client.ts`), `lib/` (results, plain-language reasons in `explain.ts`, inline questions, labels; each takes the translator `t` from `i18n.ts`). Routes import from its `index.ts` |
-| `src/i18n/` | Student copy: `messages/en.json` (the source), `locales.ts`, `request.ts` (next-intl config, locale fixed to `en` for now), `messages.test.ts` (same keys in every language, valid ICU) |
+| `src/i18n/` | Student copy: `messages/<locale>.json` (`en` is the source; other languages also carry a `domain` section for state names, categories and state questions), `locales.ts` (languages, which are reviewed, state → language offer, the `paatra.lang` cookie), `routing.ts` / `navigation.ts` (next-intl: English unprefixed, others `/hi/...`; use its `Link` and `useRouter` in student code), `request.ts`, `messages.test.ts` (same keys, valid ICU, every state word translated) |
 | `src/app/admin/` | Admin routes: `login/`, and under `(signed-in)/` the layout, `error.tsx`, A01 registry and A02 editor pages that check `requireAdmin()`, load data and render a view |
 | `src/features/registry/` | The admin feature. `views/` (`RegistryView`, `SchemeEditorView`), `components/` (`StateFilter`), `actions/scheme-actions.ts` (server actions: save, publish, withdraw), `lib/` (`options.ts` labels, `seed/phase0.ts` Phase 0 schemes). Routes import from its `index.ts` |
 | `src/app/api/rules/latest/route.ts` | Public snapshot endpoint |
@@ -69,7 +69,7 @@ student phone ──GET /api/rules/latest──▶ latest snapshot (cached)
 | `src/lib/fixtures/section5.ts` | PRD section 5 worked example, the matcher's reference test and the e2e test's snapshot |
 | `e2e/`, `playwright.config.ts` | Playwright happy path S01 → results → scheme page on a phone viewport |
 | `src/server/db/schema.ts`, `drizzle/` | Drizzle schema and generated SQL migrations (never edit an applied migration) |
-| `src/server/auth/`, `src/proxy.ts` | Admin sign-in, allowlist, `requireAdmin()` |
+| `src/server/auth/`, `src/proxy.ts` | Admin sign-in, allowlist, `requireAdmin()`; the proxy also routes student URLs by language and sends a phone that picked a language to it |
 | `public/brand/` | Paatra logos (light/dark), mark, tagline |
 
 ## Commands
@@ -94,7 +94,8 @@ CI (`.github/workflows/ci.yml`) runs lint, typecheck, test, build and e2e on eve
 - **Admin code.** Every admin page and server action calls `requireAdmin()` itself; `proxy.ts` is only the first gate. Server actions also Zod-check every argument: they are public endpoints.
 - **Server code.** Only `src/server/` touches the database or secrets, and each file there imports `server-only`. Pages and actions call repositories for reads and `publish-service.ts` for anything with a business rule; they never write queries themselves. Read settings from `src/server/env.ts`, not `process.env`.
 - **Labels.** Stored values are snake_case keys; people see labels from `src/features/registry/lib/options.ts` (admin) and `src/i18n/messages/en.json` through `src/features/eligibility/lib/labels.ts` / `explain.ts` (students). Message keys are typechecked, and the student option lists are built from the profile enums, so a new value fails typecheck until it has a label.
-- **Student copy.** Every word a student sees comes from `src/i18n/messages/en.json` via next-intl (`useTranslations` in components, `getTranslations` for metadata, `t` passed into `lib/` helpers). Never hard-code English in a student screen. Rule quotes, scheme names and admin-entered scheme text are shown as published and are never put in messages or translated. State names, categories and state questions still come from `src/domain/states.ts` in English. Admin screens stay English and do not use messages.
+- **Student copy.** Every word a student sees comes from `src/i18n/messages/en.json` via next-intl (`useTranslations` in components, `getTranslations` for metadata, `t` passed into `lib/` helpers). Never hard-code English in a student screen. Rule quotes, scheme names and admin-entered scheme text are shown as published and are never put in messages or translated. State names, categories and state questions stay English in `src/domain/states.ts` (the admin shares them) and are translated through `lib/domain-labels.ts` from each language's `domain` section. Admin screens stay English and do not use messages.
+- **Languages.** A language goes live only after a native speaker has read every screen on a phone: until `REVIEWED` in `src/i18n/locales.ts` says so, it is built on preview deploys and locally but not in production (`VERCEL_ENV`). Language choice is only a cookie holding a code; it never touches answers.
 - **Layout.** Phone first: the phone layout is the design, and wider screens add to it. Student screens sit in `Column` (`max-w-6xl`; `width="narrow"` only for short messages), forms use `FormLayout` (intro beside the form from `lg`), card lists go two-up from `md`, and results and the scheme page get a sidebar from `lg`. A wider layout never changes what a phone shows or its order.
 - **Copy.** Plain, short English for a first-year student on a phone. Say what to do next. Name the product Paatra.
 - **Brand.** Navy `#1B3A6B`, green `#1F8A4C` (`#4CC38A` on navy), gold `#E9A23B`.

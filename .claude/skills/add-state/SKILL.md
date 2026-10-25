@@ -32,6 +32,7 @@ In `src/domain/states.ts`:
    - Use `onlyFor` for questions that apply to some categories only.
 3. If the state's OBC-like categories should match national OBC rules, check `OBC_LIKE` in `src/features/registry/lib/seed/phase0.ts` and add the new keys.
 4. Update the comment at the top of `states.ts` if the count is mentioned.
+5. Translations: in every non-English file in `src/i18n/messages/`, add the state's question labels (and any new answer wording) under `domain.questions.<CODE>` / `domain.options.<CODE>`, and any new category word under `domain.categories`. `npm test` lists what is missing. If most of its students read a language Paatra has, add it to `STATE_LANGUAGE` in `src/i18n/locales.ts`.
 
 ## 3. Migrate the enum
 

@@ -1,20 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getTranslations } from "next-intl/server";
-import "./globals.css";
+import { notFound } from "next/navigation";
+import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { LOCALES } from "@/i18n/locales";
+import { fontClasses } from "../fonts";
+import "../globals.css";
 
-const plexSans = IBM_Plex_Sans({
-  variable: "--font-plex-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
-
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-});
+// The student site's root layout, once per language: / and /hi are both prerendered.
+export function generateStaticParams() {
+  return LOCALES.map((locale) => ({ locale }));
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("meta");
@@ -38,10 +33,11 @@ export const viewport: Viewport = {
   themeColor: "#1B3A6B",
 };
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const locale = await getLocale();
+export default async function RootLayout({ children, params }: LayoutProps<"/[locale]">) {
+  const { locale } = await params;
+  if (!hasLocale(LOCALES, locale)) notFound();
   return (
-    <html lang={locale} className={`${plexSans.variable} ${plexMono.variable} h-full antialiased`}>
+    <html lang={locale} className={`${fontClasses} h-full antialiased`}>
       <body className="flex min-h-full flex-col bg-white font-sans text-zinc-900">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>

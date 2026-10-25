@@ -1,21 +1,23 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { ChoiceGroup } from "@/features/eligibility/components/controls";
 import { Column, FormLayout, Screen, StepHeader, StickyCTA } from "@/features/eligibility/components/layout";
 import { UnlockQuestions } from "@/features/eligibility/components/Unlocks";
+import { StateLanguageOffer } from "@/features/eligibility/components/LanguageSwitch";
 import type { Profile } from "@/domain/profile";
 import { isLive } from "@/features/eligibility/store/answers";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
-import { STATE_BY_CODE, stateName, type StateConfig, type StateQuestion } from "@/domain/states";
+import type { StateConfig, StateQuestion } from "@/domain/states";
+import { localStateByCode, stateLabel } from "@/features/eligibility/lib/domain-labels";
 
 // S03 State questions, or S04 State not live yet when the student's state has no checked schemes.
 
 export function StateView() {
-  const t = useTranslations("state");
+  const t = useTranslations();
   const [profile, update] = useAnswers();
   const router = useRouter();
   const code = profile?.domicile_state;
@@ -25,13 +27,16 @@ export function StateView() {
   }, [profile, code, router]);
 
   if (!profile || !code) return <Screen />;
-  const config = STATE_BY_CODE.get(code);
+  const config = localStateByCode(t, code);
   return (
     <Screen>
       <Column>
-        <StepHeader label={t("step")} progress={100} backHref="/check/basics" />
+        <StepHeader label={t("state.step")} progress={100} backHref="/check/basics" />
+        <div className="pt-3 empty:hidden">
+          <StateLanguageOffer state={code} />
+        </div>
       </Column>
-      {config && isLive(code) ? <StateQuestions config={config} profile={profile} update={update} /> : <NotLive name={stateName(code) ?? code} profile={profile} update={update} />}
+      {config && isLive(code) ? <StateQuestions config={config} profile={profile} update={update} /> : <NotLive name={stateLabel(t, code) ?? code} profile={profile} update={update} />}
     </Screen>
   );
 }

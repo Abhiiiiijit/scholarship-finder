@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { ChoiceGroup, SelectField } from "@/features/eligibility/components/controls";
 import { Column, FormLayout, Screen, StepHeader, StickyCTA } from "@/features/eligibility/components/layout";
@@ -9,16 +9,13 @@ import type { Profile } from "@/domain/profile";
 import { isLive, withState } from "@/features/eligibility/store/answers";
 import { aicteOptions, courseOptions, genderOptions, institutionOptions, yearOptions } from "@/features/eligibility/lib/labels";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
-import { categoriesFor, OTHER_STATES, STATES, stateName } from "@/domain/states";
+import { localCategories, stateLabel, stateOptions } from "@/features/eligibility/lib/domain-labels";
 
 // S02 Basics: the state first, then the common questions. Every answer saves on change.
 
-const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name);
-const LIVE = [...STATES].sort(byName).map((s) => ({ value: s.code, label: s.name }));
-const OTHER = [...OTHER_STATES].sort(byName).map((s) => ({ value: s.code, label: s.name }));
-
 export function BasicsView() {
   const t = useTranslations();
+  const locale = useLocale();
   const [profile, update] = useAnswers();
   const [undo, setUndo] = useState<{ previous: Profile; from: string } | null>(null);
 
@@ -44,12 +41,13 @@ export function BasicsView() {
 
   const chooseState = (code: string) => {
     const lost = profile.category !== undefined || Object.keys(profile.state ?? {}).length > 0;
-    if (lost && profile.domicile_state) setUndo({ previous: profile, from: stateName(profile.domicile_state) ?? profile.domicile_state });
+    if (lost && profile.domicile_state) setUndo({ previous: profile, from: stateLabel(t, profile.domicile_state) ?? profile.domicile_state });
     update((p) => withState(p, code || undefined));
   };
 
   const state = profile.domicile_state;
   const live = isLive(state);
+  const states = stateOptions(t, locale);
 
   return (
     <Screen>
@@ -71,8 +69,8 @@ export function BasicsView() {
             label={t("basics.stateLabel")}
             hint={t("basics.stateHint")}
             groups={[
-              { label: t("basics.liveGroup", { count: LIVE.length }), options: LIVE },
-              { label: t("basics.otherGroup", { count: OTHER.length }), options: OTHER },
+              { label: t("basics.liveGroup", { count: states.live.length }), options: states.live },
+              { label: t("basics.otherGroup", { count: states.other.length }), options: states.other },
             ]}
             placeholder={t("basics.statePlaceholder")}
             value={state ?? ""}
@@ -98,9 +96,9 @@ export function BasicsView() {
           <IncomeField hint={t("basics.incomeHint")} value={profile.family_income} onChange={set("family_income")} />
 
           <ChoiceGroup
-            legend={state && live ? t("basics.categoryOfState", { state: stateName(state) ?? state }) : t("basics.category")}
+            legend={state && live ? t("basics.categoryOfState", { state: stateLabel(t, state) ?? state }) : t("basics.category")}
             hint={state ? undefined : t("basics.categoryHint")}
-            options={categoriesFor(state)}
+            options={localCategories(t, state)}
             value={profile.category}
             onChange={set("category")}
           />

@@ -1,7 +1,11 @@
+import { hasLocale } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
-import { DEFAULT_LOCALE, TIME_ZONE } from "./locales";
-import en from "./messages/en.json";
+import { locale as rootLocale } from "next/root-params";
+import { DEFAULT_LOCALE, LOCALES, TIME_ZONE, type AppLocale } from "./locales";
 
-// English only for now. Reading the request locale here (a header or cookie) would make every
-// student page dynamic, so the locale stays fixed until a language picker lands.
-export default getRequestConfig(() => ({ locale: DEFAULT_LOCALE, messages: en, timeZone: TIME_ZONE }));
+// The locale is the [locale] root segment, so every page can still be prerendered per language.
+export default getRequestConfig(async ({ locale }) => {
+  const requested = locale ?? (await rootLocale());
+  const chosen: AppLocale = hasLocale(LOCALES, requested) ? requested : DEFAULT_LOCALE;
+  return { locale: chosen, messages: (await import(`./messages/${chosen}.json`)).default, timeZone: TIME_ZONE };
+});

@@ -213,7 +213,8 @@
     "notAsked": "We don't ask this yet. Confirm on the official site.",
     "you": "You: {answer}",
     "notAnswered": "You haven't answered this yet.",
-    "source": "Source: official page"
+    "source": "Source: official page",
+    "officialWording": "Official wording, as published"
   },
   "rules": {
     "incomeUpTo": "Family income up to {amount}",
@@ -279,9 +280,17 @@
     "aicte_approved": "Is your course AICTE-approved?"
   },
   "options": {
-    "gender": { "female": "Female", "male": "Male", "other": "Other" },
-    "course": { "be_btech": "B.E. / B.Tech (engineering)" },
-    "courseInRule": { "be_btech": "B.E./B.Tech" },
+    "gender": {
+      "female": "Female",
+      "male": "Male",
+      "other": "Other"
+    },
+    "course": {
+      "be_btech": "B.E. / B.Tech (engineering)"
+    },
+    "courseInRule": {
+      "be_btech": "B.E./B.Tech"
+    },
     "year": {
       "1": "1st",
       "2": "2nd",
@@ -298,7 +307,14 @@
       "4": "4th year",
       "5": "5th year (dual degree)"
     },
-    "yearShort": { "1": "1st", "2": "2nd", "2_lateral": "2nd", "3": "3rd", "4": "4th", "5": "5th" },
+    "yearShort": {
+      "1": "1st",
+      "2": "2nd",
+      "2_lateral": "2nd",
+      "3": "3rd",
+      "4": "4th",
+      "5": "5th"
+    },
     "institution": {
       "govt": "Government",
       "aided": "Government-aided",
@@ -306,8 +322,16 @@
       "deemed": "Deemed university",
       "central": "Central institute (IIT, NIT, IIIT)"
     },
-    "aicte": { "yes": "Yes", "no": "No", "unknown": "Not sure" },
-    "disability": { "none": "No", "lt40": "Yes, under 40%", "gte40": "Yes, 40% or more with a certificate" },
+    "aicte": {
+      "yes": "Yes",
+      "no": "No",
+      "unknown": "Not sure"
+    },
+    "disability": {
+      "none": "No",
+      "lt40": "Yes, under 40%",
+      "gte40": "Yes, 40% or more with a certificate"
+    },
     "minority": {
       "none": "None",
       "muslim": "Muslim",
@@ -351,7 +375,10 @@
       "other": "Other state exam",
       "none": "No entrance exam"
     },
-    "freshOrRenewal": { "fresh": "Fresh application", "renewal": "Renewal" }
+    "freshOrRenewal": {
+      "fresh": "Fresh application",
+      "renewal": "Renewal"
+    }
   },
   "errors": {
     "title": "Something went wrong",

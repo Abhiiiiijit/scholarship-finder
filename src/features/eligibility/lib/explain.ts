@@ -2,8 +2,9 @@ import type { GroupCheck, RuleCheck } from "@/domain/match";
 import { ENTRANCE_EXAMS, YEARS, type Profile } from "@/domain/profile";
 import { fieldTier, isStateKey, RULE_FIELDS, type RuleField } from "@/domain/rules/fields";
 import type { PublishableRule } from "@/domain/rules/schema";
-import { NATIONAL_CATEGORIES, STATE_BY_CODE, STATES, stateName } from "@/domain/states";
+import { NATIONAL_CATEGORIES, STATE_BY_CODE, STATES } from "@/domain/states";
 import { formatINR, formatLakh } from "@/lib/format";
+import { categoryLabel, optionLabel, questionLabel, stateLabel } from "./domain-labels";
 import { joinList, type T } from "./i18n";
 import {
   aicteOptions,
@@ -19,8 +20,7 @@ import {
 
 // Plain-language reasons for every rule, so a result always says why: "Family income up to ₹8 L",
 // "Income ₹9 L is ₹1 L over the ₹8 L limit". Pure, so the screens and the tests share it. The
-// words come from the "rules" messages; state names, categories and state questions are still the
-// English text in src/domain/states.ts.
+// words come from the "rules" messages, and state words from domain-labels.ts.
 
 // Every state's category names, so a central scheme's "sc" or a state's "vjnt" reads right.
 const CATEGORY_LABELS = new Map<string, string>();
@@ -58,20 +58,28 @@ function choiceLabels(t: T, field: RuleField): readonly Option[] {
 
 function stateQuestion(field: string) {
   const [code, key] = field.split(".");
-  return STATE_BY_CODE.get(code)?.questions.find((q) => q.key === key);
+  const q = STATE_BY_CODE.get(code)?.questions.find((x) => x.key === key);
+  return q && { code, q };
 }
 
 export function fieldLabel(t: T, field: string): string {
-  if (isStateKey(field)) return stateQuestion(field)?.label ?? field;
+  if (isStateKey(field)) {
+    const found = stateQuestion(field);
+    return found ? questionLabel(t, found.code, found.q) : field;
+  }
   return field in RULE_FIELDS ? t(`ruleFields.${field as RuleField}`) : field;
 }
 
 export function valueLabel(t: T, field: string, value: unknown): string {
   if (typeof value === "boolean") return value ? t("rules.yes") : t("rules.no");
   const v = String(value);
-  if (isStateKey(field)) return stateQuestion(field)?.options.find((o) => o.value === v)?.label ?? v;
-  if (field === "category") return CATEGORY_LABELS.get(v) ?? v;
-  if (field === "domicile_state") return stateName(v) ?? v;
+  if (isStateKey(field)) {
+    const found = stateQuestion(field);
+    const option = found?.q.options.find((o) => o.value === v);
+    return found && option ? optionLabel(t, found.code, found.q, option) : v;
+  }
+  if (field === "category") return categoryLabel(t, v, CATEGORY_LABELS.get(v) ?? v);
+  if (field === "domicile_state") return stateLabel(t, v) ?? v;
   if (!(field in RULE_FIELDS)) return v;
   return labelOf(choiceLabels(t, field as RuleField), v) ?? v;
 }

@@ -13,6 +13,7 @@ describe("format", () => {
     expect(daysAgo(new Date("2026-10-21T20:00:00Z"), now)).toBe("3 days ago");
     expect(daysAgo(null, now)).toBe("never");
     expect(formatDate("2027-03-31")).toBe("31 Mar 2027");
+    expect(formatDate("2027-03-31", "hi")).toBe("31 मार्च 2027");
     // 20:00 UTC is already the next day in India.
     expect(todayInIndia(now)).toBe("2026-10-25");
   });

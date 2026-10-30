@@ -97,7 +97,7 @@ export function BasicsView() {
 
           <ChoiceGroup
             legend={state && live ? t("basics.categoryOfState", { state: stateLabel(t, state) ?? state }) : t("basics.category")}
-            hint={state ? undefined : t("basics.categoryHint")}
+            hint={state ? t("basics.categoryNames") : t("basics.categoryHint")}
             options={localCategories(t, state)}
             value={profile.category}
             onChange={set("category")}
@@ -114,9 +114,9 @@ export function BasicsView() {
 
           <ChoiceGroup legend={t("basics.year")} options={yearOptions(t)} value={profile.year} onChange={set("year")} />
 
-          <PercentField label={t("basics.class12")} value={profile.class12_pct} onChange={set("class12_pct")} />
+          <PercentField label={t("basics.class12")} hint={t("basics.class12Hint")} value={profile.class12_pct} onChange={set("class12_pct")} />
 
-          <ChoiceGroup legend={t("basics.institution")} layout="grid2" options={institutionOptions(t)} value={profile.institution_type} onChange={set("institution_type")} />
+          <ChoiceGroup legend={t("basics.institution")} hint={t("basics.institutionHint")} layout="grid2" options={institutionOptions(t)} value={profile.institution_type} onChange={set("institution_type")} />
 
           <ChoiceGroup
             legend={t("basics.aicte")}

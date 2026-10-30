@@ -7,7 +7,8 @@ import { ALL_LOCALES } from "./locales";
 import en from "./messages/en.json";
 
 // Every language has exactly English's keys, every message parses as ICU, and every language but
-// English names each state, state question and state answer in its own words ("domain").
+// English names each state, state question, question hint and state answer in its own words
+// ("domain").
 
 const dir = fileURLToPath(new URL("./messages/", import.meta.url));
 const load = (locale: string) => JSON.parse(readFileSync(`${dir}${locale}.json`, "utf8")) as Record<string, unknown>;
@@ -52,7 +53,7 @@ describe("messages", () => {
   }
 
   for (const locale of translated) {
-    it(`${locale} names every state, state question and state answer`, () => {
+    it(`${locale} names every state, state question, hint and state answer`, () => {
       const t = createTranslator({ locale, messages: load(locale) });
       const has = (k: string) => t.has(`domain.${k}` as never);
       const missing = [
@@ -60,6 +61,7 @@ describe("messages", () => {
         ...STATES.flatMap((s) =>
           s.questions.flatMap((q) => [
             ...(has(`questions.${s.code}.${q.key}`) ? [] : [`${s.code}.${q.key}`]),
+            ...(q.hint && !has(`hints.${s.code}.${q.key}`) ? [`${s.code}.${q.key} hint`] : []),
             // Labels that are only names (DTU, CBSE, IIIT-Delhi) read the same in every language.
             ...q.options
               .filter((o) => !/^[A-Z]+(-[A-Z][a-z]+)?$/.test(o.label) && !has(`options.${s.code}.${q.key}.${o.value}`) && !has(`answers.${o.value}`))

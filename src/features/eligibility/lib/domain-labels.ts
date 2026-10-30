@@ -27,6 +27,11 @@ export function questionLabel(t: T, code: string, q: StateQuestion): string {
   return domain(t, `questions.${code}.${q.key}`, q.label);
 }
 
+// The plain-language line under a state question, if it has one.
+export function questionHint(t: T, code: string, q: StateQuestion): string | undefined {
+  return q.hint && domain(t, `hints.${code}.${q.key}`, q.hint);
+}
+
 export function optionLabel(t: T, code: string, q: StateQuestion, option: { value: string; label: string }): string {
   return domain(t, `options.${code}.${q.key}.${option.value}`, domain(t, `answers.${option.value}`, option.label));
 }
@@ -40,6 +45,7 @@ export function localState(t: T, s: StateConfig): StateConfig {
     questions: s.questions.map((q) => ({
       ...q,
       label: questionLabel(t, s.code, q),
+      hint: questionHint(t, s.code, q),
       options: q.options.map((o) => ({ value: o.value, label: optionLabel(t, s.code, q, o) })),
     })),
   };

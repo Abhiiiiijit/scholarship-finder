@@ -49,14 +49,17 @@
     "category": "Category",
     "categoryOfState": "Category ({state}'s list)",
     "categoryHint": "Choose your state first to see its category list.",
+    "categoryNames": "As on your caste or EWS certificate. SC: Scheduled Caste, ST: Scheduled Tribe, OBC: Other Backward Class, EWS: Economically Weaker Section.",
     "gender": "Gender",
     "genderHint": "Some schemes are for girls only.",
     "course": "Course",
     "year": "Year of study",
     "class12": "Class 12 (HSC) percentage",
+    "class12Hint": "HSC is the Higher Secondary Certificate: your Class 12 board marks, as on your marksheet.",
     "institution": "Your college is",
+    "institutionHint": "Government-aided means a private college that gets government grants. A deemed university sets its own exams. Your college website says which.",
     "aicte": "Is your course AICTE-approved?",
-    "aicteHint": "Most B.E./B.Tech courses are. Your college's website or admission letter says so.",
+    "aicteHint": "AICTE is the All India Council for Technical Education, which approves engineering courses. Most B.E./B.Tech courses are approved; your admission letter or college website says so.",
     "continue": "Continue",
     "privacyNote": "Saved on this phone only. We never ask for Aadhaar or documents."
   },
@@ -72,7 +75,7 @@
     "notLiveTitle": "{state} schemes aren't checked yet",
     "notLiveIntro": "We only show a state's schemes after a person has checked them against the official portal. Until then you'll see every other scheme you can apply for.",
     "stillSee": "You'll still see",
-    "stillCentral": "Central schemes on NSP",
+    "stillCentral": "Central schemes on NSP (National Scholarship Portal)",
     "stillAicte": "AICTE schemes: Pragati, Saksham, Swanath",
     "stillPrivate": "Private and CSR scholarships open to your state",
     "wrongState": "Wrong state?",
@@ -101,6 +104,7 @@
     "class10Title": "Class 10 percentage",
     "class10Detail": "asked by some private schemes",
     "class10Question": "Class 10 (SSC) percentage",
+    "class10Hint": "SSC is the Secondary School Certificate: your Class 10 board marks.",
     "checksMore": "checks {count, plural, one {# more scheme} other {# more schemes}}"
   },
   "fields": {
@@ -358,7 +362,7 @@
       "labourer": "Registered construction or building worker",
       "armed_forces": "Serving in the armed forces",
       "ex_serviceman": "Ex-serviceman",
-      "capf": "CAPF or Assam Rifles (serving, retired or died in service)",
+      "capf": "Central armed police (CAPF: CRPF, BSF, CISF, ITBP, SSB) or Assam Rifles, serving, retired or died in service",
       "none": "None of these"
     },
     "specialStatus": {

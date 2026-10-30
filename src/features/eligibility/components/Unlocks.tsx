@@ -131,7 +131,7 @@ export function UnlockQuestions({
             </div>
           )}
           {r.key === "class10_pct" && (
-            <PercentField label={t("unlocks.class10Question")} value={profile.class10_pct} onChange={(v) => set("class10_pct", v)} />
+            <PercentField label={t("unlocks.class10Question")} hint={t("unlocks.class10Hint")} value={profile.class10_pct} onChange={(v) => set("class10_pct", v)} />
           )}
         </UnlockRow>
       ))}

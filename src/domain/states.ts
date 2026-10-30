@@ -5,6 +5,8 @@
 export interface StateQuestion {
   key: string;
   label: string;
+  // A plain-language line under the question: the full form of any short form, and where to look.
+  hint?: string;
   options: { value: string; label: string }[];
   // Asked only for these categories; for others S03 shows a grey note instead.
   onlyFor?: string[];
@@ -35,18 +37,32 @@ const NATIONAL = "General · SC · ST · OBC · EWS";
 
 const q = (key: string, label: string, options = YES_NO_UNSURE, onlyFor?: string[]): StateQuestion =>
   onlyFor ? { key, label, options, onlyFor } : { key, label, options };
-const residence = (label: string) => q("residence", label, YES_NO_APPLIED);
+const hinted = (question: StateQuestion, hint: string): StateQuestion => ({ ...question, hint });
+const RESIDENCE_HINT = "Proves you are a permanent resident of the state. Your tehsil or district office issues it.";
+const residence = (label: string, hint = RESIDENCE_HINT) => hinted(q("residence", label, YES_NO_APPLIED), hint);
 
 export const STATES: StateConfig[] = [
   {
     code: "BR", name: "Bihar", portal: "Bihar PMS portal", categories: cats("General · SC · ST · BC · EBC"),
-    questions: [residence("Bihar residential certificate"), q("ugeac", "Admitted through UGEAC counselling")],
+    questions: [
+      residence("Bihar residential certificate"),
+      hinted(
+        q("ugeac", "Admitted through UGEAC counselling"),
+        "UGEAC is Bihar's Under Graduate Engineering Admission Counselling, run by BCECEB using JEE Main ranks.",
+      ),
+    ],
   },
   {
     code: "DL", name: "Delhi", portal: "Institution, e-District", categories: cats(NATIONAL),
     questions: [
-      q("delhi_univ", "Studying at", opts("dtu DTU · nsut NSUT · iiitd IIIT-Delhi · igdtuw IGDTUW · dseu DSEU · other Another college")),
-      q("nfsa_card", "NFSA ration card", YES_NO),
+      hinted(
+        q("delhi_univ", "Studying at", opts("dtu DTU · nsut NSUT · iiitd IIIT-Delhi · igdtuw IGDTUW · dseu DSEU · other Another college")),
+        "Delhi Technological University, Netaji Subhas University of Technology, IIIT-Delhi, Indira Gandhi Delhi Technical University for Women, Delhi Skill and Entrepreneurship University.",
+      ),
+      hinted(
+        q("nfsa_card", "NFSA ration card", YES_NO),
+        "A ration card under the National Food Security Act (NFSA). The card itself says NFSA.",
+      ),
     ],
   },
   {
@@ -55,7 +71,13 @@ export const STATES: StateConfig[] = [
   },
   {
     code: "HR", name: "Haryana", portal: "Har-Chhatravratti", categories: cats("General · SC · BC-A · BC-B · EWS"),
-    questions: [residence("Haryana resident certificate"), q("ppp", "Parivar Pehchan Patra (family ID)", HAVE)],
+    questions: [
+      residence("Haryana resident certificate"),
+      hinted(
+        q("ppp", "Parivar Pehchan Patra (family ID)", HAVE),
+        "Haryana's family ID card. It lists everyone in the family and the family income.",
+      ),
+    ],
   },
   {
     code: "HP", name: "Himachal Pradesh", portal: "HP ePASS", categories: cats("General · SC · ST · OBC"),
@@ -66,15 +88,24 @@ export const STATES: StateConfig[] = [
     questions: [
       residence("J&K domicile certificate"),
       q("study_outside", "Studying outside J&K", YES_NO),
-      q("board12", "Class 12 board", opts("jkbose JKBOSE · cbse CBSE · other Other")),
+      hinted(
+        q("board12", "Class 12 board", opts("jkbose JKBOSE · cbse CBSE · other Other")),
+        "JKBOSE is the J&K Board of School Education.",
+      ),
     ],
   },
   {
     code: "KA", name: "Karnataka", portal: "SSP Karnataka", categories: cats("GM · Cat-1 · 2A · 2B · 3A · 3B · SC · ST"),
     questions: [
       residence("Karnataka residence certificate"),
-      q("kea_seat", "Seat allotted by KEA through KCET", opts("yes Yes · no No, management or COMEDK · unknown Not sure")),
-      q("rd_certificates", "Caste and income certificates with RD numbers", YES_NO_APPLIED),
+      hinted(
+        q("kea_seat", "Seat allotted by KEA through KCET", opts("yes Yes · no No, management or COMEDK · unknown Not sure")),
+        "KEA (Karnataka Examinations Authority) gives seats by KCET (Karnataka Common Entrance Test) rank. Your KEA allotment letter shows it.",
+      ),
+      hinted(
+        q("rd_certificates", "Caste and income certificates with RD numbers", YES_NO_APPLIED),
+        "Karnataka caste and income certificates from the Nadakacheri carry an RD number. SSP forms ask for it.",
+      ),
       q("stay", "Hostel or day scholar", STAY),
     ],
   },
@@ -84,13 +115,22 @@ export const STATES: StateConfig[] = [
   },
   {
     code: "LD", name: "Lakshadweep", portal: "NSP", categories: cats("General · ST"),
-    questions: [residence("Lakshadweep residence certificate"), q("csab_seat", "Admitted to a CSAB reserved seat")],
+    questions: [
+      residence("Lakshadweep residence certificate"),
+      hinted(
+        q("csab_seat", "Admitted to a CSAB reserved seat"),
+        "CSAB (Central Seat Allocation Board) fills seats kept for students from the North-East and some Union Territories, including Lakshadweep.",
+      ),
+    ],
   },
   {
     code: "MP", name: "Madhya Pradesh", portal: "MP Scholarship Portal", categories: cats(NATIONAL),
     questions: [
       residence("MP domicile certificate"),
-      q("samagra_id", "Samagra ID", HAVE),
+      hinted(
+        q("samagra_id", "Samagra ID", HAVE),
+        "Madhya Pradesh's family and member ID, used on most MP government forms.",
+      ),
       q("board12", "Class 12 board", opts("mp MP Board · cbse CBSE · icse ICSE · other Other")),
     ],
   },
@@ -98,9 +138,18 @@ export const STATES: StateConfig[] = [
     code: "MH", name: "Maharashtra", portal: "MahaDBT", categories: cats("Open · SC · ST · OBC · VJNT · SBC · EWS · SEBC"),
     questions: [
       residence("Maharashtra domicile certificate"),
-      q("cap_admission", "Admitted through CAP", opts("yes Yes, through CAP rounds · no No, institute or management quota · unknown Not sure")),
-      q("caste_validity", "Caste validity certificate", YES_NO_APPLIED, ["sc", "st", "obc", "vjnt", "sbc", "sebc"]),
-      q("ncl", "Non-creamy layer certificate", YES_NO_APPLIED, ["obc", "vjnt", "sbc"]),
+      hinted(
+        q("cap_admission", "Admitted through CAP", opts("yes Yes, through CAP rounds · no No, institute or management quota · unknown Not sure")),
+        "CAP is the Centralised Admission Process: the State CET Cell's seat rounds after MHT-CET or JEE Main. Your allotment letter names the CAP round.",
+      ),
+      hinted(
+        q("caste_validity", "Caste validity certificate", YES_NO_APPLIED, ["sc", "st", "obc", "vjnt", "sbc", "sebc"]),
+        "Separate from your caste certificate: the Caste Scrutiny Committee issues it after checking that certificate.",
+      ),
+      hinted(
+        q("ncl", "Non-creamy layer certificate", YES_NO_APPLIED, ["obc", "vjnt", "sbc"]),
+        "Shows your family is not in the better-off “creamy layer” of your category, judged mainly by income. Your tehsil or SDO office issues it.",
+      ),
       q("stay", "Hostel or day scholar", STAY),
     ],
   },
@@ -108,7 +157,10 @@ export const STATES: StateConfig[] = [
     code: "OD", name: "Odisha", portal: "SSP Odisha", categories: cats("General · SC · ST · SEBC"),
     questions: [
       residence("Odisha resident certificate"),
-      q("ojee", "Admitted through OJEE"),
+      hinted(
+        q("ojee", "Admitted through OJEE"),
+        "OJEE is the Odisha Joint Entrance Examination. Its counselling also gives seats by JEE Main rank.",
+      ),
       q("studied_in_od", "Passed Class 10 and 12 in Odisha", YES_NO),
     ],
   },
@@ -116,29 +168,53 @@ export const STATES: StateConfig[] = [
     code: "SK", name: "Sikkim", portal: "Sikkim scholarship portals", categories: cats("General · SC · ST · OBC"),
     questions: [
       residence("Sikkim Subject or Certificate of Identification"),
-      q("state_quota", "Admitted on a Sikkim state quota seat"),
+      hinted(
+        q("state_quota", "Admitted on a Sikkim state quota seat"),
+        "A seat kept for Sikkim students and filled by the Sikkim government, not by open counselling.",
+      ),
     ],
   },
   {
     code: "TN", name: "Tamil Nadu", portal: "Department pages", categories: cats("OC · BC · BCM · MBC/DNC · SC · SCA · ST"),
     questions: [
       residence("Tamil Nadu nativity certificate"),
-      q("tnea", "Admitted through TNEA"),
-      q("first_graduate", "First graduate in family", YES_NO),
+      hinted(
+        q("tnea", "Admitted through TNEA"),
+        "TNEA is Tamil Nadu Engineering Admissions, the state's online counselling for engineering seats.",
+      ),
+      hinted(
+        q("first_graduate", "First graduate in family", YES_NO),
+        "No one in your family has a degree yet. The tahsildar issues a first graduate certificate.",
+      ),
       q("govt_school_6_12", "Studied Class 6–12 in a TN government school", YES_NO),
     ],
   },
   {
     code: "TG", name: "Telangana", portal: "Telangana ePASS", categories: cats("OC · EBC · BC-A · BC-B · BC-C · BC-D · BC-E · SC · ST"),
     questions: [
-      residence("Telangana local status"),
-      q("convener_seat", "Convener quota seat through TG EAPCET", opts("yes Yes · no No, management quota · unknown Not sure")),
-      q("ration_card", "Food security (ration) card", YES_NO),
+      residence(
+        "Telangana local status",
+        "Set by where you studied in the years up to Class 12. Your TG EAPCET allotment letter shows your local area.",
+      ),
+      hinted(
+        q("convener_seat", "Convener quota seat through TG EAPCET", opts("yes Yes · no No, management quota · unknown Not sure")),
+        "Convener quota seats are given in TG EAPCET (Telangana's engineering entrance test) counselling. Management (Category B) seats are not.",
+      ),
+      hinted(
+        q("ration_card", "Food security (ration) card", YES_NO),
+        "Telangana's Food Security Card (FSC), the ration card for low-income families.",
+      ),
     ],
   },
   {
     code: "TR", name: "Tripura", portal: "DHE Tripura, NSP", categories: cats("General · SC · ST · OBC"),
-    questions: [residence("Permanent resident certificate (PRC)"), q("tbjee", "Admitted through TBJEE counselling")],
+    questions: [
+      residence("Permanent resident certificate (PRC)", "Tripura's proof that you are a permanent resident. The SDM office issues it."),
+      hinted(
+        q("tbjee", "Admitted through TBJEE counselling"),
+        "TBJEE is the Tripura Board of Joint Entrance Examination. It runs counselling for engineering seats in Tripura.",
+      ),
+    ],
   },
 ];
 

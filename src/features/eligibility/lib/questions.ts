@@ -1,7 +1,7 @@
 import type { Profile } from "@/domain/profile";
 import { isStateKey } from "@/domain/rules/fields";
 import { STATE_BY_CODE } from "@/domain/states";
-import { localCategories, optionLabel, questionLabel } from "./domain-labels";
+import { localCategories, optionLabel, questionHint, questionLabel } from "./domain-labels";
 import type { T } from "./i18n";
 import { aicteOptions, genderOptions, institutionOptions, yearOptions, type Option } from "./labels";
 
@@ -9,8 +9,8 @@ import { aicteOptions, genderOptions, institutionOptions, yearOptions, type Opti
 // field's own values; "Not sure" is left out because it would leave the result unchanged.
 
 export type Question =
-  | { field: string; question: string; kind: "choice"; options: Option[] }
-  | { field: string; question: string; kind: "income" | "percent" };
+  | { field: string; question: string; hint?: string; kind: "choice"; options: Option[] }
+  | { field: string; question: string; hint?: string; kind: "income" | "percent" };
 
 export function questionFor(t: T, field: string, p: Profile): Question | undefined {
   if (isStateKey(field)) {
@@ -20,6 +20,7 @@ export function questionFor(t: T, field: string, p: Profile): Question | undefin
     return {
       field,
       question: questionLabel(t, code, q),
+      hint: questionHint(t, code, q),
       kind: "choice",
       options: q.options.filter((o) => o.value !== "unknown").map((o) => ({ value: o.value, label: optionLabel(t, code, q, o) })),
     };
@@ -28,19 +29,20 @@ export function questionFor(t: T, field: string, p: Profile): Question | undefin
     case "family_income":
       return { field, question: t("questions.family_income"), kind: "income" };
     case "class12_pct":
-      return { field, question: t("questions.class12_pct"), kind: "percent" };
+      return { field, question: t("questions.class12_pct"), hint: t("basics.class12Hint"), kind: "percent" };
     case "category":
-      return { field, question: t("questions.category"), kind: "choice", options: localCategories(t, p.domicile_state) };
+      return { field, question: t("questions.category"), hint: t("basics.categoryNames"), kind: "choice", options: localCategories(t, p.domicile_state) };
     case "gender":
       return { field, question: t("questions.gender"), kind: "choice", options: genderOptions(t) };
     case "year":
       return { field, question: t("questions.year"), kind: "choice", options: yearOptions(t) };
     case "institution_type":
-      return { field, question: t("questions.institution_type"), kind: "choice", options: institutionOptions(t) };
+      return { field, question: t("questions.institution_type"), hint: t("basics.institutionHint"), kind: "choice", options: institutionOptions(t) };
     case "aicte_approved":
       return {
         field,
         question: t("questions.aicte_approved"),
+        hint: t("basics.aicteHint"),
         kind: "choice",
         options: aicteOptions(t).filter((o) => o.value !== "unknown"),
       };

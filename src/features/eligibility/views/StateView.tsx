@@ -88,6 +88,7 @@ function StateQuestions({
               <ChoiceGroup
                 key={q.key}
                 legend={q.label}
+                hint={q.hint}
                 layout={long ? "list" : q.options.length === 2 ? "grid2" : short ? "grid3" : "chips"}
                 options={q.options}
                 value={profile.state?.[`${config.code}.${q.key}`]}

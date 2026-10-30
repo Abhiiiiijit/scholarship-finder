@@ -84,6 +84,7 @@ export function QuestionCard({
   return (
     <div className="flex flex-col gap-2 rounded-[10px] bg-white p-3">
       <div className="text-[15px] leading-5 font-semibold">{question.question}</div>
+      {question.hint && <div className="text-[13px] leading-[18px] text-slate">{question.hint}</div>}
       <div className="text-[13px] leading-[18px] text-slate">{why}</div>
       {question.kind === "choice" ? (
         <div className={question.options.length <= 3 && question.options.every((o) => o.label.length <= 12) ? "grid grid-cols-3 gap-2" : "flex flex-col gap-2"}>

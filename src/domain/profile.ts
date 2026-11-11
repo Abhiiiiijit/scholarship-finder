@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { COURSE_CODES } from "./courses";
 
 // A student's answers, as the screen spec's "Student field values" stores them. Every field is
 // optional: a skipped question is unknown, which the matcher treats as "needs info", never a fail.
@@ -35,10 +36,13 @@ export const profileSchema = z.object({
   // Values come from the state's own category list, so this is not a fixed enum.
   category: z.string().min(1).optional(),
   gender: z.enum(GENDERS).optional(),
-  course: z.literal("be_btech").optional(),
+  // A course code from the catalogue; level, stream and tags are looked up from it, never stored.
+  course: z.enum(COURSE_CODES).optional(),
   year: z.enum(YEARS).optional(),
   class12_pct: pct.optional(),
   class10_pct: pct.optional(),
+  // Marks in the qualifying degree, the postgraduate twin of class12_pct. Not asked until PG opens.
+  graduation_pct: pct.optional(),
   institution_type: z.enum(INSTITUTION_TYPES).optional(),
   aicte_approved: z.enum(["yes", "no", "unknown"]).optional(),
   disability: z.enum(DISABILITY).optional(),

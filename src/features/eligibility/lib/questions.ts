@@ -1,3 +1,4 @@
+import { COURSE_BY_CODE } from "@/domain/courses";
 import type { Profile } from "@/domain/profile";
 import { isStateKey } from "@/domain/rules/fields";
 import { STATE_BY_CODE } from "@/domain/states";
@@ -38,6 +39,11 @@ export function questionFor(t: T, field: string, p: Profile): Question | undefin
       return { field, question: t("questions.year"), kind: "choice", options: yearOptions(t) };
     case "institution_type":
       return { field, question: t("questions.institution_type"), hint: t("basics.institutionHint"), kind: "choice", options: institutionOptions(t) };
+    case "regulator_approved": {
+      // For an AICTE course this is the AICTE question; other regulators are asked when they open.
+      const aicte = isAicteCourse(p) ? questionFor(t, "aicte_approved", p) : undefined;
+      return aicte && { ...aicte, field };
+    }
     case "aicte_approved":
       return {
         field,
@@ -51,8 +57,11 @@ export function questionFor(t: T, field: string, p: Profile): Question | undefin
   }
 }
 
+const isAicteCourse = (p: Profile) => p.course !== undefined && COURSE_BY_CODE.get(p.course)?.regulator === "AICTE";
+
 // Saves a QuestionCard answer into the profile; undefined clears it.
 export function answer(p: Profile, field: string, value: string | number | undefined): Profile {
+  if (field === "regulator_approved") return isAicteCourse(p) ? answer(p, "aicte_approved", value) : p;
   if (isStateKey(field)) {
     const state = { ...p.state };
     if (value === undefined) delete state[field];

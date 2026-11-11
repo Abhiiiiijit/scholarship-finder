@@ -1,3 +1,4 @@
+import { COURSE_BY_CODE, COURSE_CODES, COURSE_LEVELS, COURSE_TAGS, STREAMS } from "@/domain/courses";
 import type { GroupCheck, RuleCheck } from "@/domain/match";
 import { ENTRANCE_EXAMS, YEARS, type Profile } from "@/domain/profile";
 import { fieldTier, isStateKey, RULE_FIELDS, type RuleField } from "@/domain/rules/fields";
@@ -48,7 +49,13 @@ function choiceLabels(t: T, field: RuleField): readonly Option[] {
     case "entrance_exam":
       return keyed(ENTRANCE_EXAMS, (v) => t(`options.entranceInRule.${v}`));
     case "course":
-      return [{ value: "be_btech", label: t("options.courseInRule.be_btech") }];
+      return keyed(COURSE_CODES, (v) => t(`options.courseInRule.${v}`));
+    case "course_level":
+      return keyed(COURSE_LEVELS, (v) => t(`options.courseLevelInRule.${v}`));
+    case "stream":
+      return keyed(STREAMS, (v) => t(`options.streamInRule.${v}`));
+    case "course_tag":
+      return keyed(COURSE_TAGS, (v) => t(`options.courseTagInRule.${v}`));
     case "fresh_or_renewal":
       return keyed(["fresh", "renewal"] as const, (v) => t(`options.freshOrRenewal.${v}`));
     default:
@@ -85,7 +92,7 @@ export function valueLabel(t: T, field: string, value: unknown): string {
 }
 
 const MONEY = new Set(["family_income"]);
-const PERCENT = new Set(["class12_pct", "class10_pct", "disability_pct"]);
+const PERCENT = new Set(["class12_pct", "class10_pct", "graduation_pct", "disability_pct"]);
 
 // A limit or an answer in the field's own units: "₹8 L", "60%", "2".
 export function amount(field: string, n: number): string {
@@ -99,6 +106,7 @@ const SUBJECTS = [
   "family_income",
   "class12_pct",
   "class10_pct",
+  "graduation_pct",
   "disability_pct",
   "entrance_rank",
   "cgpa",
@@ -155,10 +163,17 @@ export function yourAnswer(t: T, field: string, p: Profile): string | undefined 
       return pct(p.class12_pct);
     case "class10_pct":
       return pct(p.class10_pct);
+    case "graduation_pct":
+      return pct(p.graduation_pct);
     case "disability_pct":
       return labelOf(disabilityOptions(t), p.disability);
     case "aicte_approved":
       return p.aicte_approved === "unknown" ? undefined : labelOf(aicteOptions(t), p.aicte_approved);
+    case "course_level":
+    case "stream": {
+      const course = p.course === undefined ? undefined : COURSE_BY_CODE.get(p.course);
+      return course ? valueLabel(t, field, field === "stream" ? course.stream : course.level) : undefined;
+    }
     case "entrance_exam":
       return p.entrance ? valueLabel(t, field, p.entrance.exam) : undefined;
     case "entrance_rank":
@@ -212,6 +227,8 @@ function numericAnswer(field: string, p: Profile): number | undefined {
       return p.class12_pct;
     case "class10_pct":
       return p.class10_pct;
+    case "graduation_pct":
+      return p.graduation_pct;
     case "entrance_rank":
       return p.entrance?.score;
     default:

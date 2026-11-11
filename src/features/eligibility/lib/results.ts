@@ -1,5 +1,5 @@
 import { isFresh, type Snapshot, type SnapshotScheme } from "@/domain/rules/snapshot";
-import { match, matchAll, type MatchSummary, type RuleCheck, type SchemeMatch } from "@/domain/match";
+import { coversCourse, match, matchAll, type MatchSummary, type RuleCheck, type SchemeMatch } from "@/domain/match";
 import type { Profile } from "@/domain/profile";
 import { fieldLabel, missText } from "./explain";
 import { daysUntil, formatDate, formatLakh } from "@/lib/format";
@@ -34,12 +34,15 @@ export function statesOf(s: SnapshotScheme): string[] {
 }
 
 // State schemes are only matched for the student's own domicile state; a state that is not live
-// yet has none in the snapshot, so its students see central, AICTE and private schemes.
+// yet has none in the snapshot, so its students see central, AICTE and private schemes. Schemes
+// for other courses are left out the same way, rather than listed as "not eligible".
 export function schemesFor(p: Profile, snapshot: Snapshot): Snapshot {
   const d = p.domicile_state;
   return {
     ...snapshot,
-    schemes: snapshot.schemes.filter((s) => s.provider !== "STATE" || (d !== undefined && statesOf(s).includes(d))),
+    schemes: snapshot.schemes.filter(
+      (s) => (s.provider !== "STATE" || (d !== undefined && statesOf(s).includes(d))) && coversCourse(s, p),
+    ),
   };
 }
 

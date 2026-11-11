@@ -19,15 +19,24 @@ export const RULE_FIELDS = {
   disability_pct: { label: "Disability %", kind: "number", tier: "unlock" },
   domicile_state: { label: "Domicile state", kind: "choice", tier: "common" },
   course: { label: "Course", kind: "choice", tier: "common" },
+  // Looked up from the course in src/domain/courses.ts, so they are answered whenever course is.
+  // A scheme with no rule on course, course_level, stream or course_tag is for B.E./B.Tech only.
+  course_level: { label: "Course level", kind: "choice", tier: "common" },
+  stream: { label: "Stream", kind: "choice", tier: "common" },
+  course_tag: { label: "Course type", kind: "multi", tier: "common" },
   year: { label: "Year of study", kind: "choice", tier: "common" },
   fresh_or_renewal: { label: "Fresh or renewal", kind: "choice", tier: "notAsked" },
   class12_pct: { label: "Class 12 %", kind: "number", tier: "common" },
   class10_pct: { label: "Class 10 %", kind: "number", tier: "unlock" },
+  // Postgraduate merit rules. Not asked until PG courses open, so it reads "confirm" till then.
+  graduation_pct: { label: "Graduation %", kind: "number", tier: "notAsked" },
   entrance_exam: { label: "Entrance exam", kind: "choice", tier: "unlock" },
   entrance_rank: { label: "Entrance rank or percentile", kind: "number", tier: "unlock" },
   cgpa: { label: "CGPA", kind: "number", tier: "notAsked" },
   institution_type: { label: "Institution type", kind: "choice", tier: "common" },
   aicte_approved: { label: "AICTE-approved course", kind: "boolean", tier: "common" },
+  // The course's own regulator (NMC, PCI, COA...); for an AICTE course it is the AICTE answer.
+  regulator_approved: { label: "Course approved by its regulator", kind: "boolean", tier: "common" },
   // Top-class schemes name their institutes in a list the MVP does not ask about.
   listed_institute: { label: "Studies at a listed institute", kind: "boolean", tier: "notAsked" },
   parent_occupation: { label: "Parent occupation", kind: "multi", tier: "unlock" },
@@ -46,6 +55,9 @@ export const RULE_FIELD_KEYS = [
 ] as [string, ...string[]];
 
 const STATE_KEY = /^[A-Z]{2}\.[a-z0-9_]+$/;
+
+// Rules on these fields say which courses a scheme is for. See coversCourse in ../match.
+export const COURSE_SCOPE_FIELDS: readonly RuleField[] = ["course", "course_level", "stream", "course_tag"];
 
 export function isStateKey(field: string): boolean {
   return STATE_KEY.test(field);

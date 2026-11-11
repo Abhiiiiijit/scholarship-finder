@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSnapshot, type SnapshotInput } from "./snapshot";
+import { buildSnapshot, SNAPSHOT_SCHEMA_VERSION, snapshotSchema, type SnapshotInput } from "./snapshot";
 
 const now = new Date("2026-10-24T12:00:00Z");
 const rule = {
@@ -44,6 +44,13 @@ describe("buildSnapshot", () => {
   it("carries the documents list for the scheme page", () => {
     const snap = buildSnapshot([scheme({ documents: ["Fee receipt"], appliesVia: "State portal" })], 1, now);
     expect(snap.schemes[0]).toMatchObject({ documents: ["Fee receipt"], benefitTypes: [], appliesVia: "State portal" });
+  });
+
+  it("stamps the schema version, and an older page refuses a newer one", () => {
+    const snap = buildSnapshot([scheme({})], 1, now);
+    expect(snap.schemaVersion).toBe(SNAPSHOT_SCHEMA_VERSION);
+    expect(snapshotSchema.safeParse({ ...snap, schemaVersion: undefined }).success).toBe(true);
+    expect(snapshotSchema.safeParse({ ...snap, schemaVersion: SNAPSHOT_SCHEMA_VERSION + 1 }).success).toBe(false);
   });
 
   it("refuses to publish a rule without a quote", () => {

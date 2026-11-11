@@ -23,9 +23,15 @@ export const snapshotSchemeSchema = z.object({
   documents: z.array(z.string()).optional(),
 });
 
+// Bumped when a snapshot may hold something an older page cannot read safely. A page that meets a
+// newer one refuses it (S09, retry) instead of guessing. Snapshots before version 2 carry none.
+// 2: course scope fields (course_level, stream, course_tag) and the B.E./B.Tech default.
+export const SNAPSHOT_SCHEMA_VERSION = 2;
+
 // The published file students download: rules-<version>.json.
 export const snapshotSchema = z.object({
   version: z.number().int().positive(),
+  schemaVersion: z.number().int().positive().max(SNAPSHOT_SCHEMA_VERSION).optional(),
   generatedAt: z.iso.datetime({ offset: true }),
   schemes: z.array(snapshotSchemeSchema),
 });
@@ -48,6 +54,7 @@ export interface SnapshotInput extends Omit<SnapshotScheme, "lastVerifiedAt" | "
 export function buildSnapshot(schemes: SnapshotInput[], version: number, now: Date): Snapshot {
   return snapshotSchema.parse({
     version,
+    schemaVersion: SNAPSHOT_SCHEMA_VERSION,
     generatedAt: now.toISOString(),
     schemes: schemes
       .filter((s) => s.status === "PUBLISHED" && isFresh(s.lastVerifiedAt, now))

@@ -20,7 +20,7 @@ export function daysAgo(then: Date | null, now: Date): string {
   return days === 1 ? "1 day ago" : `${days} days ago`;
 }
 
-// "2027-03-31" -> "31 Mar 2027" ("31 मार्च 2027" for "hi"). Digits stay Latin in every language.
+// "2027-03-31" -> "31 Mar 2027" ("31 मार्च 2027" for "hi", "31 मार्च, 2027" for "mr"). Digits stay Latin in every language.
 export function formatDate(iso: string | null, language = "en"): string {
   if (!iso) return "—";
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString(`${language}-IN`, {

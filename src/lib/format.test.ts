@@ -14,6 +14,7 @@ describe("format", () => {
     expect(daysAgo(null, now)).toBe("never");
     expect(formatDate("2027-03-31")).toBe("31 Mar 2027");
     expect(formatDate("2027-03-31", "hi")).toBe("31 मार्च 2027");
+    expect(formatDate("2027-03-31", "mr")).toBe("31 मार्च, 2027");
     // 20:00 UTC is already the next day in India.
     expect(todayInIndia(now)).toBe("2026-10-25");
     expect(daysUntil("2026-10-25", "2026-10-30")).toBe(5);

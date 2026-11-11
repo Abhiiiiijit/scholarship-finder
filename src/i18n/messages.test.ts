@@ -46,6 +46,17 @@ describe("messages", () => {
       expect(invalid).toEqual([]);
     });
 
+    // Digits stay Latin in every language. ICU's "#" uses the language's own digits (५ in
+    // Marathi), so translations write {count} instead.
+    it(`${locale} shows numbers in Latin digits`, () => {
+      const t = createTranslator({ locale, messages, onError: () => {} });
+      const native = keys(messages).filter((k) => {
+        const names = String(t.raw(k as never)).match(/(?<=\{)\w+/g) ?? [];
+        return [1, 5].some((n) => /[०-९]/.test(t(k as never, Object.fromEntries(names.map((name) => [name, n])) as never)));
+      });
+      expect(native).toEqual([]);
+    });
+
     it(`${locale} has no doubled sentence ends`, () => {
       const t = createTranslator({ locale, messages, onError: () => {} });
       expect(keys(messages).filter((k) => /[.।]{2}/.test(String(t.raw(k as never))))).toEqual([]);

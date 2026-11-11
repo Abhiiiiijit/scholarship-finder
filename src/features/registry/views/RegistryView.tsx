@@ -8,6 +8,7 @@ import { matchesStatus, NEEDS_ATTENTION, schemeBadge, STATUS_FILTERS } from "@/d
 import type { listSchemes } from "@/server/repositories/scheme-repo";
 import { STATE_BY_CODE } from "@/domain/states";
 import { StateFilter } from "@/features/registry/components/StateFilter";
+import { coverageLabel } from "@/features/registry/lib/options";
 
 const KINDS = [
   ["", "All"],
@@ -91,7 +92,7 @@ export function RegistryView({
 
       {/* A phone gets one card per scheme; the six-column table needs a tablet or wider. */}
       <ul className="flex flex-col gap-2.5 md:hidden">
-        {rows.map(({ scheme, ruleCount, quotedCount, badge }) => (
+        {rows.map(({ scheme, ruleCount, quotedCount, courseRules, badge }) => (
           <li key={scheme.id} className="flex flex-col gap-2 rounded-xl border border-line bg-white px-4 py-3.5 text-sm leading-5">
             <div className="flex items-start justify-between gap-3">
               <Link href={`/admin/schemes/${scheme.id}`} className="font-semibold text-navy hover:text-ink">
@@ -101,6 +102,7 @@ export function RegistryView({
               <StatusBadge status={badge} />
             </div>
             <div className="text-slate">{scheme.source ?? sourceFallback(scheme.provider, scheme.stateCode)}</div>
+            <div className={courseRules.length === 0 ? "text-slate" : ""}>Covers: {coverageLabel(courseRules)}</div>
             <dl className="grid grid-cols-3 gap-2 text-[13px]">
               <div>
                 <dt className="text-slate">Quoted</dt>
@@ -128,10 +130,10 @@ export function RegistryView({
       </ul>
 
       <div className="overflow-x-auto rounded-xl border border-line bg-white max-md:hidden">
-        <table className="w-full min-w-[720px] border-collapse text-sm leading-5">
+        <table className="w-full min-w-[860px] border-collapse text-sm leading-5">
           <thead>
             <tr className="text-left text-xs tracking-[0.04em] text-slate">
-              {["SCHEME", "SOURCE", "RULES QUOTED", "LAST VERIFIED", "DEADLINE", "STATUS"].map((h) => (
+              {["SCHEME", "SOURCE", "COVERS", "RULES QUOTED", "LAST VERIFIED", "DEADLINE", "STATUS"].map((h) => (
                 <th key={h} className="border-b border-line px-4 py-3 font-semibold">
                   {h}
                 </th>
@@ -139,7 +141,7 @@ export function RegistryView({
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ scheme, ruleCount, quotedCount, badge }) => (
+            {rows.map(({ scheme, ruleCount, quotedCount, courseRules, badge }) => (
               <tr key={scheme.id} className="border-b border-line-soft last:border-0">
                 <td className="px-4 py-3.5">
                   <Link href={`/admin/schemes/${scheme.id}`} className="font-semibold text-navy hover:text-ink">
@@ -149,6 +151,7 @@ export function RegistryView({
                   {scheme.reviewNotes && <span className="ml-2 text-xs font-semibold text-warn">Gaps noted</span>}
                 </td>
                 <td className="px-4 py-3.5">{scheme.source ?? sourceFallback(scheme.provider, scheme.stateCode)}</td>
+                <td className={`px-4 py-3.5 ${courseRules.length === 0 ? "text-slate" : ""}`}>{coverageLabel(courseRules)}</td>
                 <td className={`px-4 py-3.5 font-mono ${quotedCount < ruleCount || ruleCount === 0 ? "font-semibold text-warn" : ""}`}>
                   {quotedCount} / {ruleCount}
                 </td>
@@ -163,7 +166,7 @@ export function RegistryView({
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-slate">
+                <td colSpan={7} className="px-4 py-8 text-center text-slate">
                   {all.length === 0 ? "No schemes yet. Add the first one." : "No schemes match these filters."}
                 </td>
               </tr>

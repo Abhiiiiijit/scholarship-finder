@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { exampleStudent, NOW, section5Snapshot, TODAY } from "@/lib/fixtures/section5";
 import { checkRule, coversCourse, match, matchAll, type RuleOutcome } from "./match";
+import { yearsFor } from "./courses";
 import type { Profile } from "./profile";
 import type { PublishableRule } from "./rules/schema";
 import { snapshotSchema } from "./rules/snapshot";
@@ -188,6 +189,16 @@ describe("course scope", () => {
     expect(slugs(exampleStudent)).toEqual(["any-ug", "reliance-foundation-ug"]);
     expect(slugs({ ...exampleStudent, course: "bsc" })).toEqual(["any-ug"]);
     expect(slugs({ ...exampleStudent, course: "me_mtech" })).toEqual([]);
+  });
+});
+
+describe("yearsFor", () => {
+  const YEARS = ["1", "2", "2_lateral", "3", "4", "5"] as const;
+  it("offers only the course's own years", () => {
+    expect(yearsFor("be_btech", YEARS)).toEqual(YEARS);
+    expect(yearsFor("bsc", YEARS)).toEqual(["1", "2", "3"]);
+    expect(yearsFor("diploma_engg", YEARS)).toEqual(["1", "2", "2_lateral", "3"]);
+    expect(yearsFor(undefined, YEARS)).toEqual(YEARS);
   });
 });
 

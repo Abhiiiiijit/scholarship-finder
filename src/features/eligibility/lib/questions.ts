@@ -36,7 +36,7 @@ export function questionFor(t: T, field: string, p: Profile): Question | undefin
     case "gender":
       return { field, question: t("questions.gender"), kind: "choice", options: genderOptions(t) };
     case "year":
-      return { field, question: t("questions.year"), kind: "choice", options: yearOptions(t) };
+      return { field, question: t("questions.year"), kind: "choice", options: yearOptions(t, p.course) };
     case "institution_type":
       return { field, question: t("questions.institution_type"), hint: t("basics.institutionHint"), kind: "choice", options: institutionOptions(t) };
     case "regulator_approved": {

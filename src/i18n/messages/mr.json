@@ -53,6 +53,8 @@
     "gender": "लिंग",
     "genderHint": "काही योजना फक्त मुलींसाठी आहेत.",
     "course": "अभ्यासक्रम",
+    "courseHint": "सध्या Paatra B.E./B.Tech च्या शिष्यवृत्ती तपासते. इतर कोर्स आम्ही जोडत आहोत.",
+    "courseSoon": "{course}, लवकरच",
     "year": "शिक्षणाचे वर्ष",
     "class12": "इयत्ता 12 वी (HSC) टक्केवारी",
     "class12Hint": "HSC म्हणजे उच्च माध्यमिक प्रमाणपत्र: इयत्ता 12 वीच्या बोर्डाचे गुण, तुमच्या गुणपत्रिकेवर आहेत तसे.",
@@ -320,7 +322,36 @@
       "other": "इतर"
     },
     "course": {
-      "be_btech": "B.E. / B.Tech (इंजिनिअरिंग)"
+      "diploma_engg": "इंजिनिअरिंग डिप्लोमा (पॉलिटेक्निक)",
+      "d_pharm": "D.Pharm",
+      "iti": "ITI",
+      "be_btech": "B.E. / B.Tech (इंजिनिअरिंग)",
+      "mbbs": "MBBS",
+      "bds": "BDS",
+      "bams": "BAMS / BUMS / BSMS",
+      "bsc_nursing": "B.Sc नर्सिंग",
+      "b_pharm": "B.Pharm",
+      "b_arch": "B.Arch",
+      "llb_5yr": "इंटिग्रेटेड LLB (5 वर्षे)",
+      "bba": "BBA / BMS",
+      "bca": "BCA",
+      "ba": "B.A.",
+      "bsc": "B.Sc",
+      "bcom": "B.Com",
+      "bsc_agri": "B.Sc कृषी",
+      "me_mtech": "M.E. / M.Tech",
+      "md_ms": "MD / MS",
+      "mba": "MBA / PGDM",
+      "mca": "MCA",
+      "msc": "M.Sc",
+      "ma": "M.A.",
+      "phd": "PhD"
+    },
+    "courseLevel": {
+      "diploma": "डिप्लोमा",
+      "ug": "पदवी (अंडरग्रॅज्युएट)",
+      "pg": "पदव्युत्तर",
+      "doctoral": "PhD"
     },
     "courseInRule": {
       "diploma_engg": "इंजिनिअरिंग डिप्लोमा",

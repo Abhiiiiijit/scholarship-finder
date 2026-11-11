@@ -55,6 +55,13 @@ describe("registry store", () => {
     expect(row.scheme.id).toBe(id);
     expect(row.scheme.status).toBe("DRAFT");
     expect([row.quotedCount, row.ruleCount]).toEqual([2, 3]);
+    expect(row.courseRules).toEqual([]);
+  });
+
+  it("lists the course-scope rules for the Covers column", async () => {
+    await saveScheme(db, draft({ rules: [...draft().rules, { group: 3, field: "course_level", op: "IN", value: ["ug", "pg"] }] }));
+    const [row] = await listSchemes(db);
+    expect(row.courseRules).toEqual([{ field: "course_level", value: ["ug", "pg"] }]);
   });
 
   it("replaces the rules on save", async () => {

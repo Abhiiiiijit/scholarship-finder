@@ -72,16 +72,19 @@ const ALL_STATE_CODES = STATES.map((s) => o(s.code, s.name));
 const labelled = <T extends string>(labels: Record<T, string>): Option[] =>
   (Object.entries(labels) as [T, string][]).map(([value, label]) => o(value, label));
 
+const LEVEL_LABELS = {
+  diploma: "Diploma", ug: "Undergraduate", pg: "Postgraduate", doctoral: "Doctoral",
+} satisfies Record<(typeof COURSE_LEVELS)[number], string>;
+
 const CHOICES: Partial<Record<RuleField, Option[]>> = {
   gender: labelled({ female: "Female", male: "Male", other: "Other" } satisfies Record<(typeof GENDERS)[number], string>),
   minority: labelled({
     none: "None", muslim: "Muslim", christian: "Christian", sikh: "Sikh", buddhist: "Buddhist", jain: "Jain", parsi: "Parsi",
   } satisfies Record<(typeof MINORITIES)[number], string>),
   // Every catalogue course, not just live ones: a rule may name a course before it opens.
-  course: COURSES.map((c) => o(c.code, c.live ? c.label : `${c.label} (not live)`)),
-  course_level: labelled({
-    diploma: "Diploma", ug: "Undergraduate", pg: "Postgraduate", doctoral: "Doctoral",
-  } satisfies Record<(typeof COURSE_LEVELS)[number], string>),
+  // Grouped by level in the label, since the editor's value list is flat.
+  course: COURSES.map((c) => o(c.code, `${LEVEL_LABELS[c.level]} · ${c.label}${c.live ? "" : " (not live)"}`)),
+  course_level: labelled(LEVEL_LABELS),
   stream: labelled({
     engineering: "Engineering", medical: "Medical", dental: "Dental", ayush: "AYUSH", nursing: "Nursing",
     pharmacy: "Pharmacy", architecture: "Architecture", law: "Law", management: "Management",
@@ -148,4 +151,10 @@ export function valueLabel(key: string, value: unknown, stateCode: string | null
   const options = editorFields(code).find((f) => f.key === key)?.options ?? [];
   const one = (v: unknown) => options.find((opt) => opt.value === String(v))?.label ?? String(v);
   return Array.isArray(value) ? value.map(one).join(", ") : one(value);
+}
+
+// A01's "Covers" column: which students a scheme reaches, from its course-scope rules.
+export function coverageLabel(courseRules: readonly { field: string; value: unknown }[]): string {
+  if (courseRules.length === 0) return "B.E./B.Tech (no course rule)";
+  return courseRules.map((r) => `${fieldLabel(r.field)}: ${valueLabel(r.field, r.value)}`).join("; ");
 }

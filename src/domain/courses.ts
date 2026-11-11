@@ -96,3 +96,11 @@ export const LIVE_COURSES: readonly CourseConfig[] = COURSES.filter((c) => c.liv
 export function courseOf(code: string | undefined): CourseConfig | undefined {
   return COURSE_BY_CODE.get(code ?? DEFAULT_COURSE);
 }
+
+// The years a student of this course can be in, in the form's order: lateral entry only where the
+// course allows it. Unknown courses get every year, as the B.E./B.Tech form always offered.
+export function yearsFor<Y extends string>(code: string | undefined, years: readonly Y[]): Y[] {
+  const course = courseOf(code);
+  if (!course) return [...years];
+  return years.filter((y) => (y === "2_lateral" ? course.lateral === true : Number(y) <= course.years));
+}

@@ -8,6 +8,7 @@ import {
   SPECIAL_STATUSES,
   YEARS,
 } from "@/domain/profile";
+import { COURSE_LEVELS, COURSES, yearsFor } from "@/domain/courses";
 import type { T } from "./i18n";
 
 // The labels students see for each stored value, from the screen spec's "Student field values".
@@ -17,8 +18,20 @@ import type { T } from "./i18n";
 export type Option<V extends string = string> = { value: V; label: string };
 
 export const genderOptions = (t: T) => GENDERS.map((value) => ({ value, label: t(`options.gender.${value}`) }));
-export const courseOptions = (t: T) => [{ value: "be_btech" as const, label: t("options.course.be_btech") }];
-export const yearOptions = (t: T) => YEARS.map((value) => ({ value, label: t(`options.year.${value}`) }));
+// S02's course list, grouped by level. Courses that are not live yet are shown but cannot be picked,
+// so students see what is coming without getting results Paatra has not checked.
+export const courseGroups = (t: T) =>
+  COURSE_LEVELS.map((level) => ({
+    label: t(`options.courseLevel.${level}`),
+    options: COURSES.filter((c) => c.level === level).map((c) => ({
+      value: c.code,
+      label: c.live ? t(`options.course.${c.code}`) : t("basics.courseSoon", { course: t(`options.course.${c.code}`) }),
+      disabled: !c.live,
+    })),
+  }));
+// Only the years the student's course has, e.g. no 5th year for a 3-year B.Sc.
+export const yearOptions = (t: T, course?: string) =>
+  yearsFor(course, YEARS).map((value) => ({ value, label: t(`options.year.${value}`) }));
 export const institutionOptions = (t: T) =>
   INSTITUTION_TYPES.map((value) => ({ value, label: t(`options.institution.${value}`) }));
 export const aicteOptions = (t: T) =>

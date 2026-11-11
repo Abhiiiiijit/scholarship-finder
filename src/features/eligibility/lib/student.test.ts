@@ -7,6 +7,7 @@ import type { Profile } from "@/domain/profile";
 import type { PublishableRule } from "@/domain/rules/schema";
 import { displayQuote, gapText, missText, reasonRows, ruleText, yourAnswer } from "./explain";
 import { answer, questionFor } from "./questions";
+import { courseGroups } from "./labels";
 import { buildResults, counts, deadlineLine, mainReason, stateSchemeCounts } from "./results";
 import { resultsMessage, schemeMessage } from "./share";
 
@@ -139,6 +140,14 @@ describe("course rules", () => {
     expect(questionFor(t, "regulator_approved", p)).toMatchObject({ field: "regulator_approved", question: t("questions.aicte_approved") });
     expect(answer(p, "regulator_approved", "yes")).toEqual({ course: "be_btech", aicte_approved: "yes" });
     expect(questionFor(t, "regulator_approved", { course: "mbbs" })).toBeUndefined();
+  });
+
+  it("lists every course on S02 by level, with only live ones open to pick", () => {
+    const groups = courseGroups(t);
+    expect(groups.map((g) => g.label)).toEqual(["Diploma", "Degree (undergraduate)", "Postgraduate", "PhD"]);
+    const open = groups.flatMap((g) => g.options).filter((o) => !o.disabled);
+    expect(open).toEqual([{ value: "be_btech", label: "B.E. / B.Tech (engineering)", disabled: false }]);
+    expect(groups[1].options.find((o) => o.value === "mbbs")?.label).toBe("MBBS, coming soon");
   });
 
   it("leaves another course's schemes out of results, not in the far misses", () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { LANGUAGES, LOCALE_COOKIE, LOCALES, STATE_LANGUAGE, type AppLocale } from "@/i18n/locales";
 
@@ -15,26 +15,31 @@ function useSwitch() {
   };
 }
 
-// The other languages, each named in its own script. Hidden while only English is live.
+// Every live language in one dropdown, each named in its own script. Hidden while only English is
+// live. A native select, so the phone opens its own picker.
 export function LanguageSwitch() {
-  const current = useLocale();
+  const t = useTranslations("common");
+  const current = useLocale() as AppLocale;
   const switchTo = useSwitch();
-  const others = LOCALES.filter((l) => l !== current);
-  if (others.length === 0) return null;
+  if (LOCALES.length < 2) return null;
   return (
-    <div className="flex items-center gap-1">
-      {others.map((l) => (
-        <button
-          key={l}
-          type="button"
-          lang={l}
-          onClick={() => switchTo(l)}
-          className="flex min-h-11 items-center rounded-full px-3 text-sm font-semibold text-navy hover:bg-line-soft"
-        >
-          {LANGUAGES[l].name}
-        </button>
-      ))}
-    </div>
+    <label className="relative flex min-h-11 items-center">
+      <span className="sr-only">{t("language")}</span>
+      <select
+        value={current}
+        onChange={(e) => switchTo(e.target.value as AppLocale)}
+        className="min-h-9 appearance-none rounded-full border border-line bg-white py-1 pr-8 pl-3 text-sm font-semibold text-navy hover:bg-line-soft focus-visible:outline-2 focus-visible:outline-navy"
+      >
+        {LOCALES.map((l) => (
+          <option key={l} value={l} lang={l}>
+            {LANGUAGES[l].name}
+          </option>
+        ))}
+      </select>
+      <svg aria-hidden="true" viewBox="0 0 12 12" className="pointer-events-none absolute right-3 size-3 text-navy">
+        <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </label>
   );
 }
 

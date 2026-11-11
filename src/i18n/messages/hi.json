@@ -16,7 +16,8 @@
     "footnote": "पात्रता योजना ही तय करती है। आवेदन से पहले हमेशा आधिकारिक पेज पर पक्का कर लें।",
     "and": "{items} और {last}",
     "or": "{items} या {last}",
-    "listSeparator": ", "
+    "listSeparator": ", ",
+    "language": "भाषा"
   },
   "landing": {
     "scope": "B.E./B.Tech · सभी राज्य",

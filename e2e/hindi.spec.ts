@@ -11,7 +11,7 @@ test.beforeEach(async ({ page }) => {
 
 test("a student switches to Hindi and checks their eligibility", async ({ page, context }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "हिन्दी" }).click();
+  await page.getByLabel("Language").selectOption("hi");
   await expect(page).toHaveURL(/\/hi$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "hi");
   await page.getByRole("link", { name: "मेरी पात्रता देखें" }).click();
@@ -46,7 +46,7 @@ test("a student switches to Hindi and checks their eligibility", async ({ page, 
   await expect(page).toHaveURL(/\/hi\/results$/);
 
   // And switching back to English sticks too.
-  await page.getByRole("button", { name: "English" }).click();
+  await page.getByLabel("भाषा").selectOption("en");
   await expect(page).toHaveURL(/\/results$/);
   await expect(page.getByRole("heading", { name: "Your scholarships" })).toBeVisible();
 });

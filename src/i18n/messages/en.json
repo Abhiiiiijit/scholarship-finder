@@ -16,7 +16,8 @@
     "footnote": "Eligibility is decided by the scheme. Always confirm on the official page before applying.",
     "and": "{items} and {last}",
     "or": "{items} or {last}",
-    "listSeparator": ", "
+    "listSeparator": ", ",
+    "language": "Language"
   },
   "landing": {
     "scope": "B.E./B.Tech · all states",

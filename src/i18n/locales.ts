@@ -1,13 +1,14 @@
 // The languages students can read Paatra in (see the "Paatra in Indian languages" plan). English is
 // the source: every other language must have the same keys (messages.test.ts). Admin stays English.
-export const ALL_LOCALES = ["en", "hi"] as const;
+export const ALL_LOCALES = ["en", "hi", "mr"] as const;
 export type AppLocale = (typeof ALL_LOCALES)[number];
 export const DEFAULT_LOCALE: AppLocale = "en";
 
 // A language reaches the live site only after a native speaker has read every screen on a phone.
 // Until then it is served on preview deploys and locally, never in production. Hindi went live on
-// 2026-10-25 at the owner's call, before that review: fix its wording as feedback comes in.
-const REVIEWED: Record<AppLocale, boolean> = { en: true, hi: true };
+// 2026-10-25 at the owner's call, before that review: fix its wording as feedback comes in. Marathi
+// waits for its review.
+const REVIEWED: Record<AppLocale, boolean> = { en: true, hi: true, mr: false };
 const production = process.env.PAATRA_DEPLOY === "production";
 export const LOCALES: readonly AppLocale[] = ALL_LOCALES.filter((l) => REVIEWED[l] || !production);
 
@@ -15,16 +16,20 @@ export const LOCALES: readonly AppLocale[] = ALL_LOCALES.filter((l) => REVIEWED[
 export const LANGUAGES: Record<AppLocale, { name: string; offer: string; switchTo: string }> = {
   en: { name: "English", offer: "Paatra is also in English.", switchTo: "Read in English" },
   hi: { name: "हिन्दी", offer: "Paatra हिन्दी में भी है।", switchTo: "हिन्दी में पढ़ें" },
+  mr: { name: "मराठी", offer: "Paatra मराठीतही आहे.", switchTo: "मराठीत वाचा" },
 };
 
 // The language most students of a live state read, offered once they pick that domicile.
 export const STATE_LANGUAGE: Partial<Record<string, AppLocale>> = {
   BR: "hi",
   DL: "hi",
+  // Goa's own language is Konkani (not offered yet); Marathi is widely read there.
+  GA: "mr",
   HP: "hi",
   HR: "hi",
   JK: "hi",
   LA: "hi",
+  MH: "mr",
   MP: "hi",
 };
 

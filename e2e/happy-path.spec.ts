@@ -30,6 +30,8 @@ test("a student checks their eligibility and reads a scheme's rules", async ({ p
   await expect(page.getByRole("link", { name: "2 near misses" })).toBeVisible();
   const reliance = page.getByRole("article").filter({ has: page.getByRole("heading", { name: "Reliance Foundation UG Scholarship" }) });
   await expect(reliance.getByText("Eligible to apply")).toBeVisible();
+  // A parent who isn't on this phone can be sent the result, built here on the phone.
+  await expect(page.getByRole("link", { name: "Send on WhatsApp" })).toBeVisible();
   await reliance.getByRole("link", { name: "Rules and documents" }).click();
 
   await expect(page.getByRole("heading", { name: "Reliance Foundation UG Scholarship" })).toBeVisible();

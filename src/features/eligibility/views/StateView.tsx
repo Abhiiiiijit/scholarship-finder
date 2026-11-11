@@ -11,6 +11,7 @@ import { StateLanguageOffer } from "@/features/eligibility/components/LanguageSw
 import type { Profile } from "@/domain/profile";
 import { isLive } from "@/features/eligibility/store/answers";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
+import { useSnapshot } from "@/features/eligibility/hooks/use-snapshot";
 import type { StateConfig, StateQuestion } from "@/domain/states";
 import { localStateByCode, stateLabel } from "@/features/eligibility/lib/domain-labels";
 
@@ -128,6 +129,9 @@ function NotLive({
   update: (fn: (p: Profile) => Profile) => void;
 }) {
   const t = useTranslations("state");
+  // Name AICTE schemes only once some are published, so this list never promises what results won't show.
+  const [snap] = useSnapshot();
+  const aicte = snap.status === "ready" && snap.snapshot.schemes.some((s) => s.provider === "AICTE");
   return (
     <>
       <Column className="flex-1 pt-[22px] pb-6 lg:pt-10 lg:pb-12">
@@ -145,7 +149,7 @@ function NotLive({
             <div className="text-[15px] leading-[21px] font-semibold">{t("stillSee")}</div>
             <ul className="m-0 flex flex-col gap-1 pl-5 text-[15px] leading-[21px] text-muted">
               <li>{t("stillCentral")}</li>
-              <li>{t("stillAicte")}</li>
+              {aicte && <li>{t("stillAicte")}</li>}
               <li>{t("stillPrivate")}</li>
             </ul>
           </div>

@@ -5,9 +5,10 @@ import { exampleStudent, NOW, section5Snapshot, TODAY } from "@/lib/fixtures/sec
 import { match } from "@/domain/match";
 import type { Profile } from "@/domain/profile";
 import type { PublishableRule } from "@/domain/rules/schema";
-import { gapText, missText, reasonRows, ruleText, yourAnswer } from "./explain";
+import { displayQuote, gapText, missText, reasonRows, ruleText, yourAnswer } from "./explain";
 import { answer, questionFor } from "./questions";
-import { buildResults, counts, deadlineLine, mainReason } from "./results";
+import { buildResults, counts, deadlineLine, mainReason, stateSchemeCounts } from "./results";
+import { resultsMessage, schemeMessage } from "./share";
 
 // English, so these sentences match what students see today.
 const t = createTranslator({ locale: "en", messages: en });
@@ -120,5 +121,59 @@ describe("results", () => {
     const p = answer({ ...exampleStudent, family_income: 750000 }, "MH.cap_admission", "yes");
     expect(match(p, scheme("mh-rajarshi-shahu-ebc")).unknownFields).toEqual([]);
     expect(questionFor(t, "MH.cap_admission", { domicile_state: "KA" })).toBeUndefined();
+  });
+});
+
+describe("state coverage", () => {
+  // The J&K scheme is filed under JK but its domicile rule names J&K and Ladakh.
+  const jk = {
+    ...scheme("mh-rajarshi-shahu-ebc"),
+    slug: "jk-sss",
+    stateCode: "JK",
+    rules: [r({ field: "domicile_state", op: "IN", value: ["JK", "LA"] }), r({ group: 2, field: "family_income", op: "LTE", value: 800000 })],
+  };
+  const snapshot = { ...section5Snapshot, schemes: [...section5Snapshot.schemes, jk] };
+
+  it("counts published state schemes per state, including states a domicile rule names", () => {
+    const n = stateSchemeCounts(snapshot);
+    expect([n.get("MH"), n.get("JK"), n.get("LA"), n.get("KA")]).toEqual([1, 1, 1, undefined]);
+  });
+
+  it("matches a two-state scheme for students of either state", () => {
+    const student: Profile = { ...exampleStudent, domicile_state: "LA", family_income: 500000 };
+    const res = buildResults(t, student, snapshot, TODAY, NOW);
+    expect(res.results.map((m) => m.scheme.slug)).toContain("jk-sss");
+    expect(res.results.map((m) => m.scheme.slug)).not.toContain("mh-rajarshi-shahu-ebc");
+  });
+});
+
+describe("send to family", () => {
+  const c = { locale: "en", today: TODAY, base: "https://paatra.example" };
+
+  it("lists each scheme with amount, deadline, link and papers, and none of the student's answers", () => {
+    const res = buildResults(t, exampleStudent, section5Snapshot, TODAY, NOW);
+    const text = resultsMessage(t, c, res);
+    expect(text).toContain("I can apply for 1 scheme:");
+    expect(text).toContain("• Reliance Foundation UG Scholarship");
+    expect(text).toContain("https://paatra.example/scheme/reliance-foundation-ug");
+    expect(text).toContain("2 more need an answer or a check:");
+    expect(text).not.toContain("9,00,000");
+    expect(text).not.toContain("₹9 L");
+  });
+
+  it("names the papers still missing for one scheme", () => {
+    const text = schemeMessage(t, c, scheme("reliance-foundation-ug"), ["Income certificate"]);
+    expect(text).toContain("Papers I still need:\n• Income certificate");
+    expect(text).toContain("Rules and full document list:\nhttps://paatra.example/scheme/reliance-foundation-ug");
+  });
+});
+
+describe("quotes", () => {
+  it("drops a quote's own outer quotation marks so they are not doubled, and changes nothing else", () => {
+    expect(displayQuote('"Family income up to Rs. 2.5 lakh per year."')).toBe("Family income up to Rs. 2.5 lakh per year.");
+    expect(displayQuote('Family income "up to Rs. 2.50 lakh" from all sources')).toBe('Family income "up to Rs. 2.50 lakh" from all sources');
+    expect(displayQuote('"For salaried employees: ₹4 lakh per year"; "For others: ₹2.5 lakh per year"')).toBe(
+      '"For salaried employees: ₹4 lakh per year"; "For others: ₹2.5 lakh per year"',
+    );
   });
 });

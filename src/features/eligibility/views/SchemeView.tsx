@@ -6,7 +6,8 @@ import { Alert } from "@/components/ui/Alert";
 import { RuleRow } from "@/components/ui/RuleRow";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { BackIcon, Column, Footnote, Screen } from "@/features/eligibility/components/layout";
-import { Checking, LoadFailed } from "@/features/eligibility/components/results";
+import { Checking, LoadFailed, QuestionCard } from "@/features/eligibility/components/results";
+import { ShareButtons } from "@/features/eligibility/components/ShareButtons";
 import { LanguageSwitch } from "@/features/eligibility/components/LanguageSwitch";
 import { formatDate, todayInIndia } from "@/lib/format";
 import { match, type GroupCheck, type RuleCheck } from "@/domain/match";
@@ -14,19 +15,21 @@ import type { Profile } from "@/domain/profile";
 import { fieldTier } from "@/domain/rules/fields";
 import type { SnapshotScheme } from "@/domain/rules/snapshot";
 import { useDocumentTicks } from "@/features/eligibility/store/documents";
-import { gapText, ruleText, yourAnswer } from "@/features/eligibility/lib/explain";
+import { displayQuote, gapText, ruleText, yourAnswer } from "@/features/eligibility/lib/explain";
+import { answer, questionFor } from "@/features/eligibility/lib/questions";
+import { schemeMessage } from "@/features/eligibility/lib/share";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
 import { useSnapshot } from "@/features/eligibility/hooks/use-snapshot";
 import { STATE_BY_CODE } from "@/domain/states";
 
 export function SchemeView({ slug }: { slug: string }) {
   const t = useTranslations("scheme");
-  const [profile] = useAnswers();
+  const [profile, update] = useAnswers();
   const [snap, retry] = useSnapshot();
 
   return (
     <Screen>
-      <Column className="pt-4 lg:pt-6">
+      <Column className="pt-4 lg:pt-6 print:hidden">
         <div className="flex items-center justify-between">
           <Link href="/results" className="-ml-1 flex min-h-11 items-center gap-1 text-[15px] font-semibold text-navy">
             <BackIcon />
@@ -41,14 +44,16 @@ export function SchemeView({ slug }: { slug: string }) {
         ) : snap.status === "loading" || !profile ? (
           <Checking />
         ) : (
-          <Found scheme={snap.snapshot.schemes.find((s) => s.slug === slug)} profile={profile} />
+          <Found scheme={snap.snapshot.schemes.find((s) => s.slug === slug)} profile={profile} update={update} />
         )}
       </Column>
     </Screen>
   );
 }
 
-function Found({ scheme, profile }: { scheme: SnapshotScheme | undefined; profile: Profile }) {
+type Update = (fn: (p: Profile) => Profile) => void;
+
+function Found({ scheme, profile, update }: { scheme: SnapshotScheme | undefined; profile: Profile; update: Update }) {
   const t = useTranslations("scheme");
   if (!scheme) {
     return (
@@ -63,7 +68,7 @@ function Found({ scheme, profile }: { scheme: SnapshotScheme | undefined; profil
       </div>
     );
   }
-  return <Scheme scheme={scheme} profile={profile} />;
+  return <Scheme scheme={scheme} profile={profile} update={update} />;
 }
 
 const PROVIDER = {
@@ -73,7 +78,11 @@ const PROVIDER = {
   PRIVATE: "providerPrivate",
 } as const;
 
-function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile }) {
+// Central schemes whose official link is a guidelines PDF are applied for on NSP (UX review issue 11).
+const NSP_URL = "https://scholarships.gov.in/";
+const isPdf = (url: string) => /\.pdf($|[?#])/i.test(url);
+
+function Scheme({ scheme, profile, update }: { scheme: SnapshotScheme; profile: Profile; update: Update }) {
   const t = useTranslations();
   const locale = useLocale();
   const m = match(profile, scheme);
@@ -83,7 +92,11 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
   const portal = scheme.stateCode ? STATE_BY_CODE.get(scheme.stateCode)?.portal : undefined;
   const type = [t(`scheme.${PROVIDER[scheme.provider]}`), ...(scheme.benefitTypes ?? [])].join(" · ");
   const applyVia = scheme.appliesVia === "State portal" && portal ? portal : scheme.appliesVia;
-  const closed = scheme.deadline !== null && scheme.deadline < todayInIndia(new Date());
+  const today = todayInIndia(new Date());
+  const closed = scheme.deadline !== null && scheme.deadline < today;
+  // A PDF is the rules, not the place to apply: send NSP schemes to NSP and keep the PDF as a second link.
+  const pdf = isPdf(scheme.officialUrl);
+  const applyOnNsp = pdf && scheme.appliesVia === "NSP" && !closed;
 
   const facts = [
     [t("scheme.amount"), scheme.amountText ?? t("scheme.seeOfficial")],
@@ -133,7 +146,7 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
           <section className="flex flex-col gap-3">
             <h2 className="m-0 text-lg leading-6 font-semibold">{t("scheme.rulesTitle")}</h2>
             {m.groups.map((g) => (
-              <RuleGroup key={g.group} group={g} profile={profile} />
+              <RuleGroup key={g.group} group={g} profile={profile} update={update} />
             ))}
           </section>
         </div>
@@ -166,18 +179,31 @@ function Scheme({ scheme, profile }: { scheme: SnapshotScheme; profile: Profile 
 
           <div className="flex flex-col gap-3">
             <a
-              href={scheme.officialUrl}
+              href={applyOnNsp ? NSP_URL : scheme.officialUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-[52px] items-center justify-center gap-2 rounded-xl bg-navy text-[17px] font-semibold text-white no-underline hover:bg-ink"
+              className="flex h-[52px] items-center justify-center gap-2 rounded-xl bg-navy px-4 text-center text-[17px] font-semibold text-white no-underline hover:bg-ink print:hidden"
             >
-              {closed ? t("scheme.checkOfficial") : t("scheme.apply")}
+              {applyOnNsp ? t("scheme.applyOnNsp") : closed ? t("scheme.checkOfficial") : pdf ? t("scheme.readRulesPdf") : t("scheme.apply")}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M14 5h5v5M19 5l-8 8M17 14v5H5V7h5" />
               </svg>
             </a>
+            {applyOnNsp && (
+              <a href={scheme.officialUrl} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center text-[15px] font-semibold text-navy print:hidden">
+                {t("scheme.readGuidelinesPdf")}
+              </a>
+            )}
             <Footnote />
           </div>
+
+          <section className="flex flex-col gap-2.5 print:hidden">
+            <div className="flex flex-col gap-0.5">
+              <h2 className="m-0 text-lg leading-6 font-semibold">{t("share.schemeTitle")}</h2>
+              <p className="m-0 text-[13px] leading-[18px] text-slate">{t("share.schemeIntro")}</p>
+            </div>
+            <ShareButtons print={documents.length > 0} build={(base) => schemeMessage(t, { locale, today, base }, scheme, missing)} />
+          </section>
         </aside>
       </div>
     </>
@@ -192,7 +218,7 @@ function rowResult(c: RuleCheck): "pass" | "fail" | "unknown" | "confirm" {
   return c.outcome;
 }
 
-function RuleGroup({ group, profile }: { group: GroupCheck; profile: Profile }) {
+function RuleGroup({ group, profile, update }: { group: GroupCheck; profile: Profile; update: Update }) {
   const t = useTranslations();
   const locale = useLocale();
   const either = group.checks.length > 1;
@@ -210,16 +236,23 @@ function RuleGroup({ group, profile }: { group: GroupCheck; profile: Profile }) 
             : yours
               ? t(result === "fail" && c.rule.ambiguous ? "scheme.youDisputed" : "scheme.you", { answer: yours })
               : t("scheme.notAnswered");
+        // Answer an unanswered rule right here instead of going back through the questions.
+        const question = result === "unknown" ? questionFor(t, c.rule.field, profile) : undefined;
         return (
           <div key={i} className="flex flex-col gap-2">
             <ul className="m-0 list-none p-0">
               <RuleRow result={result} text={ruleText(t, c.rule)} detail={detail} label={t(`status.${result}`)} />
             </ul>
+            {question && (
+              <div className="rounded-[10px] bg-info-tint p-1 print:hidden">
+                <QuestionCard question={question} why={t("scheme.answerHere")} onAnswer={(v) => update((p) => answer(p, c.rule.field, v))} />
+              </div>
+            )}
             {/* The official wording, word for word in the source's language: never translated. */}
             <blockquote className="m-0 border-l-0 rounded-lg bg-ground px-3 py-2.5 text-[13px] leading-[19px] text-muted">
               {/* Outside English, say plainly that the quote is the source's own words, not ours. */}
               {locale !== "en" && <span className="mb-1 block text-xs font-semibold text-slate">{t("scheme.officialWording")}</span>}
-              &ldquo;{c.rule.quote}&rdquo;
+              &ldquo;{displayQuote(c.rule.quote)}&rdquo;
               <br />
               <a href={c.rule.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-navy">
                 {t("scheme.source")}

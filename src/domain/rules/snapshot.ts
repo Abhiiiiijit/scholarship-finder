@@ -21,6 +21,11 @@ export const snapshotSchemeSchema = z.object({
   appliesVia: z.string().nullable().optional(),
   benefitTypes: z.array(z.string()).optional(),
   documents: z.array(z.string()).optional(),
+  // For families comparing schemes (UX review issues 3 and 10): a rough yearly amount, this
+  // cycle's opening date, and the months applications usually run when dates aren't out yet.
+  yearlyAmount: z.number().int().positive().nullable().optional(),
+  opensOn: isoDate.nullable().optional(),
+  usualWindow: z.object({ from: z.number().int().min(1).max(12), to: z.number().int().min(1).max(12) }).nullable().optional(),
 });
 
 // Bumped when a snapshot may hold something an older page cannot read safely. A page that meets a
@@ -71,6 +76,9 @@ export function buildSnapshot(schemes: SnapshotInput[], version: number, now: Da
         appliesVia: s.appliesVia ?? null,
         benefitTypes: s.benefitTypes ?? [],
         documents: s.documents ?? [],
+        yearlyAmount: s.yearlyAmount ?? null,
+        opensOn: s.opensOn ?? null,
+        usualWindow: s.usualWindow ?? null,
       })),
   });
 }

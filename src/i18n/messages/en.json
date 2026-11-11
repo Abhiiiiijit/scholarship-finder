@@ -176,7 +176,10 @@
     "answerFirstTitle": "Answer {count, plural, one {# question} other {# questions}} to see what fits",
     "answerFirstBody": "You skipped some questions, so we can't decide {count, plural, one {# scheme} other {# schemes}} yet. That isn't a no. Each answer below settles at least one.",
     "moreQuestions": "Show {count, plural, one {# more question} other {# more questions}}",
-    "overlapNote": "Government scholarships often can't be combined, so you may get only one of these state schemes. Check each official page and choose the one that pays most."
+    "overlapNote": "Government scholarships often can't be combined, so you may get only one of these state schemes. Check each official page and choose the one that pays most.",
+    "opensOn": "Opens {date}",
+    "usuallyOpen": "Usually open {months}",
+    "aboutYearly": "About {amount} a year"
   },
   "status": {
     "eligible": "Eligible to apply",

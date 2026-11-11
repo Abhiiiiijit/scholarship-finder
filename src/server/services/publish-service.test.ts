@@ -70,6 +70,20 @@ describe("registry store", () => {
     expect((await getScheme(db, id))!.rules.map((r) => r.field)).toEqual(["domicile_state"]);
   });
 
+  it("carries the yearly amount and usual months into the snapshot", async () => {
+    const id = await saveScheme(db, draft({ yearlyAmount: "50000" as never, deadline: null, opensOn: null, windowFrom: "8" as never, windowTo: "10" as never }));
+    await publishScheme(db, id, "Abhiiiiijit", now);
+    const [s] = (await latestSnapshot(db))!.schemes;
+    expect([s.yearlyAmount, s.usualWindow, s.opensOn]).toEqual([50000, { from: 8, to: 10 }, null]);
+  });
+
+  it("refuses half a window, and the database refuses a month out of range", async () => {
+    expect(schemeDraftSchema.safeParse({ ...draft(), windowFrom: 8, windowTo: null }).success).toBe(false);
+    const id = await saveScheme(db, draft());
+    await expect(db.update(scholarships).set({ windowFrom: 13, windowTo: 2 }).where(eq(scholarships.id, id))).rejects.toThrow();
+    await expect(db.update(scholarships).set({ windowFrom: 8, windowTo: null }).where(eq(scholarships.id, id))).rejects.toThrow();
+  });
+
   it("refuses to publish while a rule has no quote", async () => {
     const id = await saveScheme(db, draft({ rules: [{ group: 1, field: "family_income", op: "LTE", value: 800000 }] }));
     await expect(publishScheme(db, id, "Abhiiiiijit", now)).rejects.toBeInstanceOf(PublishError);

@@ -50,12 +50,15 @@ function schemeValues(d: SchemeDraft) {
     sourceFormat: d.sourceFormat,
     officialUrl: d.officialUrl,
     amountText: d.amountText,
+    yearlyAmount: d.yearlyAmount,
     benefitTypes: d.benefitTypes,
     documents: d.documents,
     cannotCombineWith: d.cannotCombineWith,
     reviewNotes: d.reviewNotes,
     opensOn: d.opensOn,
     deadline: d.deadline,
+    windowFrom: d.windowFrom,
+    windowTo: d.windowTo,
   };
 }
 

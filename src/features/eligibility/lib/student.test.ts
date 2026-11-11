@@ -8,7 +8,7 @@ import type { PublishableRule } from "@/domain/rules/schema";
 import { displayQuote, gapText, missText, reasonRows, ruleText, yourAnswer } from "./explain";
 import { answer, questionFor } from "./questions";
 import { courseGroups } from "./labels";
-import { buildResults, counts, deadlineLine, mainReason, stateSchemeCounts } from "./results";
+import { amountLine, buildResults, byPay, counts, deadlineLine, mainReason, stateSchemeCounts } from "./results";
 import { resultsMessage, schemeMessage } from "./share";
 
 // English, so these sentences match what students see today.
@@ -208,5 +208,27 @@ describe("quotes", () => {
     expect(displayQuote('"For salaried employees: ₹4 lakh per year"; "For others: ₹2.5 lakh per year"')).toBe(
       '"For salaried employees: ₹4 lakh per year"; "For others: ₹2.5 lakh per year"',
     );
+  });
+});
+
+describe("how much and by when", () => {
+  const s = (over: Partial<ReturnType<typeof scheme>>) => ({ ...scheme("reliance-foundation-ug"), deadline: null, ...over });
+
+  it("says when applications open, or the months they usually run, before a deadline is announced", () => {
+    expect(deadlineLine(t, "en", s({ opensOn: "2026-12-01" }), TODAY).text).toBe("Opens 1 Dec 2026");
+    expect(deadlineLine(t, "en", s({ usualWindow: { from: 8, to: 10 } }), TODAY).text).toBe("Usually open Aug–Oct");
+    expect(deadlineLine(t, "en", s({ usualWindow: { from: 7, to: 7 } }), TODAY).text).toBe("Usually open Jul");
+    // An opening date already past says nothing new; the usual months still help.
+    expect(deadlineLine(t, "en", s({ opensOn: "2026-08-15", usualWindow: { from: 8, to: 10 } }), TODAY).text).toBe("Usually open Aug–Oct");
+    expect(deadlineLine(t, "en", s({}), TODAY).text).toBe("Deadline not announced yet");
+  });
+
+  it("leads with a comparable yearly figure and puts the best-paying scheme first", () => {
+    expect(amountLine(t, s({ yearlyAmount: 50000 }))).toBe("About ₹50,000 a year");
+    expect(amountLine(t, s({}))).toBe("Up to ₹2 lakh over the degree");
+    const res = buildResults(t, { ...exampleStudent, family_income: 300000, gender: "female", disability: "none" }, section5Snapshot, TODAY, NOW);
+    const eligible = res.results.filter((m) => m.status === "eligible");
+    const paid = eligible.map((m, i) => ({ ...m, scheme: { ...m.scheme, yearlyAmount: i === eligible.length - 1 ? 90000 : null } }));
+    expect(byPay(paid)[0].scheme.yearlyAmount).toBe(90000);
   });
 });

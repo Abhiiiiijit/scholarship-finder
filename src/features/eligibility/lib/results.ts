@@ -2,7 +2,7 @@ import { isFresh, type Snapshot, type SnapshotScheme } from "@/domain/rules/snap
 import { coversCourse, match, matchAll, type MatchSummary, type RuleCheck, type SchemeMatch } from "@/domain/match";
 import type { Profile } from "@/domain/profile";
 import { fieldLabel, missText } from "./explain";
-import { daysUntil, formatDate, formatLakh } from "@/lib/format";
+import { daysUntil, formatDate, formatINR, formatLakh } from "@/lib/format";
 import type { T } from "./i18n";
 
 // Everything S06 and S07 show, computed on the phone from the downloaded snapshot.
@@ -118,10 +118,23 @@ export function mainReason(t: T, r: Results, p: Profile): string {
 // Two weeks or less before the deadline, the card says how many days are left, in the warning colour.
 export const URGENT_DAYS = 14;
 
-// The deadline line on a result card: "Apply by 30 Sep 2026 · 5 days left", "Deadline not
-// announced yet" or "Closed on 5 Oct 2026".
+// "Aug", or "अग॰" in Hindi: month 1-12 in the reader's language.
+export function monthName(month: number, locale: string): string {
+  return new Date(Date.UTC(2026, month - 1, 1)).toLocaleDateString(`${locale}-IN`, { month: "short", timeZone: "UTC" });
+}
+
+// The deadline line on a result card: "Apply by 30 Sep 2026 · 5 days left", "Opens 1 Dec 2026",
+// "Usually open Aug–Oct", "Deadline not announced yet" or "Closed on 5 Oct 2026".
 export function deadlineLine(t: T, locale: string, s: SnapshotScheme, today: string): { text: string; urgent: boolean } {
-  if (s.deadline === null) return { text: t("results.noDeadline"), urgent: false };
+  if (s.deadline === null) {
+    if (s.opensOn && s.opensOn > today) return { text: t("results.opensOn", { date: formatDate(s.opensOn, locale) }), urgent: false };
+    if (s.usualWindow) {
+      const { from, to } = s.usualWindow;
+      const months = from === to ? monthName(from, locale) : `${monthName(from, locale)}–${monthName(to, locale)}`;
+      return { text: t("results.usuallyOpen", { months }), urgent: false };
+    }
+    return { text: t("results.noDeadline"), urgent: false };
+  }
   const date = formatDate(s.deadline, locale);
   const left = daysUntil(today, s.deadline);
   if (left < 0) return { text: t("results.closedOn", { date }), urgent: false };
@@ -129,4 +142,15 @@ export function deadlineLine(t: T, locale: string, s: SnapshotScheme, today: str
   return left <= URGENT_DAYS
     ? { text: `${applyBy} · ${t("results.daysLeft", { count: left })}`, urgent: true }
     : { text: applyBy, urgent: false };
+}
+
+// "About ₹50,000 a year" when the scheme has a comparable figure, else its own wording.
+export function amountLine(t: T, s: SnapshotScheme): string | null {
+  return s.yearlyAmount ? t("results.aboutYearly", { amount: formatINR(s.yearlyAmount) }) : s.amountText;
+}
+
+// Eligible schemes that pay more come first, so a family choosing between schemes that can't be
+// combined sees the best one on top. Schemes without a yearly figure keep their order, after them.
+export function byPay(matches: SchemeMatch[]): SchemeMatch[] {
+  return [...matches].sort((a, b) => (b.scheme.yearlyAmount ?? 0) - (a.scheme.yearlyAmount ?? 0));
 }

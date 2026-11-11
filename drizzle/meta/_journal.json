@@ -50,6 +50,13 @@
       "when": 1794418107613,
       "tag": "0006_course_fields",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794428991133,
+      "tag": "0007_amount_and_window",
+      "breakpoints": true
     }
   ]
 }

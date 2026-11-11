@@ -1,7 +1,7 @@
 import type { SchemeMatch } from "@/domain/match";
 import type { SnapshotScheme } from "@/domain/rules/snapshot";
 import { formatDate } from "@/lib/format";
-import { deadlineLine, type Results } from "./results";
+import { amountLine, byPay, deadlineLine, type Results } from "./results";
 import type { T } from "./i18n";
 
 // "Send to family" (UX review issue 5): a plain-text summary built on the phone, for the parent who
@@ -21,7 +21,7 @@ const schemeUrl = (c: ShareContext, s: SnapshotScheme) => `${c.base}/scheme/${s.
 function block(t: T, c: ShareContext, s: SnapshotScheme): string {
   return [
     `• ${s.name}`,
-    s.amountText ? `  ${t("share.amount", { amount: s.amountText })}` : undefined,
+    amountLine(t, s) ? `  ${t("share.amount", { amount: amountLine(t, s)! })}` : undefined,
     `  ${deadlineLine(t, c.locale, s, c.today).text}`,
     `  ${schemeUrl(c, s)}`,
   ]
@@ -38,7 +38,7 @@ function documentsOf(schemes: SnapshotScheme[]): string[] {
 
 export function resultsMessage(t: T, c: ShareContext, r: Results): string {
   const of = (status: SchemeMatch["status"]) => r.results.filter((m) => m.status === status).map((m) => m.scheme);
-  const eligible = of("eligible");
+  const eligible = byPay(r.results.filter((m) => m.status === "eligible")).map((m) => m.scheme);
   const check = [...of("needsInfo"), ...of("nearMiss")];
   const docs = documentsOf(eligible);
 
@@ -58,8 +58,8 @@ export function schemeMessage(t: T, c: ShareContext, s: SnapshotScheme, missing:
   const parts = [
     s.name,
     [
-      s.amountText ? t("share.amount", { amount: s.amountText }) : undefined,
-      s.deadline ? t("share.deadline", { date: formatDate(s.deadline, c.locale) }) : t("results.noDeadline"),
+      amountLine(t, s) ? t("share.amount", { amount: amountLine(t, s)! }) : undefined,
+      s.deadline ? t("share.deadline", { date: formatDate(s.deadline, c.locale) }) : deadlineLine(t, c.locale, s, c.today).text,
     ]
       .filter(Boolean)
       .join("\n"),

@@ -50,16 +50,19 @@ export interface EditorScheme {
   id: number;
   badge: SchemeBadge;
   lastVerifiedAt: string | null;
-  draft: Omit<SchemeDraft, "trackerId" | "stateCode" | "source" | "appliesVia" | "sourceFormat" | "amountText" | "reviewNotes" | "opensOn" | "deadline" | "rules"> & {
+  draft: Omit<SchemeDraft, "trackerId" | "stateCode" | "source" | "appliesVia" | "sourceFormat" | "amountText" | "yearlyAmount" | "reviewNotes" | "opensOn" | "deadline" | "windowFrom" | "windowTo" | "rules"> & {
     trackerId: string;
     stateCode: string;
     source: string;
     appliesVia: string;
     sourceFormat: "HTML" | "PDF" | "";
     amountText: string;
+    yearlyAmount: string;
     reviewNotes: string;
     opensOn: string;
     deadline: string;
+    windowFrom: string;
+    windowTo: string;
     rules: Omit<UiRule, "key">[];
   };
 }
@@ -77,14 +80,20 @@ const EMPTY: EditorScheme["draft"] = {
   sourceFormat: "",
   officialUrl: "",
   amountText: "",
+  yearlyAmount: "",
   reviewNotes: "",
   benefitTypes: [],
   documents: [],
   cannotCombineWith: [],
   opensOn: "",
   deadline: "",
+  windowFrom: "",
+  windowTo: "",
   rules: [],
 };
+
+// "Usually opens in" and "closes in": shown to students while this cycle's dates are not out.
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((label, i) => ({ value: String(i + 1), label }));
 
 let nextKey = 1;
 const withKeys = (rules: Omit<UiRule, "key">[]): UiRule[] => rules.map((r) => ({ ...r, key: nextKey++ }));
@@ -270,10 +279,17 @@ export function SchemeEditorView({ initial }: { initial?: EditorScheme }) {
                 onChange={(e) => set("officialUrl", e.target.value)} />
               <TextField fieldId="amount" label="Amount, as students see it" value={draft.amountText}
                 onChange={(e) => set("amountText", e.target.value)} />
+              <TextField fieldId="yearly" label="About how much a year (₹)" inputMode="numeric" placeholder="50000"
+                hint="Rounded, for families comparing schemes. Leave empty if it depends on fees." value={draft.yearlyAmount} error={errors.yearlyAmount}
+                onChange={(e) => set("yearlyAmount", e.target.value.replace(/[^0-9]/g, ""))} />
               <TextField fieldId="opens" label="Opens (this cycle)" type="date" value={draft.opensOn} error={errors.opensOn}
                 onChange={(e) => set("opensOn", e.target.value)} />
               <TextField fieldId="deadline" label="Deadline (this cycle)" type="date" value={draft.deadline} error={errors.deadline}
                 onChange={(e) => set("deadline", e.target.value)} />
+              <SelectField fieldId="window-from" label="Usually opens in" placeholder="Month" groups={[{ options: MONTHS }]} value={draft.windowFrom} error={errors.windowFrom}
+                onChange={(e) => set("windowFrom", e.target.value)} />
+              <SelectField fieldId="window-to" label="Usually closes in" placeholder="Month" groups={[{ options: MONTHS }]} value={draft.windowTo} error={errors.windowTo}
+                onChange={(e) => set("windowTo", e.target.value)} />
               <TextField fieldId="combine" label="Cannot be combined with" placeholder="C2, M4" hint="Tracker ids, comma-separated"
                 value={draft.cannotCombineWith.join(", ")}
                 onChange={(e) => set("cannotCombineWith", e.target.value.split(",").map((s) => s.trim().toUpperCase()).filter(Boolean))} />
@@ -346,6 +362,8 @@ export function SchemeEditorView({ initial }: { initial?: EditorScheme }) {
             <ul className="flex flex-col gap-2">
               <RuleRow result={draft.officialUrl ? "pass" : "fail"} text="Official link added" detail="Checked to open when you publish" />
               <RuleRow result={draft.amountText && draft.deadline ? "pass" : "unknown"} text="Amount and deadline filled in" />
+              <RuleRow result={draft.yearlyAmount && (draft.deadline || draft.windowFrom) ? "pass" : "unknown"} text="Yearly amount and usual months filled in"
+                detail="Families compare schemes by these" />
               <RuleRow result={draft.reviewNotes.trim() ? "unknown" : "pass"} text="Gaps closed"
                 detail={draft.reviewNotes.trim() ? "Clear the gaps note once each item is checked" : undefined} />
               <RuleRow result={draft.rules.length > 0 && quoted === draft.rules.length ? "pass" : "fail"}

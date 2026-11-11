@@ -57,10 +57,20 @@ export function localStateByCode(t: T, code: string | null | undefined): StateCo
 }
 
 // The domicile select: live states first, then the rest, each sorted in the reader's language.
-export function stateOptions(t: T, locale: string) {
-  const sorted = (list: { code: string }[]) =>
+// Once the rules have downloaded, each live state says how many of its schemes are published, so
+// a state whose schemes are still being checked never looks covered (UX review issue 1).
+export function stateOptions(t: T, locale: string, stateSchemes?: Map<string, number>) {
+  const sorted = (list: { code: string }[], counted: boolean) =>
     list
-      .map((s) => ({ value: s.code, label: stateLabel(t, s.code) ?? s.code }))
-      .sort((a, b) => a.label.localeCompare(b.label, locale));
-  return { live: sorted(STATES), other: sorted(OTHER_STATES) };
+      .map((s) => {
+        const name = stateLabel(t, s.code) ?? s.code;
+        return {
+          value: s.code,
+          name,
+          label: counted && stateSchemes ? t("basics.stateWithCount", { state: name, count: stateSchemes.get(s.code) ?? 0 }) : name,
+        };
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, locale))
+      .map(({ value, label }) => ({ value, label }));
+  return { live: sorted(STATES, true), other: sorted(OTHER_STATES, false) };
 }

@@ -23,13 +23,35 @@ export interface Results extends MatchSummary {
   closed: SchemeMatch[];
 }
 
+// The states a state scheme is for: its own state, plus any its domicile rule names, so the J&K
+// scheme that is "for J&K and Ladakh" reaches Ladakh students too.
+export function statesOf(s: SnapshotScheme): string[] {
+  const named = s.rules
+    .filter((r) => r.field === "domicile_state")
+    .flatMap((r) => (Array.isArray(r.value) ? r.value : [r.value]))
+    .filter((v): v is string => typeof v === "string");
+  return [...new Set([...(s.stateCode ? [s.stateCode] : []), ...named])];
+}
+
 // State schemes are only matched for the student's own domicile state; a state that is not live
 // yet has none in the snapshot, so its students see central, AICTE and private schemes.
 export function schemesFor(p: Profile, snapshot: Snapshot): Snapshot {
+  const d = p.domicile_state;
   return {
     ...snapshot,
-    schemes: snapshot.schemes.filter((s) => s.provider !== "STATE" || s.stateCode === p.domicile_state),
+    schemes: snapshot.schemes.filter((s) => s.provider !== "STATE" || (d !== undefined && statesOf(s).includes(d))),
   };
+}
+
+// How many published state schemes each state has, so the state picker and results can say
+// "no Karnataka schemes checked yet" instead of an empty state section (UX review issue 1).
+export function stateSchemeCounts(snapshot: Snapshot): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const s of snapshot.schemes) {
+    if (s.provider !== "STATE") continue;
+    for (const code of statesOf(s)) counts.set(code, (counts.get(code) ?? 0) + 1);
+  }
+  return counts;
 }
 
 const open = (s: SnapshotScheme, today: string, now: Date) =>

@@ -9,6 +9,8 @@ import type { Profile } from "@/domain/profile";
 import { isLive, withState } from "@/features/eligibility/store/answers";
 import { aicteOptions, courseOptions, genderOptions, institutionOptions, yearOptions } from "@/features/eligibility/lib/labels";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
+import { useSnapshot } from "@/features/eligibility/hooks/use-snapshot";
+import { stateSchemeCounts } from "@/features/eligibility/lib/results";
 import { localCategories, stateLabel, stateOptions } from "@/features/eligibility/lib/domain-labels";
 
 // S02 Basics: the state first, then the common questions. Every answer saves on change.
@@ -17,6 +19,8 @@ export function BasicsView() {
   const t = useTranslations();
   const locale = useLocale();
   const [profile, update] = useAnswers();
+  // Only for the scheme counts in the state list; the form works the same without them.
+  const [snap] = useSnapshot();
   const [undo, setUndo] = useState<{ previous: Profile; from: string } | null>(null);
 
   // The course has one option in the MVP, so it is preselected.
@@ -47,7 +51,7 @@ export function BasicsView() {
 
   const state = profile.domicile_state;
   const live = isLive(state);
-  const states = stateOptions(t, locale);
+  const states = stateOptions(t, locale, snap.status === "ready" ? stateSchemeCounts(snap.snapshot) : undefined);
 
   return (
     <Screen>
@@ -131,7 +135,7 @@ export function BasicsView() {
         label={t("basics.continue")}
         href="/check/state"
         disabled={!state}
-        note={t("basics.privacyNote")}
+        note={state ? t("basics.privacyNote") : t("basics.chooseStateFirst")}
       />
     </Screen>
   );

@@ -3,7 +3,8 @@
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Alert } from "@/components/ui/Alert";
 import { Column, Footnote, Screen } from "@/features/eligibility/components/layout";
 import { Checking, CountTile, LoadFailed, QuestionCard, ResultCard } from "@/features/eligibility/components/results";
 import { LanguageSwitch } from "@/features/eligibility/components/LanguageSwitch";
@@ -17,7 +18,9 @@ import { fieldLabel, gapText, reasonRows } from "@/features/eligibility/lib/expl
 import { joinList, type T } from "@/features/eligibility/lib/i18n";
 import { labelOf } from "@/features/eligibility/lib/labels";
 import { answer, questionFor } from "@/features/eligibility/lib/questions";
-import { buildResults, counts, deadlineLine, mainReason, type Results } from "@/features/eligibility/lib/results";
+import { buildResults, counts, deadlineLine, mainReason, stateSchemeCounts, type Results } from "@/features/eligibility/lib/results";
+import { resultsMessage } from "@/features/eligibility/lib/share";
+import { ShareButtons } from "@/features/eligibility/components/ShareButtons";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
 import { useMediaQuery } from "@/features/eligibility/hooks/use-media-query";
 import { useSnapshot } from "@/features/eligibility/hooks/use-snapshot";
@@ -40,7 +43,8 @@ export function ResultsView() {
     if (!profile || snap.status !== "ready") return null;
     const now = new Date();
     const today = todayInIndia(now);
-    return { today, ...buildResults(t, profile, snap.snapshot, today, now) };
+    const stateSchemes = profile.domicile_state ? (stateSchemeCounts(snap.snapshot).get(profile.domicile_state) ?? 0) : 0;
+    return { today, stateSchemes, ...buildResults(t, profile, snap.snapshot, today, now) };
   }, [t, profile, snap]);
 
   if (!profile?.domicile_state) return <Screen />;
@@ -149,12 +153,14 @@ function Found({
   profile,
   update,
 }: {
-  results: Results & { today: string };
+  results: Results & { today: string; stateSchemes: number };
   profile: Profile;
   update: (fn: (p: Profile) => Profile) => void;
 }) {
   const t = useTranslations();
+  const locale = useLocale();
   const wide = useMediaQuery("(min-width: 1024px)");
+  const [allQuestions, setAllQuestions] = useState(false);
   const c = counts(results);
   const of = (s: SchemeMatch["status"]) => results.results.filter((m) => m.status === s);
   const nothing = c.eligible === 0 && c.nearMiss === 0;
@@ -181,10 +187,16 @@ function Found({
     return n ? t("unlocks.checksMore", { count: n }) : undefined;
   };
 
+  // A student who only skipped questions has not been turned down: say what to answer, not "nothing".
+  const skippedOnly = nothing && questions.length > 0 && decided >= results.farMisses.length;
   const summary = nothing ? (
     <section className="flex flex-col gap-2">
-      <h2 className="m-0 text-xl leading-7 font-semibold">{t("results.nothingTitle")}</h2>
-      <p className="m-0 text-[15px] leading-[22px] text-muted">{mainReason(t, results, profile)}</p>
+      <h2 className="m-0 text-xl leading-7 font-semibold">
+        {skippedOnly ? t("results.answerFirstTitle", { count: questions.length }) : t("results.nothingTitle")}
+      </h2>
+      <p className="m-0 text-[15px] leading-[22px] text-muted">
+        {skippedOnly ? t("results.answerFirstBody", { count: decided }) : mainReason(t, results, profile)}
+      </p>
     </section>
   ) : (
     <div className="grid grid-cols-3 gap-2 md:gap-3">
@@ -194,8 +206,19 @@ function Found({
     </div>
   );
 
+  // A state listed as live whose schemes are still being checked: say so, instead of an empty state section.
+  const state = profile.domicile_state;
+  const coverage = state && isLive(state) && results.stateSchemes === 0 && (
+    <Alert tone="info" title={t("results.noStateSchemesTitle", { state: stateLabel(t, state) ?? state })}>
+      {t("results.noStateSchemesBody")}
+    </Alert>
+  );
+
+  // Several state schemes that fit usually can't all be paid together; a parent would add them up.
+  const eligibleState = of("eligible").filter((m) => m.scheme.provider === "STATE").length;
   const eligible = c.eligible > 0 && (
     <Group id="eligible" title={t("results.eligibleGroup")}>
+      {eligibleState >= 2 && <p className="m-0 text-[13px] leading-[18px] text-slate">{t("results.overlapNote")}</p>}
       <Cards>
         {of("eligible").map((m) => (
           <Card key={m.scheme.slug} m={m} profile={profile} today={results.today} />
@@ -212,9 +235,18 @@ function Found({
         </h2>
         <p className="m-0 text-[13px] leading-[18px] text-info">{t("results.updatesOnTap")}</p>
       </div>
-      {questions.map(({ q, card }) => (
+      {(allQuestions ? questions : questions.slice(0, FIRST_QUESTIONS)).map(({ q, card }) => (
         <QuestionCard key={q.field} question={card!} why={why(q.field)} onAnswer={(v) => update((p) => answer(p, q.field, v))} />
       ))}
+      {!allQuestions && questions.length > FIRST_QUESTIONS && (
+        <button
+          type="button"
+          onClick={() => setAllQuestions(true)}
+          className="min-h-11 rounded-[10px] border border-field bg-white px-3 text-[15px] font-semibold text-navy hover:border-navy"
+        >
+          {t("results.moreQuestions", { count: questions.length - FIRST_QUESTIONS })}
+        </button>
+      )}
     </section>
   );
 
@@ -276,17 +308,29 @@ function Found({
     </p>
   );
 
+  // Shown once something fits; a student who is still answering has nothing to send yet.
+  const share = !nothing && (
+    <section className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-white p-4">
+      <div className="flex flex-col gap-0.5">
+        <h2 className="m-0 text-[17px] leading-6 font-semibold">{t("share.resultsTitle")}</h2>
+        <p className="m-0 text-[13px] leading-[18px] text-slate">{t("share.resultsIntro")}</p>
+      </div>
+      <ShareButtons build={(base) => resultsMessage(t, { locale, today: results.today, base }, results)} />
+    </section>
+  );
+
   const whyNot = <WhyNot results={results} />;
   const footnote = (
     <Footnote>{t("results.footnote")}</Footnote>
   );
 
-  const side = [toAnswer, unlocks, later].some(Boolean) || results.farMisses.length > 0 || results.hidden.length > 0;
+  const side = [toAnswer, unlocks, later, share].some(Boolean) || results.farMisses.length > 0 || results.hidden.length > 0;
   if (wide && side) {
     // Laptop: the schemes on the left; the questions that decide more of them stay beside the cards.
     return (
       <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,22rem)] items-start gap-10">
         <div className="flex flex-col gap-8">
+          {coverage}
           {summary}
           {eligible}
           {needsInfo}
@@ -295,6 +339,7 @@ function Found({
           {footnote}
         </div>
         <aside className="flex flex-col gap-6">
+          {share}
           {toAnswer}
           {unlocks}
           {later}
@@ -306,8 +351,10 @@ function Found({
 
   return (
     <>
+      {coverage}
       {summary}
       {eligible}
+      {share}
       {toAnswer}
       {needsInfo}
       {nearMiss}
@@ -319,6 +366,9 @@ function Found({
     </>
   );
 }
+
+// On a phone the first few questions decide most schemes; the rest wait behind "Show more".
+const FIRST_QUESTIONS = 3;
 
 function WhyNot({ results }: { results: Results }) {
   const t = useTranslations();

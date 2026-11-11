@@ -282,3 +282,12 @@ export function reasonRows(t: T, groups: GroupCheck[], p: Profile): ReasonRow[] 
       }));
   });
 }
+
+// A quote stored with its own quotation marks ("\"Family income up to Rs. 8 lakh.\"") is shown
+// without them, so the page's quote marks are not doubled. Only a fully wrapped quote with no other
+// marks inside is changed; the words themselves never are.
+export function displayQuote(quote: string): string {
+  const trimmed = quote.trim();
+  const m = /^["“]([\s\S]*)["”]$/.exec(trimmed);
+  return m && !/["“”]/.test(m[1]) ? m[1] : quote;
+}

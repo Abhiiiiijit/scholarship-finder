@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { RULE_FIELDS } from "@/domain/rules/fields";
+import { COURSE_SCOPE_FIELDS, RULE_FIELDS } from "@/domain/rules/fields";
 import { publishableRuleSchema, ruleValueSchema } from "@/domain/rules/schema";
 import { STATE_BY_CODE, stateFieldKeys } from "@/domain/states";
 
@@ -86,4 +86,10 @@ export function issuesByPath(error: z.ZodError): Record<string, string> {
     out[key] ??= issue.message;
   }
   return out;
+}
+
+// Says which courses a scheme reaches. Until the cutover (course plan step 4) a scheme without a
+// course rule may still be published, but it reaches B.E./B.Tech students only.
+export function hasCourseRule(rules: readonly { field: string }[]): boolean {
+  return rules.some((r) => (COURSE_SCOPE_FIELDS as readonly string[]).includes(r.field));
 }

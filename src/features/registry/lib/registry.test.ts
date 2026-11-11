@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { editorFields, fieldLabel, valueLabel } from "./options";
-import { publishProblems, schemeDraftSchema } from "@/domain/registry/scheme-input";
+import { coverageLabel, editorFields, fieldLabel, valueLabel } from "./options";
+import { hasCourseRule, publishProblems, schemeDraftSchema } from "@/domain/registry/scheme-input";
 import { matchesStatus, schemeBadge } from "@/domain/registry/status";
 import { checkOfficialUrl } from "@/server/services/url-check";
 
@@ -109,5 +109,18 @@ describe("display labels", () => {
     expect(valueLabel("institution_type", "govt")).toBe("Government");
     expect(valueLabel("category", "vjnt", "MH")).toBe("VJNT");
     expect(valueLabel("DL.delhi_univ", "iiitd")).toBe("IIIT-Delhi");
+  });
+});
+
+describe("course coverage", () => {
+  it("reads a scheme without a course rule as B.E./B.Tech only", () => {
+    expect(hasCourseRule(base.rules)).toBe(false);
+    expect(coverageLabel([])).toBe("B.E./B.Tech (no course rule)");
+  });
+
+  it("names the levels, streams or courses a rule covers", () => {
+    expect(hasCourseRule([{ field: "stream" }])).toBe(true);
+    expect(coverageLabel([{ field: "course_level", value: ["ug", "pg"] }])).toBe("Course level: Undergraduate, Postgraduate");
+    expect(valueLabel("course", "mbbs")).toBe("Undergraduate · MBBS (not live)");
   });
 });

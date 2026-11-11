@@ -7,7 +7,7 @@ import { Column, FormLayout, Screen, StepHeader, StickyCTA } from "@/features/el
 import { IncomeField, PercentField } from "@/features/eligibility/components/NumberFields";
 import type { Profile } from "@/domain/profile";
 import { isLive, withState } from "@/features/eligibility/store/answers";
-import { aicteOptions, courseOptions, genderOptions, institutionOptions, yearOptions } from "@/features/eligibility/lib/labels";
+import { aicteOptions, courseGroups, genderOptions, institutionOptions, yearOptions } from "@/features/eligibility/lib/labels";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
 import { useSnapshot } from "@/features/eligibility/hooks/use-snapshot";
 import { stateSchemeCounts } from "@/features/eligibility/lib/results";
@@ -23,7 +23,7 @@ export function BasicsView() {
   const [snap] = useSnapshot();
   const [undo, setUndo] = useState<{ previous: Profile; from: string } | null>(null);
 
-  // The course has one option in the MVP, so it is preselected.
+  // B.E./B.Tech is the only live course, so it is preselected.
   useEffect(() => {
     if (profile && !profile.course) update((p) => ({ ...p, course: "be_btech" }));
   }, [profile, update]);
@@ -40,6 +40,14 @@ export function BasicsView() {
     update((p) => {
       const next = { ...p, [key]: value };
       if (value === undefined) delete next[key];
+      return next;
+    });
+
+  // A year the new course does not have (5th year of a 3-year course) is cleared, not kept.
+  const setCourse = (code: string) =>
+    update((p) => {
+      const next = { ...p, course: code as Profile["course"] };
+      if (next.year && !yearOptions(t, code).some((o) => o.value === next.year)) delete next.year;
       return next;
     });
 
@@ -111,12 +119,13 @@ export function BasicsView() {
 
           <SelectField
             label={t("basics.course")}
-            groups={[{ options: courseOptions(t) }]}
+            hint={t("basics.courseHint")}
+            groups={courseGroups(t)}
             value={profile.course ?? "be_btech"}
-            onChange={() => set("course")("be_btech")}
+            onChange={(e) => setCourse(e.target.value)}
           />
 
-          <ChoiceGroup legend={t("basics.year")} options={yearOptions(t)} value={profile.year} onChange={set("year")} />
+          <ChoiceGroup legend={t("basics.year")} options={yearOptions(t, profile.course)} value={profile.year} onChange={set("year")} />
 
           <PercentField label={t("basics.class12")} hint={t("basics.class12Hint")} value={profile.class12_pct} onChange={set("class12_pct")} />
 

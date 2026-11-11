@@ -1,5 +1,6 @@
 import "server-only";
 import { asc, eq, sql } from "drizzle-orm";
+import { COURSE_SCOPE_FIELDS } from "@/domain/rules/fields";
 import { rules, scholarships } from "@/server/db/schema";
 import type { Db } from "@/server/db/types";
 import type { SchemeDraft } from "@/domain/registry/scheme-input";
@@ -16,6 +17,8 @@ export async function listSchemes(db: Db) {
       scheme: scholarships,
       ruleCount: sql<number>`count(${rules.id})::int`,
       quotedCount: sql<number>`count(${rules.id}) filter (where btrim(${rules.quote}) <> '' and btrim(${rules.sourceUrl}) <> '')::int`,
+      // The rules that say which courses the scheme is for, for A01's "Covers" column.
+      courseRules: sql<{ field: string; value: unknown }[]>`coalesce(jsonb_agg(jsonb_build_object('field', ${rules.field}, 'value', ${rules.value}) order by ${rules.group}, ${rules.id}) filter (where ${rules.field}::text in (${sql.join(COURSE_SCOPE_FIELDS.map((f) => sql`${f}`), sql`, `)})), '[]'::jsonb)`,
     })
     .from(scholarships)
     .leftJoin(rules, eq(rules.scholarshipId, scholarships.id))

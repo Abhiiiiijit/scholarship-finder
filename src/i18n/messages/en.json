@@ -54,6 +54,8 @@
     "gender": "Gender",
     "genderHint": "Some schemes are for girls only.",
     "course": "Course",
+    "courseHint": "Paatra checks B.E./B.Tech scholarships for now. We are adding other courses.",
+    "courseSoon": "{course}, coming soon",
     "year": "Year of study",
     "class12": "Class 12 (HSC) percentage",
     "class12Hint": "HSC is the Higher Secondary Certificate: your Class 12 board marks, as on your marksheet.",
@@ -321,7 +323,36 @@
       "other": "Other"
     },
     "course": {
-      "be_btech": "B.E. / B.Tech (engineering)"
+      "diploma_engg": "Diploma in engineering (polytechnic)",
+      "d_pharm": "D.Pharm",
+      "iti": "ITI",
+      "be_btech": "B.E. / B.Tech (engineering)",
+      "mbbs": "MBBS",
+      "bds": "BDS",
+      "bams": "BAMS / BUMS / BSMS",
+      "bsc_nursing": "B.Sc Nursing",
+      "b_pharm": "B.Pharm",
+      "b_arch": "B.Arch",
+      "llb_5yr": "Integrated LLB (5 years)",
+      "bba": "BBA / BMS",
+      "bca": "BCA",
+      "ba": "B.A.",
+      "bsc": "B.Sc",
+      "bcom": "B.Com",
+      "bsc_agri": "B.Sc Agriculture",
+      "me_mtech": "M.E. / M.Tech",
+      "md_ms": "MD / MS",
+      "mba": "MBA / PGDM",
+      "mca": "MCA",
+      "msc": "M.Sc",
+      "ma": "M.A.",
+      "phd": "PhD"
+    },
+    "courseLevel": {
+      "diploma": "Diploma",
+      "ug": "Degree (undergraduate)",
+      "pg": "Postgraduate",
+      "doctoral": "PhD"
     },
     "courseInRule": {
       "diploma_engg": "Diploma in engineering",

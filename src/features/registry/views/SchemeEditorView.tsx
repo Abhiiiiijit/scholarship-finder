@@ -25,7 +25,7 @@ import {
   valueLabel,
   type FieldInfo,
 } from "@/features/registry/lib/options";
-import { publishProblems, type SchemeDraft } from "@/domain/registry/scheme-input";
+import { hasCourseRule, publishProblems, type SchemeDraft } from "@/domain/registry/scheme-input";
 import type { SchemeBadge } from "@/domain/registry/status";
 import type { PublishableRule } from "@/domain/rules/schema";
 import { ruleValueSchema } from "@/domain/rules/schema";
@@ -350,6 +350,8 @@ export function SchemeEditorView({ initial }: { initial?: EditorScheme }) {
                 detail={draft.reviewNotes.trim() ? "Clear the gaps note once each item is checked" : undefined} />
               <RuleRow result={draft.rules.length > 0 && quoted === draft.rules.length ? "pass" : "fail"}
                 text={`Every rule has a quote and link (${quoted} of ${draft.rules.length})`} />
+              <RuleRow result={hasCourseRule(draft.rules) ? "pass" : "unknown"} text="Course rule added"
+                detail={hasCourseRule(draft.rules) ? undefined : "No course rule: students will only see this for B.E./B.Tech"} />
               <RuleRow result={!dirty && id !== undefined ? "pass" : "fail"} text="Changes saved" />
             </ul>
             <Button onClick={publish} disabled={pending || dirty || id === undefined || problems.length > 0}>

@@ -180,7 +180,7 @@ export function TextField({
   );
 }
 
-export type SelectGroup = { label?: string; options: Option[] };
+export type SelectGroup = { label?: string; options: (Option & { disabled?: boolean })[] };
 
 export function SelectField({
   label,
@@ -192,7 +192,7 @@ export function SelectField({
   const id = useId();
   const options = (g: SelectGroup) =>
     g.options.map((o) => (
-      <option key={o.value} value={o.value}>
+      <option key={o.value} value={o.value} disabled={o.disabled}>
         {o.label}
       </option>
     ));

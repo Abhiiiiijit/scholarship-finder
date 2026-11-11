@@ -122,3 +122,27 @@ describe("results", () => {
     expect(questionFor(t, "MH.cap_admission", { domicile_state: "KA" })).toBeUndefined();
   });
 });
+
+describe("course rules", () => {
+  it("says course scope in a student's words", () => {
+    expect(ruleText(t, r({ field: "course_level", op: "IN", value: ["ug", "pg"] }))).toBe(
+      "Course level: Undergraduate degree or Postgraduate degree",
+    );
+    expect(ruleText(t, r({ field: "stream", op: "EQ", value: "medical" }))).toBe("Stream: Medicine");
+    expect(ruleText(t, r({ field: "course", op: "IN", value: ["mbbs", "bds"] }))).toBe("Course: MBBS or BDS");
+    expect(yourAnswer(t, "course_level", { course: "be_btech" })).toBe("Undergraduate degree");
+  });
+
+  it("asks the AICTE question for an AICTE course's regulator rule, and saves it there", () => {
+    const p: Profile = { course: "be_btech" };
+    expect(questionFor(t, "regulator_approved", p)).toMatchObject({ field: "regulator_approved", question: t("questions.aicte_approved") });
+    expect(answer(p, "regulator_approved", "yes")).toEqual({ course: "be_btech", aicte_approved: "yes" });
+    expect(questionFor(t, "regulator_approved", { course: "mbbs" })).toBeUndefined();
+  });
+
+  it("leaves another course's schemes out of results, not in the far misses", () => {
+    const res = buildResults(t, { ...exampleStudent, course: "bcom" }, section5Snapshot, TODAY, NOW);
+    expect(res.results).toEqual([]);
+    expect(res.farMisses).toEqual([]);
+  });
+});

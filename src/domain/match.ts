@@ -1,5 +1,6 @@
+import { COURSE_BY_CODE, courseOf, DEFAULT_COURSE } from "./courses";
 import type { Profile } from "./profile";
-import { fieldTier, isStateKey } from "./rules/fields";
+import { COURSE_SCOPE_FIELDS, fieldTier, isStateKey } from "./rules/fields";
 import type { PublishableRule } from "./rules/schema";
 import { isFresh, type Snapshot, type SnapshotScheme } from "./rules/snapshot";
 
@@ -62,11 +63,16 @@ const one = (v: string | boolean | undefined): Answer =>
 const many = (vs: string[] | undefined): Answer =>
   vs && vs.length > 0 ? { kind: "set", values: vs } : none;
 
+const yesNo = (v: "yes" | "no" | "unknown" | undefined): Answer =>
+  v === "yes" ? one(true) : v === "no" ? one(false) : none;
+
 function resolveField(field: string, p: Profile): Answer {
   if (isStateKey(field)) {
     const v = p.state?.[field];
     return v === undefined || v === "unknown" ? none : one(v);
   }
+  // Level, stream and tags come from the catalogue, so they can never disagree with the course.
+  const course = p.course === undefined ? undefined : COURSE_BY_CODE.get(p.course);
   switch (field) {
     case "family_income":
       return num(p.family_income);
@@ -74,6 +80,8 @@ function resolveField(field: string, p: Profile): Answer {
       return num(p.class12_pct);
     case "class10_pct":
       return num(p.class10_pct);
+    case "graduation_pct":
+      return num(p.graduation_pct);
     case "domicile_state":
       return one(p.domicile_state);
     case "category":
@@ -84,12 +92,22 @@ function resolveField(field: string, p: Profile): Answer {
       return one(p.gender);
     case "course":
       return one(p.course);
+    case "course_level":
+      return one(course?.level);
+    case "stream":
+      return one(course?.stream);
+    case "course_tag":
+      // A course with no tags is a known answer: it is in none of them.
+      return course ? { kind: "set", values: [...course.tags] } : none;
+    case "regulator_approved":
+      // The AICTE question already asks this for AICTE courses; others are asked when they open.
+      return course?.regulator === "AICTE" ? yesNo(p.aicte_approved) : none;
     case "year":
       return one(p.year);
     case "institution_type":
       return one(p.institution_type);
     case "aicte_approved":
-      return p.aicte_approved === "yes" ? one(true) : p.aicte_approved === "no" ? one(false) : none;
+      return yesNo(p.aicte_approved);
     case "disability_pct":
       // The form asks in bands, so "under 40%" is a range, not a number.
       if (p.disability === "none") return { kind: "range", lo: 0, hi: 0 };
@@ -185,7 +203,20 @@ function evaluateGroup(group: number, checks: RuleCheck[]): GroupCheck {
   return { group, outcome: "fail", checks };
 }
 
+// Course scope, and the safety net while schemes get their course rules (course plan, step 1): a
+// scheme with no rule on course, course_level, stream or course_tag is for B.E./B.Tech students
+// only, so an engineering-only scheme can never look open to a medical student. A student who has
+// not said their course is treated as B.E./B.Tech, as the form always assumed.
+export function coversCourse(scheme: Pick<SnapshotScheme, "rules">, p: Profile): boolean {
+  if (scheme.rules.some((r) => COURSE_SCOPE_FIELDS.includes(r.field as never))) return true;
+  return courseOf(p.course)?.code === DEFAULT_COURSE;
+}
+
 export function match(p: Profile, scheme: SnapshotScheme): SchemeMatch {
+  if (!coversCourse(scheme, p)) {
+    // Not for this course at all, like another state's scheme: no rule failed, so none is named.
+    return { scheme, status: "notEligible", groups: [], unknownFields: [], confirm: [], hiddenUntil: [] };
+  }
   const byGroup = new Map<number, PublishableRule[]>();
   for (const r of scheme.rules) byGroup.set(r.group, [...(byGroup.get(r.group) ?? []), r]);
   const groups = [...byGroup.entries()]

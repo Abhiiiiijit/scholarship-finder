@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { exampleStudent, NOW, section5Snapshot, TODAY } from "@/lib/fixtures/section5";
-import { checkRule, match, matchAll, type RuleOutcome } from "./match";
+import { checkRule, coversCourse, match, matchAll, type RuleOutcome } from "./match";
 import type { Profile } from "./profile";
 import type { PublishableRule } from "./rules/schema";
 import { snapshotSchema } from "./rules/snapshot";
@@ -114,6 +114,17 @@ describe("checkRule", () => {
     ["percentile waits for board tables", rule({ field: "class12_pct", op: "PERCENTILE_GTE", value: 80 }), { class12_pct: 99 }, "unknown"],
     ["a 1st-year student applies fresh", rule({ field: "fresh_or_renewal", op: "EQ", value: "fresh" }), { year: "1" }, "pass"],
     ["a number rule on a choice field never passes", rule({ field: "gender", op: "LTE", value: 1 }), { gender: "female" }, "unknown"],
+    // Course scope: level, stream and tags are looked up from the course, never asked.
+    ["B.E./B.Tech is an undergraduate degree", rule({ field: "course_level", op: "IN", value: ["ug", "pg"] }), { course: "be_btech" }, "pass"],
+    ["MBBS is not a postgraduate course", rule({ field: "course_level", op: "EQ", value: "pg" }), { course: "mbbs" }, "fail"],
+    ["MBBS is in the medical stream", rule({ field: "stream", op: "IN", value: ["medical", "dental"] }), { course: "mbbs" }, "pass"],
+    ["B.Com is not engineering", rule({ field: "stream", op: "EQ", value: "engineering" }), { course: "bcom" }, "fail"],
+    ["no course means no level yet", rule({ field: "course_level", op: "EQ", value: "ug" }), {}, "unknown"],
+    ["B.Pharm is a professional course", rule({ field: "course_tag", op: "EQ", value: "professional" }), { course: "b_pharm" }, "pass"],
+    ["a course with no tags is not professional", rule({ field: "course_tag", op: "EQ", value: "professional" }), { course: "ba" }, "fail"],
+    ["an AICTE course reads the AICTE answer", rule({ field: "regulator_approved", op: "IS_TRUE", value: true }), { course: "be_btech", aicte_approved: "no" }, "fail"],
+    ["other regulators are not asked yet", rule({ field: "regulator_approved", op: "IS_TRUE", value: true }), { course: "mbbs", aicte_approved: "yes" }, "unknown"],
+    ["graduation % below the limit fails", rule({ field: "graduation_pct", op: "GTE", value: 60 }), { graduation_pct: 55 }, "fail"],
   ])("%s", (_name, r, p, expected) => {
     expect(outcome(r, p)).toBe(expected);
   });
@@ -149,6 +160,34 @@ describe("match", () => {
     expect(m.status).toBe("needsInfo");
     expect(m.unknownFields).toEqual([]);
     expect(m.confirm.map((c) => c.rule.field)).toEqual(["siblings_claiming"]);
+  });
+});
+
+describe("course scope", () => {
+  const [reliance] = section5Snapshot.schemes;
+  const courseRule = (field: string, value: string[]) =>
+    ({ ...reliance.rules[0], group: 9, field, op: "IN" as const, value }) as PublishableRule;
+  const anyUg = { ...reliance, slug: "any-ug", name: "Any UG", rules: [...reliance.rules, courseRule("course_level", ["ug"])] };
+  const snapshot = { ...section5Snapshot, schemes: [reliance, anyUg] };
+  const slugs = (p: Profile) => matchAll(p, snapshot, TODAY, NOW).results.map((r) => r.scheme.slug);
+
+  it("treats a scheme with no course rule as B.E./B.Tech only", () => {
+    expect(coversCourse(reliance, exampleStudent)).toBe(true);
+    expect(coversCourse(reliance, { ...exampleStudent, course: "mbbs" })).toBe(false);
+    const m = match({ ...exampleStudent, course: "mbbs" }, reliance);
+    // Out of scope, like another state's scheme: nothing failed, so nothing is named.
+    expect(m.status).toBe("notEligible");
+    expect(m.groups).toEqual([]);
+  });
+
+  it("reads a saved answer without a course as B.E./B.Tech", () => {
+    expect(coversCourse(reliance, { ...exampleStudent, course: undefined })).toBe(true);
+  });
+
+  it("lets a course rule open a scheme to other courses", () => {
+    expect(slugs(exampleStudent)).toEqual(["any-ug", "reliance-foundation-ug"]);
+    expect(slugs({ ...exampleStudent, course: "bsc" })).toEqual(["any-ug"]);
+    expect(slugs({ ...exampleStudent, course: "me_mtech" })).toEqual([]);
   });
 });
 

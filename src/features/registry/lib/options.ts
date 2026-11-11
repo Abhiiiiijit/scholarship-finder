@@ -1,3 +1,4 @@
+import { COURSE_LEVELS, COURSE_TAGS, COURSES, STREAMS } from "@/domain/courses";
 import { ENTRANCE_EXAMS, GENDERS, INSTITUTION_TYPES, MINORITIES, PARENT_OCCUPATIONS, SPECIAL_STATUSES, YEARS } from "@/domain/profile";
 import { RULE_FIELDS, type RuleField } from "@/domain/rules/fields";
 import { STATE_BY_CODE, STATES } from "@/domain/states";
@@ -76,7 +77,20 @@ const CHOICES: Partial<Record<RuleField, Option[]>> = {
   minority: labelled({
     none: "None", muslim: "Muslim", christian: "Christian", sikh: "Sikh", buddhist: "Buddhist", jain: "Jain", parsi: "Parsi",
   } satisfies Record<(typeof MINORITIES)[number], string>),
-  course: [o("be_btech", "B.E. / B.Tech")],
+  // Every catalogue course, not just live ones: a rule may name a course before it opens.
+  course: COURSES.map((c) => o(c.code, c.live ? c.label : `${c.label} (not live)`)),
+  course_level: labelled({
+    diploma: "Diploma", ug: "Undergraduate", pg: "Postgraduate", doctoral: "Doctoral",
+  } satisfies Record<(typeof COURSE_LEVELS)[number], string>),
+  stream: labelled({
+    engineering: "Engineering", medical: "Medical", dental: "Dental", ayush: "AYUSH", nursing: "Nursing",
+    pharmacy: "Pharmacy", architecture: "Architecture", law: "Law", management: "Management",
+    computer_apps: "Computer applications", arts_science_commerce: "Arts, science, commerce",
+    agriculture: "Agriculture", any: "Any subject (PhD)",
+  } satisfies Record<(typeof STREAMS)[number], string>),
+  course_tag: labelled({
+    professional: "Professional course", technical: "Technical course",
+  } satisfies Record<(typeof COURSE_TAGS)[number], string>),
   year: labelled({
     "1": "1st year", "2": "2nd year", "2_lateral": "2nd year (lateral entry)", "3": "3rd year", "4": "4th year", "5": "5th year",
   } satisfies Record<(typeof YEARS)[number], string>),

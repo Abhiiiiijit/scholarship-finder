@@ -26,7 +26,9 @@ Each rule is `{ group, field, op, value, quote, sourceUrl, ambiguous }`.
 - **sourceUrl**: the page or PDF the quote is from (often the same as `officialUrl`).
 - **ambiguous**: `true` when official sources disagree. Students then see "confirm on the official site".
 
-Fields the MVP does not ask (`fresh_or_renewal`, `cgpa`, `siblings_claiming`, `gap_years`, `listed_institute`) are fine to store; they show as "confirm on the official site".
+**Course scope.** Quote which courses the scheme is for with one rule on `course_level` (`"ug"`, `"pg"`, `"diploma"`: "post-matric", "degree"), `stream` (`"medical"`: "medical courses"), `course_tag` (`"professional"`) or `course` (named courses, codes from `src/domain/courses.ts`). A scheme with none of these is shown to B.E./B.Tech students only, so add one whenever the source covers more courses. If the source names no course, use the closest rule with `ambiguous: true`.
+
+Fields the MVP does not ask (`fresh_or_renewal`, `cgpa`, `graduation_pct`, `siblings_claiming`, `gap_years`, `listed_institute`) are fine to store; they show as "confirm on the official site".
 
 Also fill: `slug` (lowercase-hyphen), `trackerId`, `name`, `provider` (`CENTRAL`/`AICTE`/`STATE`/`PRIVATE`), `stateCode` (state schemes only), `source`, `appliesVia`, `sourceFormat`, `officialUrl`, `amountText`, `benefitTypes`, `documents` (from `DOCUMENTS` in `options.ts`), `cannotCombineWith`, `opensOn`, `deadline`, and `reviewNotes` for anything the matcher cannot check.
 

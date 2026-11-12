@@ -9,6 +9,7 @@ import { BackIcon, Column, Footnote, Screen } from "@/features/eligibility/compo
 import { Checking, LoadFailed, QuestionCard } from "@/features/eligibility/components/results";
 import { ShareButtons } from "@/features/eligibility/components/ShareButtons";
 import { LanguageSwitch } from "@/features/eligibility/components/LanguageSwitch";
+import { StudentThemeToggle } from "@/features/eligibility/components/StudentThemeToggle";
 import { formatDate, todayInIndia } from "@/lib/format";
 import { match, type GroupCheck, type RuleCheck } from "@/domain/match";
 import type { Profile } from "@/domain/profile";
@@ -36,7 +37,10 @@ export function SchemeView({ slug }: { slug: string }) {
             <BackIcon />
             {t("allResults")}
           </Link>
-          <LanguageSwitch />
+          <div className="flex items-center gap-2">
+            <LanguageSwitch />
+            <StudentThemeToggle />
+          </div>
         </div>
       </Column>
       <Column className="flex-1 gap-6 pt-2 pb-8 lg:pb-12">
@@ -110,7 +114,7 @@ function Scheme({ scheme, profile, update }: { scheme: SnapshotScheme; profile: 
   const factList = (className: string) => (
     <dl className={`m-0 grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-line bg-line ${className}`}>
       {facts.map(([k, v, detail]) => (
-        <div key={k} className="flex flex-col gap-0.5 bg-white px-3.5 py-3">
+        <div key={k} className="flex flex-col gap-0.5 bg-surface px-3.5 py-3">
           <dt className="text-xs leading-4 text-slate">{k}</dt>
           <dd className="m-0 text-[15px] leading-5 font-semibold">{v}</dd>
           {detail && <dd className="m-0 text-[13px] leading-[18px] text-slate">{detail}</dd>}
@@ -163,7 +167,7 @@ function Scheme({ scheme, profile, update }: { scheme: SnapshotScheme; profile: 
                 <h2 className="m-0 text-lg leading-6 font-semibold">{t("scheme.documentsTitle")}</h2>
                 <p className="m-0 text-[13px] leading-[18px] text-slate">{t("scheme.documentsIntro")}</p>
               </div>
-              <div className="flex flex-col rounded-[14px] border border-line bg-white">
+              <div className="flex flex-col rounded-[14px] border border-line bg-surface">
                 {documents.map((d) => (
                   <label key={d} className="flex min-h-12 cursor-pointer items-center gap-3 border-b border-line-soft px-4 py-2 text-[15px] leading-5 last:border-b-0">
                     <input type="checkbox" checked={ticks.includes(d)} onChange={(e) => toggle(d, e.target.checked)} className="size-5 flex-none accent-navy" />
@@ -185,7 +189,7 @@ function Scheme({ scheme, profile, update }: { scheme: SnapshotScheme; profile: 
               href={applyOnNsp ? NSP_URL : scheme.officialUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-[52px] items-center justify-center gap-2 rounded-xl bg-navy px-4 text-center text-[17px] font-semibold text-white no-underline hover:bg-ink print:hidden"
+              className="flex h-[52px] items-center justify-center gap-2 rounded-xl bg-navy px-4 text-center text-[17px] font-semibold text-on-fill no-underline hover:bg-ink print:hidden"
             >
               {applyOnNsp ? t("scheme.applyOnNsp") : closed ? t("scheme.checkOfficial") : pdf ? t("scheme.readRulesPdf") : t("scheme.apply")}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -226,7 +230,7 @@ function RuleGroup({ group, profile, update }: { group: GroupCheck; profile: Pro
   const locale = useLocale();
   const either = group.checks.length > 1;
   return (
-    <div className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-white p-4">
+    <div className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-surface p-4">
       {either && <div className="text-xs leading-4 font-semibold tracking-[0.06em] text-slate uppercase">{t("scheme.anyOne")}</div>}
       {group.checks.map((c, i) => {
         const result = rowResult(c);

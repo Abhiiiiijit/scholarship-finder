@@ -17,7 +17,9 @@
     "and": "{items} and {last}",
     "or": "{items} or {last}",
     "listSeparator": ", ",
-    "language": "Language"
+    "language": "Language",
+    "themeDark": "Switch to dark theme",
+    "themeLight": "Switch to light theme"
   },
   "landing": {
     "scope": "B.E./B.Tech · all states",

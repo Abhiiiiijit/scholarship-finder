@@ -21,7 +21,7 @@ export function StateFilter({ value }: { value: string }) {
           else next.delete("state");
           router.push(`${pathname}?${next}`);
         }}
-        className="min-h-10 rounded-full border border-field bg-white px-3 text-sm text-ink"
+        className="min-h-10 rounded-full border border-field bg-surface px-3 text-sm text-ink"
       >
         <option value="">All states</option>
         {STATES.map((s) => (

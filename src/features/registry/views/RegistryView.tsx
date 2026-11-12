@@ -93,7 +93,7 @@ export function RegistryView({
       {/* A phone gets one card per scheme; the six-column table needs a tablet or wider. */}
       <ul className="flex flex-col gap-2.5 md:hidden">
         {rows.map(({ scheme, ruleCount, quotedCount, courseRules, badge }) => (
-          <li key={scheme.id} className="flex flex-col gap-2 rounded-xl border border-line bg-white px-4 py-3.5 text-sm leading-5">
+          <li key={scheme.id} className="flex flex-col gap-2 rounded-xl border border-line bg-surface px-4 py-3.5 text-sm leading-5">
             <div className="flex items-start justify-between gap-3">
               <Link href={`/admin/schemes/${scheme.id}`} className="font-semibold text-navy hover:text-ink">
                 {scheme.trackerId && <span className="mr-2 font-mono text-slate">{scheme.trackerId}</span>}
@@ -123,13 +123,13 @@ export function RegistryView({
           </li>
         ))}
         {rows.length === 0 && (
-          <li className="rounded-xl border border-line bg-white px-4 py-8 text-center text-sm text-slate">
+          <li className="rounded-xl border border-line bg-surface px-4 py-8 text-center text-sm text-slate">
             {all.length === 0 ? "No schemes yet. Add the first one." : "No schemes match these filters."}
           </li>
         )}
       </ul>
 
-      <div className="overflow-x-auto rounded-xl border border-line bg-white max-md:hidden">
+      <div className="overflow-x-auto rounded-xl border border-line bg-surface max-md:hidden">
         <table className="w-full min-w-[860px] border-collapse text-sm leading-5">
           <thead>
             <tr className="text-left text-xs tracking-[0.04em] text-slate">
@@ -184,7 +184,7 @@ export function RegistryView({
 
 function Tile({ label, value, tone = "" }: { label: string; value: number; tone?: string }) {
   return (
-    <div className="flex flex-col gap-1.5 rounded-xl border border-line bg-white px-4 py-3.5">
+    <div className="flex flex-col gap-1.5 rounded-xl border border-line bg-surface px-4 py-3.5">
       <span className="text-[13px] text-slate">{label}</span>
       <b className={`text-2xl leading-7 ${tone}`}>{value}</b>
     </div>

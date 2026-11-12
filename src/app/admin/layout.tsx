@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ThemeScript } from "@/components/ui/ThemeScript";
 import { fontClasses } from "../fonts";
 import "../globals.css";
 
@@ -11,8 +12,11 @@ export const metadata: Metadata = {
 
 export default function AdminRootLayout({ children }: LayoutProps<"/admin">) {
   return (
-    <html lang="en" className={`${fontClasses} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-white font-sans text-zinc-900">{children}</body>
+    <html lang="en" className={`${fontClasses} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
+      <body className="flex min-h-full flex-col bg-surface font-sans text-ink">{children}</body>
     </html>
   );
 }

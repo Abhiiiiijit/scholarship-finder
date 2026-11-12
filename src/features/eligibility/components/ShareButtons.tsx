@@ -44,7 +44,7 @@ export function ShareButtons({ build, print = false }: { build: (base: string) =
   };
 
   const secondary =
-    "flex min-h-11 flex-1 items-center justify-center rounded-xl border border-field bg-white px-3 text-[15px] font-semibold text-navy hover:border-navy";
+    "flex min-h-11 flex-1 items-center justify-center rounded-xl border border-field bg-surface px-3 text-[15px] font-semibold text-navy hover:border-navy";
 
   return (
     <div className="flex flex-col gap-2 print:hidden">
@@ -54,7 +54,7 @@ export function ShareButtons({ build, print = false }: { build: (base: string) =
           e.preventDefault();
           window.open(`https://wa.me/?text=${encodeURIComponent(text())}`, "_blank", "noopener,noreferrer");
         }}
-        className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-pass px-4 text-base font-semibold text-white no-underline hover:opacity-90"
+        className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-pass px-4 text-base font-semibold text-on-fill no-underline hover:opacity-90"
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M4 20l1.3-3.9A8 8 0 1 1 8 18.8z" />

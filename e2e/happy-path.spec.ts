@@ -42,3 +42,16 @@ test("a student checks their eligibility and reads a scheme's rules", async ({ p
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("paatra.answers.v1") ?? "{}"));
   expect(saved).toMatchObject({ domicile_state: "MH", family_income: 900000, year: "1", class12_pct: 88.9 });
 });
+
+test("the theme follows the phone, and a pick from the header is remembered", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto("/");
+  const html = page.locator("html");
+  await expect(html).toHaveClass(/\bdark\b/);
+
+  await page.getByRole("button", { name: "Switch to light theme" }).click();
+  await expect(html).not.toHaveClass(/\bdark\b/);
+  await page.reload();
+  await expect(html).not.toHaveClass(/\bdark\b/);
+  await expect(page.getByRole("button", { name: "Switch to dark theme" })).toBeVisible();
+});

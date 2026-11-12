@@ -25,7 +25,7 @@ export default function Error({ error, retry }: { error: unknown; retry: () => v
         <button
           type="button"
           onClick={() => retry()}
-          className="flex h-[52px] w-full items-center justify-center rounded-xl bg-navy text-[17px] font-semibold text-white hover:bg-ink"
+          className="flex h-[52px] w-full items-center justify-center rounded-xl bg-navy text-[17px] font-semibold text-on-fill hover:bg-ink"
         >
           {t("common.tryAgain")}
         </button>

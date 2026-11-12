@@ -19,7 +19,7 @@ export default function NotFound() {
         </div>
         <Link
           href="/"
-          className="flex h-[52px] items-center justify-center rounded-xl bg-navy text-[17px] font-semibold text-white no-underline hover:bg-ink"
+          className="flex h-[52px] items-center justify-center rounded-xl bg-navy text-[17px] font-semibold text-on-fill no-underline hover:bg-ink"
         >
           {t("common.goToStart")}
         </Link>

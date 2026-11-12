@@ -28,7 +28,7 @@ export function LanguageSwitch() {
       <select
         value={current}
         onChange={(e) => switchTo(e.target.value as AppLocale)}
-        className="min-h-9 appearance-none rounded-full border border-line bg-white py-1 pr-8 pl-3 text-sm font-semibold text-navy hover:bg-line-soft focus-visible:outline-2 focus-visible:outline-navy"
+        className="min-h-9 appearance-none rounded-full border border-line bg-surface py-1 pr-8 pl-3 text-sm font-semibold text-navy hover:bg-line-soft focus-visible:outline-2 focus-visible:outline-navy"
       >
         {LOCALES.map((l) => (
           <option key={l} value={l} lang={l}>

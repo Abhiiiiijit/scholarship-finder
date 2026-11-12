@@ -89,7 +89,7 @@ export function UnlockQuestions({
   if (rows.length === 0) return null;
 
   return (
-    <div className="flex flex-col rounded-[14px] border border-line bg-white">
+    <div className="flex flex-col rounded-[14px] border border-line bg-surface">
       {rows.map((r) => (
         <UnlockRow
           key={r.key}

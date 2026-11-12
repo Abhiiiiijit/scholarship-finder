@@ -145,7 +145,7 @@ function NotLive({
             </>
           }
         >
-          <div className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-white p-4">
+          <div className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-surface p-4">
             <div className="text-[15px] leading-[21px] font-semibold">{t("stillSee")}</div>
             <ul className="m-0 flex flex-col gap-1 pl-5 text-[15px] leading-[21px] text-muted">
               <li>{t("stillCentral")}</li>

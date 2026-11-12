@@ -3,7 +3,7 @@ import type { ComponentProps, ReactNode } from "react";
 // TextField and SelectField from the screen spec, sized for the admin screens.
 
 const control =
-  "h-[42px] w-full rounded-lg border bg-white px-2.5 text-[15px] text-ink outline-none focus:border-navy focus:ring-2 focus:ring-navy/20";
+  "h-[42px] w-full rounded-lg border bg-surface px-2.5 text-[15px] text-ink outline-none focus:border-navy focus:ring-2 focus:ring-navy/20";
 
 function Shell({ id, label, hint, error, children }: { id: string; label: string; hint?: string; error?: string; children: ReactNode }) {
   return (

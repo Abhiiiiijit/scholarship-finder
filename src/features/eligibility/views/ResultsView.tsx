@@ -8,6 +8,7 @@ import { Alert } from "@/components/ui/Alert";
 import { Column, Footnote, Screen } from "@/features/eligibility/components/layout";
 import { Checking, CountTile, LoadFailed, QuestionCard, ResultCard } from "@/features/eligibility/components/results";
 import { LanguageSwitch } from "@/features/eligibility/components/LanguageSwitch";
+import { StudentThemeToggle } from "@/features/eligibility/components/StudentThemeToggle";
 import { UNLOCK_FIELDS, UnlockQuestions, unansweredUnlocks, type UnlockKey } from "@/features/eligibility/components/Unlocks";
 import { formatDate, formatINR, todayInIndia } from "@/lib/format";
 import type { SchemeMatch } from "@/domain/match";
@@ -68,6 +69,7 @@ export function ResultsView() {
           <h1 className="m-0 text-2xl leading-[30px] font-semibold lg:text-[32px] lg:leading-10">{results ? t("results.title") : t("results.checkingTitle")}</h1>
           <div className="flex items-center gap-1">
             <LanguageSwitch />
+            <StudentThemeToggle />
             <Link href="/check/basics" className="flex min-h-11 items-center text-sm font-semibold text-navy">
               {t("common.editAnswers")}
             </Link>
@@ -242,7 +244,7 @@ function Found({
         <button
           type="button"
           onClick={() => setAllQuestions(true)}
-          className="min-h-11 rounded-[10px] border border-field bg-white px-3 text-[15px] font-semibold text-navy hover:border-navy"
+          className="min-h-11 rounded-[10px] border border-field bg-surface px-3 text-[15px] font-semibold text-navy hover:border-navy"
         >
           {t("results.moreQuestions", { count: questions.length - FIRST_QUESTIONS })}
         </button>
@@ -272,7 +274,7 @@ function Found({
 
   // Collapsed, so closed schemes never crowd out the ones open now.
   const closed = results.closed.length > 0 && (
-    <details id="closed" className="flex flex-col rounded-[14px] border border-line bg-white px-4 py-3.5">
+    <details id="closed" className="flex flex-col rounded-[14px] border border-line bg-surface px-4 py-3.5">
       <summary className="min-h-6 cursor-pointer text-[15px] leading-[22px] font-semibold">
         {t("results.closedGroup", { count: results.closed.length })}
       </summary>
@@ -310,7 +312,7 @@ function Found({
 
   // Shown once something fits; a student who is still answering has nothing to send yet.
   const share = !nothing && (
-    <section className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-white p-4">
+    <section className="flex flex-col gap-2.5 rounded-[14px] border border-line bg-surface p-4">
       <div className="flex flex-col gap-0.5">
         <h2 className="m-0 text-[17px] leading-6 font-semibold">{t("share.resultsTitle")}</h2>
         <p className="m-0 text-[13px] leading-[18px] text-slate">{t("share.resultsIntro")}</p>
@@ -374,7 +376,7 @@ function WhyNot({ results }: { results: Results }) {
   const t = useTranslations();
   if (results.farMisses.length === 0 && results.hidden.length === 0) return null;
   return (
-    <details className="rounded-[14px] border border-line bg-white px-4 py-3.5">
+    <details className="rounded-[14px] border border-line bg-surface px-4 py-3.5">
       <summary className="min-h-6 cursor-pointer text-[15px] leading-[22px] font-semibold">{t("results.whyNot")}</summary>
       <div className="mt-2.5 flex flex-col gap-2.5 text-sm leading-5 text-slate">
         {results.farMisses.map((m) => (

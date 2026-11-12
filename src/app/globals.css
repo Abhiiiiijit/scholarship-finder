@@ -1,23 +1,85 @@
 @import "tailwindcss";
 
-/* Tokens from the design's UI kit. Components use these names, never raw hex. */
+/* Dark theme: `.dark` on <html>, set before paint by ThemeScript from the saved pick or the
+   phone's own setting. Components never write dark: variants for colour; the tokens below flip. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tokens from the design's UI kit, as variables so each theme sets its own values. */
+:root {
+  color-scheme: light;
+  --ink: #13213c;
+  --navy: #1b3a6b;
+  --slate: #4a5363;
+  --field: #b9c0cb;
+  --line: #dde1e7;
+  --line-soft: #eaedf2;
+  --ground: #f4f5f7;
+  --surface: #ffffff;
+  --on-fill: #ffffff;
+  --muted: #2e3746;
+  --disabled: #c3c9d3;
+  --pass: #0b5d4b;
+  --pass-tint: #ddf0ea;
+  --warn: #8a4300;
+  --warn-tint: #fce9d2;
+  --warn-row: #fff7ec;
+  --info: #1d4e89;
+  --info-tint: #e3ecf8;
+  /* The admin bar stays dark in both themes. */
+  --bar: #13213c;
+  --bar-soft: #2c3e60;
+  --bar-muted: #c9d3e3;
+}
+
+/* Dark: navy ground, light text; fills (buttons, chips, badges) turn light with dark text on them,
+   so the same bg-navy + text-on-fill pairs keep their contrast. */
+.dark {
+  color-scheme: dark;
+  --ink: #e8edf5;
+  --navy: #9dc0f2;
+  --slate: #a6b1c2;
+  --field: #4b5a74;
+  --line: #2b3954;
+  --line-soft: #202d45;
+  --ground: #0c1424;
+  --surface: #152038;
+  --on-fill: #0c1424;
+  --muted: #c7cfdb;
+  --disabled: #3a4760;
+  --pass: #5fd0a2;
+  --pass-tint: #133a2f;
+  --warn: #f2b56b;
+  --warn-tint: #3d2912;
+  --warn-row: #2a1f12;
+  --info: #a8c7f2;
+  --info-tint: #18294a;
+  --bar: #070d19;
+  --bar-soft: #22314d;
+  --bar-muted: #b4c0d3;
+}
+
 @theme inline {
   --font-sans: var(--font-plex-sans), var(--font-plex-devanagari), sans-serif;
   --font-mono: var(--font-plex-mono);
-  --color-ink: #13213c;
-  --color-navy: #1b3a6b;
-  --color-slate: #4a5363;
-  --color-field: #b9c0cb;
-  --color-line: #dde1e7;
-  --color-line-soft: #eaedf2;
-  --color-ground: #f4f5f7;
-  --color-muted: #2e3746;
-  --color-disabled: #c3c9d3;
-  --color-pass: #0b5d4b;
-  --color-pass-tint: #ddf0ea;
-  --color-warn: #8a4300;
-  --color-warn-tint: #fce9d2;
-  --color-warn-row: #fff7ec;
-  --color-info: #1d4e89;
-  --color-info-tint: #e3ecf8;
+  --color-ink: var(--ink);
+  --color-navy: var(--navy);
+  --color-slate: var(--slate);
+  --color-field: var(--field);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-on-fill: var(--on-fill);
+  --color-muted: var(--muted);
+  --color-disabled: var(--disabled);
+  --color-pass: var(--pass);
+  --color-pass-tint: var(--pass-tint);
+  --color-warn: var(--warn);
+  --color-warn-tint: var(--warn-tint);
+  --color-warn-row: var(--warn-row);
+  --color-info: var(--info);
+  --color-info-tint: var(--info-tint);
+  --color-bar: var(--bar);
+  --color-bar-soft: var(--bar-soft);
+  --color-bar-muted: var(--bar-muted);
 }

@@ -332,7 +332,7 @@ export function SchemeEditorView({ initial }: { initial?: EditorScheme }) {
         </div>
 
         <aside className="flex min-w-0 flex-[1_1_320px] flex-col gap-4">
-          <section className="flex flex-col gap-3 rounded-xl border border-line bg-white p-[18px]">
+          <section className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-[18px]">
             <h2 className="text-base leading-[22px] font-semibold">Test with the example student</h2>
             <div className="font-mono text-xs leading-[17px] text-slate">
               {exampleStudent.domicile_state} · {formatINR(exampleStudent.family_income!)} · B.Tech yr {exampleStudent.year} · Class 12{" "}
@@ -357,7 +357,7 @@ export function SchemeEditorView({ initial }: { initial?: EditorScheme }) {
             )}
           </section>
 
-          <section className="flex flex-col gap-3 rounded-xl border border-line bg-white p-[18px]">
+          <section className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-[18px]">
             <h2 className="text-base leading-[22px] font-semibold">Before publishing</h2>
             <ul className="flex flex-col gap-2">
               <RuleRow result={draft.officialUrl ? "pass" : "fail"} text="Official link added" detail="Checked to open when you publish" />
@@ -412,7 +412,7 @@ function gapNote(c: RuleCheck, isNearMiss: boolean): string | undefined {
 
 function Section({ title, intro, action, children }: { title: string; intro?: string; action?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col gap-4 rounded-xl border border-line bg-white p-5">
+    <section className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-5">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div className="flex flex-col gap-0.5">
           <h2 className="text-[17px] leading-6 font-semibold">{title}</h2>

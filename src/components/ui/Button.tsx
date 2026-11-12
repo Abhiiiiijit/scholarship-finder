@@ -4,8 +4,8 @@ import type { ComponentProps } from "react";
 type Variant = "primary" | "secondary";
 
 const styles: Record<Variant, string> = {
-  primary: "bg-navy text-white hover:bg-ink disabled:bg-disabled disabled:text-muted",
-  secondary: "border border-navy bg-white text-navy hover:bg-ground disabled:border-disabled disabled:text-muted",
+  primary: "bg-navy text-on-fill hover:bg-ink disabled:bg-disabled disabled:text-muted",
+  secondary: "border border-navy bg-surface text-navy hover:bg-ground disabled:border-disabled disabled:text-muted",
 };
 const base =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] px-4 text-[15px] font-semibold disabled:cursor-not-allowed";

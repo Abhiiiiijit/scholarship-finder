@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { LOCALES } from "@/i18n/locales";
+import { ThemeScript } from "@/components/ui/ThemeScript";
 import { fontClasses } from "../fonts";
 import "../globals.css";
 
@@ -30,15 +31,21 @@ const ICONS: Metadata["icons"] = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1B3A6B",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#1B3A6B" },
+    { media: "(prefers-color-scheme: dark)", color: "#0C1424" },
+  ],
 };
 
 export default async function RootLayout({ children, params }: LayoutProps<"/[locale]">) {
   const { locale } = await params;
   if (!hasLocale(LOCALES, locale)) notFound();
   return (
-    <html lang={locale} className={`${fontClasses} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-white font-sans text-zinc-900">
+    <html lang={locale} className={`${fontClasses} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
+      <body className="flex min-h-full flex-col bg-surface font-sans text-ink">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>

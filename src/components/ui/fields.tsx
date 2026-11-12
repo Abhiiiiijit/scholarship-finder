@@ -13,7 +13,7 @@ function Shell({ id, label, hint, error, children }: { id: string; label: string
       </label>
       {children}
       {(error || hint) && (
-        <span id={`${id}-hint`} className={`text-[13px] leading-[18px] ${error ? "text-warn" : "text-slate"}`}>
+        <span id={`${id}-hint`} className={`mt-0.5 text-[13px] leading-[18px] ${error ? "text-warn" : "text-slate"}`}>
           {error ?? hint}
         </span>
       )}
@@ -70,7 +70,7 @@ export function SelectField({
       <select
         id={fieldId}
         aria-invalid={error ? true : undefined}
-        className={`${control} ${error ? "border-warn" : "border-field"}`}
+        className={`${control} select-chevron pr-10 ${error ? "border-warn" : "border-field"}`}
         {...select}
       >
         {placeholder !== undefined && <option value="">{placeholder}</option>}

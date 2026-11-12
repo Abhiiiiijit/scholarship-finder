@@ -172,7 +172,7 @@ export function TextField({
         {suffix && <span className="text-base text-slate">{suffix}</span>}
       </div>
       {note && (
-        <div id={`${id}-note`} className={`text-[13px] leading-[18px] ${error ? "text-warn" : "text-slate"}`}>
+        <div id={`${id}-note`} className={`mt-0.5 text-[13px] leading-[18px] ${error ? "text-warn" : "text-slate"}`}>
           {note}
         </div>
       )}
@@ -204,7 +204,7 @@ export function SelectField({
       <select
         id={id}
         aria-describedby={hint ? `${id}-note` : undefined}
-        className="h-12 rounded-[10px] border border-field bg-white px-3 text-base text-ink outline-none focus:border-navy focus:ring-2 focus:ring-navy/20"
+        className="select-chevron h-12 rounded-[10px] border border-field bg-white px-3 pr-10 text-base text-ink outline-none focus:border-navy focus:ring-2 focus:ring-navy/20"
         {...select}
       >
         {placeholder !== undefined && <option value="">{placeholder}</option>}
@@ -219,7 +219,7 @@ export function SelectField({
         )}
       </select>
       {hint && (
-        <div id={`${id}-note`} className="text-[13px] leading-[18px] text-slate">
+        <div id={`${id}-note`} className="mt-0.5 text-[13px] leading-[18px] text-slate">
           {hint}
         </div>
       )}

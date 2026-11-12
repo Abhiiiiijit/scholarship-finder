@@ -45,6 +45,8 @@ export const scholarships = pgTable(
     stateCode: text(),
     officialUrl: text().notNull(),
     amountText: text(),
+    // A rough "about ₹X a year" so families can compare schemes; amountText keeps the exact wording.
+    yearlyAmount: integer(),
     benefitTypes: jsonb().$type<string[]>().notNull().default([]),
     documents: jsonb().$type<string[]>().notNull().default([]),
     // Tracker ids of schemes this one cannot be combined with.
@@ -53,6 +55,9 @@ export const scholarships = pgTable(
     reviewNotes: text(),
     opensOn: date(),
     deadline: date(),
+    // The months applications usually open and close (1-12), shown while this cycle's dates are unknown.
+    windowFrom: integer(),
+    windowTo: integer(),
     status: text().notNull().default("DRAFT"),
     // Results hide anything not verified in the last 90 days.
     lastVerifiedAt: timestamp({ withTimezone: true }),
@@ -63,6 +68,8 @@ export const scholarships = pgTable(
     check("scholarships_provider_check", sql`${t.provider} IN (${inList(PROVIDERS)})`),
     check("scholarships_status_check", sql`${t.status} IN (${inList(STATUSES)})`),
     check("scholarships_source_format_check", sql`${t.sourceFormat} IN (${inList(SOURCE_FORMATS)})`),
+    check("scholarships_yearly_amount_check", sql`${t.yearlyAmount} > 0`),
+    check("scholarships_window_check", sql`(${t.windowFrom} IS NULL) = (${t.windowTo} IS NULL) AND ${t.windowFrom} BETWEEN 1 AND 12 AND ${t.windowTo} BETWEEN 1 AND 12`),
     index("scholarships_state_idx").on(t.stateCode),
   ],
 );

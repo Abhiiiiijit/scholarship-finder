@@ -12,7 +12,7 @@ import type { SchemeDraftInput } from "@/domain/registry/scheme-input";
 type DraftRule = SchemeDraftInput["rules"][number];
 
 // Optional editor fields stay optional here (their input type is unknown because of the blank-to-null step).
-type OptionalKeys = "stateCode" | "source" | "appliesVia" | "sourceFormat" | "amountText" | "reviewNotes" | "opensOn" | "deadline";
+type OptionalKeys = "stateCode" | "source" | "appliesVia" | "sourceFormat" | "amountText" | "yearlyAmount" | "reviewNotes" | "opensOn" | "deadline" | "windowFrom" | "windowTo";
 type SeedInput = Omit<SchemeDraftInput, OptionalKeys | "trackerId"> & Partial<Record<OptionalKeys, string | null>>;
 
 export interface SeedScheme extends SeedInput {

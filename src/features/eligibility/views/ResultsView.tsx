@@ -18,7 +18,7 @@ import { fieldLabel, gapText, reasonRows } from "@/features/eligibility/lib/expl
 import { joinList, type T } from "@/features/eligibility/lib/i18n";
 import { labelOf } from "@/features/eligibility/lib/labels";
 import { answer, questionFor } from "@/features/eligibility/lib/questions";
-import { buildResults, counts, deadlineLine, mainReason, stateSchemeCounts, type Results } from "@/features/eligibility/lib/results";
+import { amountLine, buildResults, byPay, counts, deadlineLine, mainReason, stateSchemeCounts, type Results } from "@/features/eligibility/lib/results";
 import { resultsMessage } from "@/features/eligibility/lib/share";
 import { ShareButtons } from "@/features/eligibility/components/ShareButtons";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
@@ -100,7 +100,7 @@ function providerLabel(t: T, s: SnapshotScheme): string {
 }
 
 function meta(t: T, s: SnapshotScheme): string {
-  return [providerLabel(t, s), s.amountText].filter(Boolean).join(" · ");
+  return [providerLabel(t, s), amountLine(t, s)].filter(Boolean).join(" · ");
 }
 
 // `closed` shows a scheme whose deadline has passed: a grey "Closed" badge instead of its match.
@@ -220,7 +220,7 @@ function Found({
     <Group id="eligible" title={t("results.eligibleGroup")}>
       {eligibleState >= 2 && <p className="m-0 text-[13px] leading-[18px] text-slate">{t("results.overlapNote")}</p>}
       <Cards>
-        {of("eligible").map((m) => (
+        {byPay(of("eligible")).map((m) => (
           <Card key={m.scheme.slug} m={m} profile={profile} today={results.today} />
         ))}
       </Cards>

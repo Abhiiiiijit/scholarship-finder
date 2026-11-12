@@ -8,6 +8,7 @@ import { STATE_BY_CODE, stateFieldKeys } from "@/domain/states";
 const blankToNull = (v: unknown) => (v === undefined || (typeof v === "string" && v.trim() === "") ? null : v);
 const optionalText = z.preprocess(blankToNull, z.string().trim().nullable());
 const optionalDate = z.preprocess(blankToNull, z.iso.date().nullable());
+const optionalMonth = z.preprocess(blankToNull, z.coerce.number().int().min(1).max(12).nullable());
 
 export const draftRuleSchema = z.intersection(
   ruleValueSchema,
@@ -30,12 +31,19 @@ export const schemeDraftSchema = z
     sourceFormat: z.preprocess(blankToNull, z.enum(["HTML", "PDF"]).nullable()),
     officialUrl: z.url("Link the scheme's official page"),
     amountText: optionalText,
+    // Rupees a year, rounded: what a family compares. Leave empty when it can't be said honestly.
+    yearlyAmount: z.preprocess(
+      blankToNull,
+      z.coerce.number({ error: "Rupees a year, digits only" }).int("Whole rupees").positive("More than zero").nullable(),
+    ),
     benefitTypes: z.array(z.string()).default([]),
     documents: z.array(z.string()).default([]),
     cannotCombineWith: z.array(z.string().trim().min(1)).default([]),
     reviewNotes: optionalText,
     opensOn: optionalDate,
     deadline: optionalDate,
+    windowFrom: optionalMonth,
+    windowTo: optionalMonth,
     rules: z.array(draftRuleSchema),
   })
   .superRefine((s, ctx) => {
@@ -47,6 +55,9 @@ export const schemeDraftSchema = z
     }
     if (s.opensOn && s.deadline && s.opensOn > s.deadline) {
       ctx.addIssue({ code: "custom", path: ["deadline"], message: "The last date is before the opening date" });
+    }
+    if ((s.windowFrom === null) !== (s.windowTo === null)) {
+      ctx.addIssue({ code: "custom", path: [s.windowFrom === null ? "windowFrom" : "windowTo"], message: "Pick both months, or neither" });
     }
     const allowed = new Set([...Object.keys(RULE_FIELDS), ...stateFieldKeys(s.stateCode)]);
     s.rules.forEach((r, i) => {

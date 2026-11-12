@@ -18,6 +18,7 @@ import { useDocumentTicks } from "@/features/eligibility/store/documents";
 import { displayQuote, gapText, ruleText, yourAnswer } from "@/features/eligibility/lib/explain";
 import { answer, questionFor } from "@/features/eligibility/lib/questions";
 import { schemeMessage } from "@/features/eligibility/lib/share";
+import { amountLine, deadlineLine } from "@/features/eligibility/lib/results";
 import { useAnswers } from "@/features/eligibility/hooks/use-answers";
 import { useSnapshot } from "@/features/eligibility/hooks/use-snapshot";
 import { STATE_BY_CODE } from "@/domain/states";
@@ -98,19 +99,21 @@ function Scheme({ scheme, profile, update }: { scheme: SnapshotScheme; profile: 
   const pdf = isPdf(scheme.officialUrl);
   const applyOnNsp = pdf && scheme.appliesVia === "NSP" && !closed;
 
-  const facts = [
-    [t("scheme.amount"), scheme.amountText ?? t("scheme.seeOfficial")],
-    [t("scheme.deadline"), scheme.deadline ? formatDate(scheme.deadline, locale) : t("scheme.deadlineUnknown")],
+  // With a yearly figure, the amount leads with "About ₹X a year" and keeps the scheme's own wording below it.
+  const facts: [string, string, string?][] = [
+    [t("scheme.amount"), amountLine(t, scheme) ?? t("scheme.seeOfficial"), scheme.yearlyAmount ? (scheme.amountText ?? undefined) : undefined],
+    [t("scheme.deadline"), scheme.deadline ? formatDate(scheme.deadline, locale) : scheme.opensOn || scheme.usualWindow ? deadlineLine(t, locale, scheme, today).text : t("scheme.deadlineUnknown")],
     [t("scheme.type"), type],
     [t("scheme.applyThrough"), applyVia ?? t("scheme.officialSite")],
   ];
 
   const factList = (className: string) => (
     <dl className={`m-0 grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-line bg-line ${className}`}>
-      {facts.map(([k, v]) => (
+      {facts.map(([k, v, detail]) => (
         <div key={k} className="flex flex-col gap-0.5 bg-white px-3.5 py-3">
           <dt className="text-xs leading-4 text-slate">{k}</dt>
           <dd className="m-0 text-[15px] leading-5 font-semibold">{v}</dd>
+          {detail && <dd className="m-0 text-[13px] leading-[18px] text-slate">{detail}</dd>}
         </div>
       ))}
     </dl>

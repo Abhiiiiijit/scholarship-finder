@@ -90,7 +90,7 @@ export function BasicsView() {
           />
 
           {undo && (
-            <div role="status" className="flex items-center justify-between gap-3 rounded-xl bg-ink px-4 py-2 text-sm text-white">
+            <div role="status" className="flex items-center justify-between gap-3 rounded-xl bg-ink px-4 py-2 text-sm text-on-fill">
               <span>{t("basics.cleared", { state: undo.from })}</span>
               <button
                 type="button"

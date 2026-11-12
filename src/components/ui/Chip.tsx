@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 const base = "inline-flex min-h-10 items-center rounded-full border px-3.5 text-sm";
-const on = "border-navy bg-navy text-white";
-const off = "border-field bg-white text-ink hover:border-navy";
+const on = "border-navy bg-navy text-on-fill";
+const off = "border-field bg-surface text-ink hover:border-navy";
 
 export function ChipLink({ label, selected, href }: { label: string; selected: boolean; href: string }) {
   return (

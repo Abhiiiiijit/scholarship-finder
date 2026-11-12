@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { Brand, Column, Footnote, joinList, LanguageSwitch, Screen, StartButton, stateLabel } from "@/features/eligibility";
+import { Brand, Column, Footnote, joinList, LanguageSwitch, Screen, StudentThemeToggle, StartButton, stateLabel } from "@/features/eligibility";
 import { STATES } from "@/domain/states";
 
 // S01 Landing.
@@ -20,8 +20,9 @@ export default function Landing() {
           <div className="mr-auto">
             <Brand />
           </div>
-          <div className="sm:order-last">
+          <div className="flex items-center gap-2 sm:order-last">
             <LanguageSwitch />
+            <StudentThemeToggle />
           </div>
           <div className="basis-full sm:basis-auto">
             <span className="inline-flex rounded-full border border-disabled px-3 py-1 text-xs leading-4 text-slate">{t("landing.scope")}</span>
@@ -48,7 +49,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <ul className="m-0 flex list-none flex-col rounded-[14px] border border-line bg-white p-0">
+          <ul className="m-0 flex list-none flex-col rounded-[14px] border border-line bg-surface p-0">
             {TRUST.map((item) => (
               <li key={item.key} className="flex items-start gap-3 border-b border-line-soft px-4 py-3.5 last:border-b-0">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="mt-px flex-none text-navy">

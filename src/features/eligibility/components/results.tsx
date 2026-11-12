@@ -40,7 +40,7 @@ export function ResultCard({
 }) {
   const t = useTranslations();
   return (
-    <article className="flex h-full flex-col gap-3 rounded-[14px] border border-line bg-white p-4">
+    <article className="flex h-full flex-col gap-3 rounded-[14px] border border-line bg-surface p-4">
       <div className="flex flex-col items-start gap-1.5">
         <StatusBadge status={status} label={badgeLabel ?? t(`status.${status}`)} />
         <h3 className="m-0 text-lg leading-6 font-semibold">{schemeName}</h3>
@@ -82,7 +82,7 @@ export function QuestionCard({
   const t = useTranslations("results");
   const [pending, setPending] = useState<number>();
   return (
-    <div className="flex flex-col gap-2 rounded-[10px] bg-white p-3">
+    <div className="flex flex-col gap-2 rounded-[10px] bg-surface p-3">
       <div className="text-[15px] leading-5 font-semibold">{question.question}</div>
       {question.hint && <div className="text-[13px] leading-[18px] text-slate">{question.hint}</div>}
       <div className="text-[13px] leading-[18px] text-slate">{why}</div>
@@ -93,7 +93,7 @@ export function QuestionCard({
               key={o.value}
               type="button"
               onClick={() => onAnswer(o.value)}
-              className="min-h-11 rounded-[10px] border border-field bg-white px-3 py-2 text-[15px] leading-5 text-ink hover:border-navy"
+              className="min-h-11 rounded-[10px] border border-field bg-surface px-3 py-2 text-[15px] leading-5 text-ink hover:border-navy"
             >
               {o.label}
             </button>
@@ -110,7 +110,7 @@ export function QuestionCard({
             type="button"
             disabled={pending === undefined}
             onClick={() => pending !== undefined && onAnswer(pending)}
-            className="min-h-11 rounded-[10px] bg-navy px-4 text-[15px] font-semibold text-white disabled:bg-disabled disabled:text-muted"
+            className="min-h-11 rounded-[10px] bg-navy px-4 text-[15px] font-semibold text-on-fill disabled:bg-disabled disabled:text-muted"
           >
             {t("check")}
           </button>
@@ -148,7 +148,7 @@ export function Checking({ sources }: { sources?: string }) {
         {t("line", { sources: sources ?? t("schemeRules") })}
       </div>
       {[0, 1].map((i) => (
-        <div key={i} className="flex animate-pulse flex-col gap-3 rounded-[14px] border border-line bg-white p-4 motion-reduce:animate-none">
+        <div key={i} className="flex animate-pulse flex-col gap-3 rounded-[14px] border border-line bg-surface p-4 motion-reduce:animate-none">
           {bar("w-24", "h-5")}
           {bar("w-4/5", "h-[22px]")}
           {bar("w-3/5", "h-4")}
@@ -184,7 +184,7 @@ export function LoadFailed({ reason, onRetry }: { reason: "offline" | "slow" | "
       <button
         type="button"
         onClick={onRetry}
-        className="flex h-[52px] w-full items-center justify-center rounded-xl bg-navy text-[17px] font-semibold text-white hover:bg-ink"
+        className="flex h-[52px] w-full items-center justify-center rounded-xl bg-navy text-[17px] font-semibold text-on-fill hover:bg-ink"
       >
         {t("common.tryAgain")}
       </button>

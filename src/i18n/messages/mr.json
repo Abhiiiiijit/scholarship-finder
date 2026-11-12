@@ -17,7 +17,9 @@
     "and": "{items} आणि {last}",
     "or": "{items} किंवा {last}",
     "listSeparator": ", ",
-    "language": "भाषा"
+    "language": "भाषा",
+    "themeDark": "डार्क थीमवर जा",
+    "themeLight": "लाइट थीमवर जा"
   },
   "landing": {
     "scope": "B.E./B.Tech · सर्व राज्ये",

@@ -8,5 +8,6 @@ export { StartButton } from "./components/StartButton";
 export { Brand, Column, Footnote, Screen } from "./components/layout";
 export { Checking } from "./components/results";
 export { LanguageSwitch } from "./components/LanguageSwitch";
+export { StudentThemeToggle } from "./components/StudentThemeToggle";
 export { joinList } from "./lib/i18n";
 export { stateLabel } from "./lib/domain-labels";

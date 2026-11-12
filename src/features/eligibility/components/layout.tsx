@@ -2,6 +2,7 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { LanguageSwitch } from "./LanguageSwitch";
+import { StudentThemeToggle } from "./StudentThemeToggle";
 
 // Page chrome for the student screens: a column on the grey ground, StepHeader and StickyCTA from
 // the screen spec, and the Paatra mark. Phones get the designed single column; wider screens get a
@@ -43,7 +44,9 @@ export function Brand() {
   return (
     <Link href="/" className="flex items-center gap-2 text-[17px] font-semibold tracking-tight text-ink no-underline">
       {/* eslint-disable-next-line @next/next/no-img-element -- a 28px SVG mark needs no optimising */}
-      <img src="/brand/mark-light.svg" alt="" width={28} height={28} />
+      <img src="/brand/mark-light.svg" alt="" width={28} height={28} className="dark:hidden" />
+      {/* eslint-disable-next-line @next/next/no-img-element -- as above, the light-on-dark mark */}
+      <img src="/brand/mark-dark.svg" alt="" width={28} height={28} className="hidden dark:block" />
       Paatra
     </Link>
   );
@@ -67,6 +70,7 @@ export function StepHeader({ label, progress, backHref }: { label: string; progr
         </Link>
         <div className="flex-1 text-sm text-slate">{label}</div>
         <LanguageSwitch />
+        <StudentThemeToggle />
       </div>
       <div
         role="progressbar"
@@ -83,7 +87,7 @@ export function StepHeader({ label, progress, backHref }: { label: string; progr
 }
 
 const cta =
-  "flex h-[52px] w-full items-center justify-center rounded-xl bg-navy text-[17px] font-semibold text-white no-underline hover:bg-ink";
+  "flex h-[52px] w-full items-center justify-center rounded-xl bg-navy text-[17px] font-semibold text-on-fill no-underline hover:bg-ink";
 
 export function StickyCTA({
   label,
@@ -99,7 +103,7 @@ export function StickyCTA({
   note?: string;
 }) {
   return (
-    <div className="sticky bottom-0 border-t border-line bg-white pt-4 pb-6 md:py-4">
+    <div className="sticky bottom-0 border-t border-line bg-surface pt-4 pb-6 md:py-4">
       <Column className="gap-2 md:flex-row-reverse md:items-center md:justify-between md:gap-6">
         {href && !disabled ? (
           <Link href={href} onClick={onClick} className={`${cta} md:w-80`}>

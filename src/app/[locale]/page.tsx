@@ -15,12 +15,17 @@ export default function Landing() {
   return (
     <Screen>
       <Column className="flex-1 gap-7 pt-5 pb-6 lg:gap-10 lg:pb-12">
-        <header className="flex items-center justify-between">
-          <Brand />
-          <div className="flex items-center gap-2">
+        {/* Phone: the scope chip drops to its own row under the logo; from sm it sits before the language. */}
+        <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <div className="mr-auto">
+            <Brand />
+          </div>
+          <div className="flex items-center gap-2 sm:order-last">
             <LanguageSwitch />
             <StudentThemeToggle />
-            <span className="rounded-full border border-disabled px-2.5 py-1 text-xs leading-4 text-slate">{t("landing.scope")}</span>
+          </div>
+          <div className="basis-full sm:basis-auto">
+            <span className="inline-flex rounded-full border border-disabled px-3 py-1 text-xs leading-4 text-slate">{t("landing.scope")}</span>
           </div>
         </header>
 

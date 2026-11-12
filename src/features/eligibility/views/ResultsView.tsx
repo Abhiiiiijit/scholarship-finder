@@ -65,12 +65,13 @@ export function ResultsView() {
   return (
     <Screen>
       <Column className="gap-2.5 pt-5 lg:pt-10">
-        <div className="flex items-center justify-between">
+        {/* Phone: language and Edit answers sit in a row above the title, which has no room beside them. */}
+        <div className="flex flex-col-reverse gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <h1 className="m-0 text-2xl leading-[30px] font-semibold lg:text-[32px] lg:leading-10">{results ? t("results.title") : t("results.checkingTitle")}</h1>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-3 self-end sm:self-auto">
             <LanguageSwitch />
             <StudentThemeToggle />
-            <Link href="/check/basics" className="flex min-h-11 items-center text-sm font-semibold text-navy">
+            <Link href="/check/basics" className="flex min-h-11 items-center text-sm font-semibold whitespace-nowrap text-navy">
               {t("common.editAnswers")}
             </Link>
           </div>

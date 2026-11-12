@@ -83,3 +83,20 @@
   --color-bar-soft: var(--bar-soft);
   --color-bar-muted: var(--bar-muted);
 }
+
+/* Native selects with the browser arrow drawn in, so the chevron sits 14px in from the edge instead of
+   against it, and long option text stops before the chevron (pair it with pr-10). Used by every select except the
+   language pill, which draws its own. */
+@utility select-chevron {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%231b3a6b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-position: right 0.875rem center;
+  background-repeat: no-repeat;
+  background-size: 0.75rem;
+  text-overflow: ellipsis;
+}
+
+/* The chevron is an image, so it can't read a variable: the dark theme draws it in dark-theme navy. */
+.dark .select-chevron {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%239dc0f2' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}

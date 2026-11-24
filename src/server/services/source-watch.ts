@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { decideScheme, type PageResult } from "@/domain/sources/decide";
 import { rules, scholarships, sources } from "@/server/db/schema";
 import type { Db } from "@/server/db/types";
-import { syncSources, watchedUrls } from "@/server/repositories/source-repo";
+import { insertRun, syncSources, watchedUrls } from "@/server/repositories/source-repo";
 import { writeSnapshot } from "@/server/repositories/snapshot-repo";
 import { fetchPage } from "./page-fetch";
 
@@ -17,24 +17,41 @@ export const WATCHER = "source-check";
 export interface WatchSummary {
   pages: { url: string; status: PageResult["status"]; reason?: string }[];
   refreshed: string[];
-  deadlines: { slug: string; from: string | null; to: string }[];
-  flagged: string[];
-  unflagged: string[];
+  deadlines: { slug: string; name: string; from: string | null; to: string }[];
+  flagged: RuleNote[];
+  unflagged: RuleNote[];
   notes: { slug: string; note: string }[];
   snapshotVersion: number | null;
   dryRun: boolean;
+}
+
+export interface RuleNote {
+  slug: string;
+  name: string;
+  ruleId: number;
+  field: string;
 }
 
 class DryRun extends Error {}
 
 export async function runWatch(
   db: Db,
-  opts: { now: Date; dryRun?: boolean; read?: (url: string) => Promise<PageResult>; concurrency?: number },
+  opts: {
+    now: Date;
+    dryRun?: boolean;
+    read?: (url: string) => Promise<PageResult>;
+    concurrency?: number;
+    // Only these schemes (the admin's "Check now" on one scheme). Default: every published scheme.
+    schemeIds?: number[];
+    // Who started it, for the run history on A04. Not saved on a dry run.
+    trigger?: "schedule" | "admin";
+    triggeredBy?: string;
+  },
 ): Promise<WatchSummary> {
-  const { now, dryRun = false, read = (url: string) => fetchPage(url), concurrency = 4 } = opts;
+  const { now, dryRun = false, read = (url: string) => fetchPage(url), concurrency = 4, schemeIds } = opts;
 
   // Fetch first, outside the transaction: government sites can take a while.
-  const urls = await watchedUrls(db);
+  const urls = await watchedUrls(db, schemeIds);
   const pages = new Map<string, PageResult>();
   const queue = [...urls];
   await Promise.all(
@@ -61,7 +78,7 @@ export async function runWatch(
     await db.transaction(async (txn) => {
       const tx = txn as unknown as Db;
       let studentsSeeChange = false;
-      for (const { scheme, rules: schemeRules, sources: schemeSources } of await syncSources(tx)) {
+      for (const { scheme, rules: schemeRules, sources: schemeSources } of await syncSources(tx, schemeIds)) {
         const decision = decideScheme(
           { officialUrl: scheme.officialUrl, lastVerifiedAt: scheme.lastVerifiedAt, deadline: scheme.deadline },
           schemeSources,
@@ -73,12 +90,13 @@ export async function runWatch(
 
         for (const change of decision.rules) {
           const before = schemeRules.find((r) => r.id === change.id)!;
+          const note = { slug: scheme.slug, name: scheme.name, ruleId: change.id, field: before.field };
           if (!before.quoteMissingSince && change.quoteMissingSince) {
-            summary.flagged.push(`${scheme.slug} rule ${change.id}`);
+            summary.flagged.push(note);
             studentsSeeChange = true;
           }
           if (before.quoteMissingSince && !change.quoteMissingSince) {
-            summary.unflagged.push(`${scheme.slug} rule ${change.id}`);
+            summary.unflagged.push(note);
             studentsSeeChange = true;
           }
           await tx
@@ -121,11 +139,20 @@ export async function runWatch(
             .where(eq(scholarships.id, scheme.id));
           studentsSeeChange = true;
           if (decision.refresh) summary.refreshed.push(scheme.slug);
-          if (decision.deadline) summary.deadlines.push({ slug: scheme.slug, from: scheme.deadline, to: decision.deadline });
+          if (decision.deadline) summary.deadlines.push({ slug: scheme.slug, name: scheme.name, from: scheme.deadline, to: decision.deadline });
         }
       }
       if (studentsSeeChange) summary.snapshotVersion = (await writeSnapshot(tx, WATCHER, now)).version;
       if (dryRun) throw new DryRun();
+      await insertRun(tx, {
+        startedAt: now,
+        finishedAt: new Date(),
+        trigger: opts.trigger ?? "schedule",
+        triggeredBy: opts.triggeredBy ?? null,
+        scholarshipId: schemeIds?.length === 1 ? schemeIds[0] : null,
+        snapshotVersion: summary.snapshotVersion,
+        summary,
+      });
     });
   } catch (e) {
     if (!(e instanceof DryRun)) throw e;

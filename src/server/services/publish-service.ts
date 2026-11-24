@@ -6,6 +6,7 @@ import { scholarships } from "@/server/db/schema";
 import type { Db } from "@/server/db/types";
 import { getScheme } from "@/server/repositories/scheme-repo";
 import { snapshotRule, writeSnapshot } from "@/server/repositories/snapshot-repo";
+import { resetWatchState } from "@/server/repositories/source-repo";
 
 // Publishing and withdrawing: the quote gate, the verified stamp and a new snapshot, in one transaction.
 
@@ -29,6 +30,7 @@ export async function publishScheme(db: Db, id: number, createdBy: string, now: 
       .update(scholarships)
       .set({ status: "PUBLISHED", lastVerifiedAt: now, updatedAt: now })
       .where(eq(scholarships.id, id));
+    await resetWatchState(tx as unknown as Db, id);
     return writeSnapshot(tx as unknown as Db, createdBy, now);
   });
 }

@@ -13,6 +13,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { RULE_FIELD_KEYS } from "../../domain/rules/fields";
 import { OPERATORS } from "../../domain/rules/schema";
@@ -90,6 +91,11 @@ export const rules = pgTable(
     sourceUrl: text().notNull().default(""),
     // Sources disagree: students see "confirm on the official site" for this rule.
     ambiguous: boolean().notNull().default(false),
+    // Set by the daily source check (scripts/watch-sources.ts). Found = the quote was last seen word
+    // for word on its source page; missing = it was seen before and has gone, so students get
+    // "confirm on the official site" for this rule until the quote is back or the rule is re-saved.
+    quoteFoundAt: timestamp({ withTimezone: true }),
+    quoteMissingSince: timestamp({ withTimezone: true }),
   },
   (t) => [
     index("rules_scholarship_idx").on(t.scholarshipId),
@@ -111,8 +117,19 @@ export const sources = pgTable(
     lastHash: text(),
     lastFetched: timestamp({ withTimezone: true }),
     etag: text(),
+    // The page text hash when the scheme was last verified by a person. While the page still hashes
+    // the same, the daily check may re-verify the scheme by itself. Cleared on publish.
+    baselineHash: text(),
+    // ok | blocked (the site refuses scripts) | error (404, 5xx, timeout)
+    lastStatus: text(),
+    lastError: text(),
+    lastChangedAt: timestamp({ withTimezone: true }),
   },
-  (t) => [check("sources_kind_check", sql`${t.kind} IN ('HTML', 'PDF')`)],
+  (t) => [
+    check("sources_kind_check", sql`${t.kind} IN ('HTML', 'PDF')`),
+    check("sources_last_status_check", sql`${t.lastStatus} IN ('ok', 'blocked', 'error')`),
+    uniqueIndex("sources_scheme_url_idx").on(t.scholarshipId, t.url),
+  ],
 );
 
 // Each publish writes the whole student-facing registry as one versioned file: rules-<version>.json.

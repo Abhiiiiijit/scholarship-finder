@@ -16,7 +16,9 @@ export function snapshotRule(r: RuleRow) {
     value: r.value,
     quote: r.quote,
     sourceUrl: r.sourceUrl,
-    ambiguous: r.ambiguous,
+    // A quote the daily source check no longer finds on its page reads as "confirm on the
+    // official site" until it is back or a person re-verifies the scheme.
+    ambiguous: r.ambiguous || r.quoteMissingSince !== null,
   };
 }
 

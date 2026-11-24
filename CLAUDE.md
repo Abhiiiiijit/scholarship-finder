@@ -19,7 +19,8 @@ Context for AI agents working in this repo. Read this first, then the file you a
 2. **Student answers never leave the phone.** They live in `localStorage` (`paatra.answers.v1`, document ticks in `paatra.documents.v1`). Matching runs in the browser against the published snapshot. Do not add any API that receives a profile, analytics on answers, or server-side matching for students.
 3. **Freshness.** A scheme not re-verified in 90 days (`FRESH_DAYS`) is left out of the snapshot. Unknown is never a fail: a skipped question becomes "needs info", never "not eligible".
 4. **Email alerts are future scope.** "Email me when a scheme fits" and deadline reminders were deliberately removed from the MVP (PR #11). Do not add email capture or stored student emails.
-5. **Live data changes need the owner's go-ahead.** Publishing, retiring or editing schemes in the live Neon database, running migrations on it, and changing Vercel settings all wait for Abhijit's explicit approval.
+5. **The daily source check runs without review (Abhijit's call, 2026-11-24).** `npm run sources:check` (GitHub Actions, 6 AM IST) may re-verify a scheme, move its deadline later, and turn a rule into "confirm on the official site". It never writes a rule's field, operator, value or quote. Keep it that way: anything it changes on its own must be provable from the official page (a quote found word for word, an unchanged page hash, one clear "last date").
+6. **Live data changes need the owner's go-ahead.** Publishing, retiring or editing schemes in the live Neon database, running migrations on it, and changing Vercel settings all wait for Abhijit's explicit approval.
 
 ## Stack
 
@@ -48,6 +49,7 @@ student phone ──GET /api/rules/latest──▶ latest snapshot (cached)
 - **Courses.** `src/domain/courses.ts` is the course catalogue (code, level, stream, tags, regulator, `live`); only B.E./B.Tech is live. `course_level`, `stream` and `course_tag` are looked up from the student's course, never asked. A scheme with no rule on `course`, `course_level`, `stream` or `course_tag` matches B.E./B.Tech students only (`coversCourse()` in `match.ts`), so an engineering-only scheme never looks open to another course. Plan: https://claude.ai/artifact/R3HwUZdpDznsmz6j1iojpo
 - **Enums.** `rules.field` and `rules.op` are Postgres enums `rule_field` / `rule_op` built from `RULE_FIELD_KEYS` and `OPERATORS`. Adding a field or a state question changes the enum, so it needs `npm run db:generate` and a migration.
 - **Matcher.** `src/domain/match.ts` is pure and shared. `resolveField()` maps a rule field to the profile. A numeric fail within 20% of the limit (`NEAR_MISS_GAP`) is a near-miss. Ambiguous rules, `notAsked` fields and percentile rules make a scheme "confirm", never plain "eligible". State schemes match only the student's own domicile state.
+- **Source check.** `runWatch()` in `src/server/services/source-watch.ts` reads every published scheme's official URL and rule source URLs (`sources` table), and `decideScheme()` in `src/domain/sources/decide.ts` decides per scheme. A quote is checked only by its words in quotation marks (or the whole quote if it has none); a rule's quote that was seen on its page and is gone sets `rules.quote_missing_since`, which the snapshot shows as `ambiguous`. A scheme is re-verified (at most weekly) only when every source page was read, no quote is missing, and each page either still carries a quote or hashes the same as when a person last verified it (`sources.baseline_hash`). Blocked or failing sites change nothing. Publishing resets this state.
 - **Publishing.** `publishScheme()` and `withdrawScheme()` in `src/server/services/publish-service.ts` always write a new full snapshot. Snapshots are append-only; the API serves the highest version.
 
 ## Key paths
@@ -86,9 +88,10 @@ npm run e2e           # Playwright happy path against `npm run start` (build fir
 npm run db:generate   # after editing src/server/db/schema.ts, fields.ts or a state's questions
 npm run db:migrate    # apply migrations (DATABASE_URL picks the database)
 npm run db:seed       # load Phase 0 schemes as drafts; `-- --sql` prints SQL instead
+npm run sources:check # the daily source check against DATABASE_URL; `-- --dry-run` reports without saving
 ```
 
-CI (`.github/workflows/ci.yml`) runs lint, typecheck, test, build and e2e on every PR. Run them all before pushing.
+`.github/workflows/watch-sources.yml` runs the source check daily with the `DATABASE_URL` Actions secret. CI (`.github/workflows/ci.yml`) runs lint, typecheck, test, build and e2e on every PR. Run them all before pushing.
 
 ## Conventions
 

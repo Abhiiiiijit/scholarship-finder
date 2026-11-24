@@ -132,6 +132,28 @@ export const sources = pgTable(
   ],
 );
 
+// One row per source check (daily schedule or the admin's "Check now"), for the A04 status screen.
+export const sourceRuns = pgTable(
+  "source_runs",
+  {
+    id: bigserial({ mode: "number" }).primaryKey(),
+    startedAt: timestamp({ withTimezone: true }).notNull(),
+    finishedAt: timestamp({ withTimezone: true }).notNull(),
+    // schedule | admin
+    trigger: text().notNull(),
+    triggeredBy: text(),
+    // Set when the admin checked one scheme only.
+    scholarshipId: bigint({ mode: "number" }).references(() => scholarships.id, { onDelete: "set null" }),
+    snapshotVersion: integer(),
+    // WatchSummary from src/server/services/source-watch.ts.
+    summary: jsonb().notNull(),
+  },
+  (t) => [
+    check("source_runs_trigger_check", sql`${t.trigger} IN ('schedule', 'admin')`),
+    index("source_runs_started_idx").on(t.startedAt),
+  ],
+);
+
 // Each publish writes the whole student-facing registry as one versioned file: rules-<version>.json.
 export const snapshots = pgTable("snapshots", {
   version: bigserial({ mode: "number" }).primaryKey(),

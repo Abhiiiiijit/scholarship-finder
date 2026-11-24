@@ -20,6 +20,9 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
             <Link href="/admin" className="font-semibold text-white">
               Registry
             </Link>
+            <Link href="/admin/sources" className="font-semibold text-white">
+              Source check
+            </Link>
           </nav>
           <span className="flex-1" />
           <span className="text-sm text-bar-muted max-sm:hidden">{login}</span>

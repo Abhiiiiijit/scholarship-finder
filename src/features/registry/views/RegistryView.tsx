@@ -175,8 +175,11 @@ export function RegistryView({
         </table>
       </div>
       <p className="text-[13px] leading-[18px] text-slate">
-        Weekly: open each Live scheme&apos;s official page. Unchanged, publish it again to re-verify. Changed, edit the
-        rules, then publish.
+        Live schemes are checked against their official pages every morning. See{" "}
+        <Link href="/admin/sources" className="font-semibold text-navy underline">
+          Source check
+        </Link>{" "}
+        for what changed, or to check now.
       </p>
     </>
   );

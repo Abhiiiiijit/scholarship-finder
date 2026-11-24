@@ -24,9 +24,9 @@ function report(s: WatchSummary, now: Date): string {
     s.snapshotVersion ? `New snapshot: v${s.snapshotVersion}.` : "No new snapshot: nothing students see changed.",
   ];
   if (s.deadlines.length) {
-    lines.push("", "### Deadlines", ...s.deadlines.map((d) => `- ${d.slug}: ${d.from ?? "none"} → ${d.to}`));
+    lines.push("", "### Deadlines", ...s.deadlines.map((d) => `- ${d.name}: ${d.from ?? "none"} → ${d.to}`));
   }
-  if (s.flagged.length) lines.push("", "### Quote no longer on the page (students now see \"confirm\")", ...s.flagged.map((f) => `- ${f}`));
+  if (s.flagged.length) lines.push("", "### Quote no longer on the page (students now see \"confirm\")", ...s.flagged.map((f) => `- ${f.name}: ${f.field} (rule ${f.ruleId})`));
   if (s.notes.length) lines.push("", "### Notes", ...s.notes.map((n) => `- ${n.slug}: ${n.note}`));
   const unread = s.pages.filter((p) => p.status !== "ok");
   if (unread.length) lines.push("", "### Pages that could not be read", ...unread.map((p) => `- ${p.url}: ${p.reason}`));

@@ -9,6 +9,7 @@ import { schemeDraftSchema } from "@/domain/registry/scheme-input";
 import type { PageResult } from "@/domain/sources/decide";
 import type { Db } from "@/server/db/types";
 import { saveScheme } from "@/server/repositories/scheme-repo";
+import { recentRuns, sourceStatus } from "@/server/repositories/source-repo";
 import { latestSnapshot } from "@/server/repositories/snapshot-repo";
 import { pageResult } from "./page-fetch";
 import { publishScheme } from "./publish-service";
@@ -57,7 +58,7 @@ describe("runWatch", () => {
     await runWatch(db, { now: day(10), read: pages(PAGE) });
     const changed = PAGE.replaceAll("8 Lakhs", "6 Lakhs");
     const s = await runWatch(db, { now: day(11), read: pages(changed) });
-    expect(s.flagged).toHaveLength(1);
+    expect(s.flagged).toEqual([expect.objectContaining({ slug: "mh-ebc", field: "family_income" })]);
     expect(s.refreshed).toEqual([]);
     const snap = await latestSnapshot(db);
     expect(snap!.schemes[0].rules.map((r) => r.ambiguous)).toEqual([false, true]);
@@ -69,7 +70,7 @@ describe("runWatch", () => {
 
   it("moves the deadline to a later last date on the official page", async () => {
     const s = await runWatch(db, { now: day(10), read: pages(`${PAGE} Last date to apply online extended to 31-12-2026.`) });
-    expect(s.deadlines).toEqual([{ slug: "mh-ebc", from: "2026-11-30", to: "2026-12-31" }]);
+    expect(s.deadlines).toEqual([{ slug: "mh-ebc", name: "EBC", from: "2026-11-30", to: "2026-12-31" }]);
     expect((await latestSnapshot(db))!.schemes[0].deadline).toBe("2026-12-31");
   });
 
@@ -94,5 +95,23 @@ describe("runWatch", () => {
     await publishScheme(db, id, "Abhiiiiijit", day(12));
     expect((await ruleRows()).every((r) => r.quoteMissingSince === null && r.quoteFoundAt === null)).toBe(true);
     expect((await db.select().from(sources))[0].baselineHash).toBeNull();
+  });
+
+  it("records each run for the status screen, and none on a dry run", async () => {
+    await runWatch(db, { now: day(10), read: pages(PAGE), dryRun: true });
+    expect(await recentRuns(db)).toHaveLength(0);
+    await runWatch(db, { now: day(10), read: pages(PAGE), trigger: "admin", triggeredBy: "Abhiiiiijit", schemeIds: [id] });
+    const [run] = await recentRuns(db);
+    expect(run).toMatchObject({ trigger: "admin", triggeredBy: "Abhiiiiijit", scholarshipId: id });
+    expect((run.summary as { refreshed: string[] }).refreshed).toEqual(["mh-ebc"]);
+    const [status] = await sourceStatus(db);
+    expect(status.sources[0].lastStatus).toBe("ok");
+    expect(status.rules.every((r) => r.quoteFoundAt !== null)).toBe(true);
+  });
+
+  it("checks only the schemes asked for", async () => {
+    const seen: string[] = [];
+    await runWatch(db, { now: day(10), schemeIds: [id + 1000], dryRun: true, read: async (u) => (seen.push(u), pageResult(PAGE)) });
+    expect(seen).toEqual([]);
   });
 });

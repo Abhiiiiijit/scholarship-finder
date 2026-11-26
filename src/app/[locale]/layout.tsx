@@ -4,6 +4,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { LOCALES } from "@/i18n/locales";
 import { ThemeScript } from "@/components/ui/ThemeScript";
+import { SiteAnalytics } from "@/components/ui/SiteAnalytics";
 import { fontClasses } from "../fonts";
 import "../globals.css";
 
@@ -47,6 +48,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[lo
       </head>
       <body className="flex min-h-full flex-col bg-surface font-sans text-ink">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <SiteAnalytics />
       </body>
     </html>
   );

@@ -5,6 +5,7 @@ export { StateView } from "./views/StateView";
 export { ResultsView } from "./views/ResultsView";
 export { SchemeView } from "./views/SchemeView";
 export { StartButton } from "./components/StartButton";
+export { VisitorCount } from "./components/VisitorCount";
 export { Brand, Column, Footnote, Screen } from "./components/layout";
 export { Checking } from "./components/results";
 export { LanguageSwitch } from "./components/LanguageSwitch";

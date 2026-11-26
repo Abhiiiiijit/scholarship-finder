@@ -35,7 +35,8 @@
     "trustWhyTitle": "Tells you why not",
     "trustWhyBody": "“Income ₹1 L over the ₹8 L limit”, not just a missing result.",
     "liveStates": "State schemes go live one state at a time, starting with the {count} states and UTs whose rules we have confirmed: {names}.",
-    "elsewhere": "Elsewhere you still get central, AICTE and private schemes."
+    "elsewhere": "Elsewhere you still get central, AICTE and private schemes.",
+    "visitors": "{count, plural, one {{count} person has} other {{count} people have}} visited Paatra."
   },
   "basics": {
     "step": "Step 1 of 2 · Basics",

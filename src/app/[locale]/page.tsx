@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { Brand, Column, Footnote, joinList, LanguageSwitch, Screen, StudentThemeToggle, StartButton, stateLabel } from "@/features/eligibility";
+import { Brand, Column, Footnote, joinList, LanguageSwitch, Screen, StudentThemeToggle, StartButton, stateLabel, VisitorCount } from "@/features/eligibility";
 import { STATES } from "@/domain/states";
 
 // S01 Landing.
@@ -77,6 +77,7 @@ export default function Landing() {
             })}
           </span>
           <span>{t("landing.elsewhere")}</span>
+          <VisitorCount />
         </div>
 
         <Footnote />

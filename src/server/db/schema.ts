@@ -17,6 +17,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { RULE_FIELD_KEYS } from "../../domain/rules/fields";
 import { OPERATORS } from "../../domain/rules/schema";
+import { VISIT_SITES } from "../../domain/visits";
 
 const inList = (values: readonly string[]) => sql.raw(values.map((v) => `'${v}'`).join(", "));
 
@@ -162,3 +163,15 @@ export const snapshots = pgTable("snapshots", {
   schemeCount: integer().notNull(),
   payload: jsonb().notNull(),
 });
+
+// Public visitor counters: one row per site, a number and nothing else. Each phone counts itself
+// once (a localStorage flag), so no IP, cookie or answer is ever stored (CLAUDE.md rule 2).
+export const visitCounts = pgTable(
+  "visit_counts",
+  {
+    site: text().primaryKey(),
+    count: bigint({ mode: "number" }).notNull().default(0),
+    updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [check("visit_counts_site_check", sql`${t.site} IN (${inList(VISIT_SITES)})`)],
+);
